@@ -2,140 +2,161 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>圖書館整合管理儀表板</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#242d42;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#e8eaf0;--text2:#8b92a8;--text3:#565f77;--accent:#4f8ef7;--g:#6ee7b7;--y:#fbbf24;--r:#f87171;--p:#c084fc;--danger:#ef4444;--success:#10b981;--rr:10px;--r2:6px;--sh:0 4px 24px rgba(0,0,0,.4)}
+:root{--bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#242d42;--bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.14);--tx:#e8eaf0;--tx2:#8b92a8;--tx3:#565f77;--ac:#4f8ef7;--gn:#6ee7b7;--yw:#fbbf24;--rd:#f87171;--pp:#c084fc;--r:10px;--r2:6px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
 /* LOGIN */
 #ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-.lc{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:var(--sh)}
+.lc{background:var(--bg2);border:1px solid var(--bd2);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:400px}
 .ll{text-align:center;margin-bottom:2rem}
-.ll .ic{width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--p));border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:.75rem}
+.ll .ic{width:60px;height:60px;background:linear-gradient(135deg,var(--ac),var(--pp));border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:.75rem}
 .ll h1{font-size:1.3rem;font-weight:700}
-.ll p{font-size:.8rem;color:var(--text2);margin-top:.25rem}
+.ll p{font-size:.8rem;color:var(--tx2);margin-top:.2rem}
 .fg{margin-bottom:1rem}
-.fg label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:.4rem;font-weight:500}
-.fg input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.7rem 1rem;color:var(--text);font-size:.9rem;font-family:inherit;transition:border-color .2s}
-.fg input:focus{outline:none;border-color:var(--accent)}
-.bl{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--r2);padding:.8rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.5rem;letter-spacing:.02em}
+.fg label{display:block;font-size:.78rem;color:var(--tx2);margin-bottom:.4rem;font-weight:500}
+.fg input{width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r2);padding:.7rem 1rem;color:var(--tx);font-size:.9rem;font-family:inherit}
+.fg input:focus{outline:none;border-color:var(--ac)}
+.bl{width:100%;background:var(--ac);color:#fff;border:none;border-radius:var(--r2);padding:.8rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.5rem}
 .bl:hover{opacity:.88}
-.le{color:var(--r);font-size:.78rem;text-align:center;margin-top:.6rem;display:none}
-.lh{font-size:.72rem;color:var(--text3);text-align:center;margin-top:1rem;line-height:1.6}
+.le{color:var(--rd);font-size:.78rem;text-align:center;margin-top:.6rem;display:none}
+.lh{font-size:.72rem;color:var(--tx3);text-align:center;margin-top:1rem;line-height:1.6}
 /* APP */
 #app{display:none}
-.topbar{position:sticky;top:0;z-index:100;background:rgba(15,17,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.7rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(15,17,23,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:.65rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .tl{display:flex;align-items:center;gap:.75rem}
-.tlogo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--p));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.tt{font-size:.92rem;font-weight:700;white-space:nowrap}
-.ts{font-size:.68rem;color:var(--text2)}
+.tlogo{width:36px;height:36px;background:linear-gradient(135deg,var(--ac),var(--pp));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.tt{font-size:.9rem;font-weight:700;white-space:nowrap}
+.ts{font-size:.68rem;color:var(--tx2)}
 .tr{display:flex;align-items:center;gap:.6rem}
-.brole{font-size:.7rem;padding:.22rem .6rem;border-radius:20px;font-weight:700;background:rgba(79,142,247,.15);color:var(--accent);border:1px solid rgba(79,142,247,.3)}
-.brole.adm{background:rgba(251,191,36,.12);color:var(--y);border-color:rgba(251,191,36,.3)}
-.bsm{font-size:.73rem;padding:.32rem .7rem;border-radius:var(--r2);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap}
-.bsm:hover{background:var(--bg3);color:var(--text)}
-.bsm.dng{border-color:rgba(239,68,68,.4);color:var(--r)}
+.brole{font-size:.7rem;padding:.22rem .6rem;border-radius:20px;font-weight:700;background:rgba(79,142,247,.15);color:var(--ac);border:1px solid rgba(79,142,247,.3)}
+.brole.adm{background:rgba(251,191,36,.12);color:var(--yw);border-color:rgba(251,191,36,.3)}
+.bsm{font-size:.73rem;padding:.32rem .7rem;border-radius:var(--r2);border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;font-family:inherit}
+.bsm:hover{background:var(--bg3);color:var(--tx)}
+/* YEAR BAR */
+.ybar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:.5rem 1.25rem;display:flex;align-items:center;gap:.75rem;overflow-x:auto;scrollbar-width:none}
+.ybar::-webkit-scrollbar{display:none}
+.ybar-label{font-size:.72rem;color:var(--tx3);white-space:nowrap;font-weight:600;letter-spacing:.04em}
+.ytab{font-size:.78rem;padding:.32rem .85rem;border-radius:20px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.ytab.on{background:rgba(79,142,247,.2);color:var(--ac);border-color:rgba(79,142,247,.4);font-weight:600}
+.y-sep{width:1px;height:18px;background:var(--bd2);flex-shrink:0}
 /* NAV */
-.nw{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 1.25rem;overflow-x:auto;scrollbar-width:none}
+.nw{background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 1.25rem;overflow-x:auto;scrollbar-width:none}
 .nw::-webkit-scrollbar{display:none}
 .nav{display:flex}
-.nb{padding:.62rem 1rem;font-size:.8rem;font-weight:500;color:var(--text2);background:transparent;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
-.nb:hover{color:var(--text)}
-.nb.on{color:var(--accent);border-bottom-color:var(--accent)}
+.nb{padding:.6rem .95rem;font-size:.8rem;font-weight:500;color:var(--tx2);background:transparent;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
+.nb:hover{color:var(--tx)}
+.nb.on{color:var(--ac);border-bottom-color:var(--ac)}
 /* MAIN */
 .main{padding:1.25rem;max-width:1400px;margin:0 auto}
 /* KPI */
 .kg{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1.25rem}
-.kc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rr);padding:1rem 1.1rem;position:relative;overflow:hidden}
+.kc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1rem 1.1rem;position:relative;overflow:hidden}
 .kc::before{content:'';position:absolute;top:-10px;right:-10px;width:60px;height:60px;border-radius:50%;opacity:.1}
-.kc:nth-child(1)::before{background:var(--accent)}
-.kc:nth-child(2)::before{background:var(--g)}
-.kc:nth-child(3)::before{background:var(--y)}
-.kc:nth-child(4)::before{background:var(--p)}
-.kc:nth-child(5)::before{background:var(--r)}
-.kl{font-size:.7rem;color:var(--text2);margin-bottom:.3rem;font-weight:500;letter-spacing:.02em}
+.kc:nth-child(1)::before{background:var(--ac)}
+.kc:nth-child(2)::before{background:var(--gn)}
+.kc:nth-child(3)::before{background:var(--yw)}
+.kc:nth-child(4)::before{background:var(--pp)}
+.kc:nth-child(5)::before{background:var(--rd)}
+.kl{font-size:.7rem;color:var(--tx2);margin-bottom:.3rem;font-weight:500}
 .kv{font-size:1.5rem;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-.02em}
-.ks{font-size:.67rem;color:var(--text3);margin-top:.15rem}
+.ks{font-size:.67rem;color:var(--tx3);margin-top:.15rem}
 /* GRID */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
 /* CARD */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rr);padding:1.1rem}
-.ct{font-size:.7rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.85rem}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem}
+.ct{font-size:.7rem;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.85rem}
 .cw{position:relative;width:100%}
 /* FILTER */
 .fb{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;padding:.55rem .85rem;background:var(--bg3);border-radius:var(--r2)}
-.fb select{font-size:.75rem;padding:.28rem .55rem;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg4);color:var(--text);font-family:inherit}
-.ft{font-size:.73rem;padding:.26rem .65rem;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap}
-.ft.on{background:rgba(79,142,247,.18);color:var(--accent);border-color:rgba(79,142,247,.35)}
+.fb select,.fb-sel{font-size:.75rem;padding:.28rem .55rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit}
+.ft{font-size:.73rem;padding:.26rem .65rem;border-radius:20px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.ft.on{background:rgba(79,142,247,.18);color:var(--ac);border-color:rgba(79,142,247,.35)}
 /* LEGEND */
 .leg{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.55rem}
-.li{display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--text2)}
+.li{display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--tx2)}
 .ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-/* RANK */
-.ri{display:flex;align-items:center;gap:.55rem;padding:.42rem 0;border-bottom:1px solid var(--border)}
-.ri:last-child{border:none}
-.rn2{font-size:.68rem;color:var(--text3);min-width:14px;font-family:'DM Mono',monospace}
-.rname{font-size:.76rem;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rb{width:70px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;flex-shrink:0}
-.rf{height:100%;border-radius:2px}
-.rv{font-size:.72rem;font-weight:700;color:var(--text2);min-width:28px;text-align:right;font-family:'DM Mono',monospace}
 /* TABLE */
 .tw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.76rem}
-thead th{background:var(--bg3);color:var(--text2);font-weight:600;padding:.5rem .65rem;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border2);font-size:.68rem;letter-spacing:.02em}
+thead th{background:var(--bg3);color:var(--tx2);font-weight:600;padding:.5rem .65rem;text-align:right;white-space:nowrap;border-bottom:1px solid var(--bd2);font-size:.68rem;letter-spacing:.02em;position:sticky;top:0}
 thead th:first-child{text-align:left}
-tbody td{padding:.44rem .65rem;text-align:right;border-bottom:1px solid var(--border);color:var(--text)}
+tbody td{padding:.44rem .65rem;text-align:right;border-bottom:1px solid var(--bd);color:var(--tx);font-size:.78rem}
 tbody td:first-child{text-align:left;font-weight:500}
 tbody tr:hover{background:rgba(255,255,255,.02)}
-tbody tr.tr-tot td{background:var(--bg3);font-weight:700;color:var(--g)}
+tbody tr.tr-tot td{background:var(--bg3);font-weight:700;color:var(--gn)}
 .bv{display:inline-flex;align-items:center;justify-content:center;width:20px;height:16px;border-radius:3px;font-size:.68rem;font-weight:700}
 .bvv{background:rgba(16,185,129,.18);color:#34d399}
 .bvx{background:rgba(239,68,68,.1);color:rgba(239,68,68,.55)}
-/* ADMIN */
+/* ADMIN BAR */
 .ab{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:var(--r2);padding:.55rem .9rem;margin-bottom:1rem;display:none;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
 .ab.show{display:flex}
-.aa{font-size:.73rem;color:var(--y);font-weight:700}
+.aa{font-size:.73rem;color:var(--yw);font-weight:700}
 .aas{display:flex;gap:.45rem;flex-wrap:wrap}
-.badd{font-size:.73rem;padding:.3rem .75rem;border-radius:var(--r2);border:1px solid rgba(110,231,183,.35);background:rgba(110,231,183,.08);color:var(--g);cursor:pointer;font-family:inherit}
+.badd{font-size:.73rem;padding:.3rem .75rem;border-radius:var(--r2);border:1px solid rgba(110,231,183,.35);background:rgba(110,231,183,.08);color:var(--gn);cursor:pointer;font-family:inherit}
 .badd:hover{background:rgba(110,231,183,.18)}
 /* MODAL */
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
 .mo.show{display:flex}
-.md{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rr);padding:1.5rem;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;box-shadow:var(--sh)}
+.md{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r);padding:1.5rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
 .mh{font-size:.95rem;font-weight:700;margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between}
-.mc2{background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;line-height:1}
-.mg{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
-.mg1{grid-template-columns:1fr}
-.mf{display:flex;flex-direction:column;gap:.28rem}
-.mf label{font-size:.7rem;color:var(--text2);font-weight:500}
-.mf input,.mf select,.mf textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.5rem .7rem;color:var(--text);font-size:.82rem;font-family:inherit}
-.mf input:focus,.mf select:focus{outline:none;border-color:var(--accent)}
-.mfoot{display:flex;gap:.45rem;justify-content:flex-end;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--border)}
-.bsave{padding:.5rem 1.1rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r2);font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit}
+.mc2{background:none;border:none;color:var(--tx2);font-size:1.2rem;cursor:pointer;line-height:1}
+.mf{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.6rem}
+.mf label{font-size:.7rem;color:var(--tx2);font-weight:500}
+.mf input,.mf select,.mf textarea{background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r2);padding:.5rem .7rem;color:var(--tx);font-size:.82rem;font-family:inherit;width:100%}
+.mf input:focus,.mf select:focus{outline:none;border-color:var(--ac)}
+.mfoot{display:flex;gap:.45rem;justify-content:flex-end;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--bd)}
+.bsave{padding:.5rem 1.1rem;background:var(--ac);color:#fff;border:none;border-radius:var(--r2);font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit}
 .bsave:hover{opacity:.88}
-.bcancel{padding:.5rem .9rem;background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r2);font-size:.82rem;cursor:pointer;font-family:inherit}
+.bcancel{padding:.5rem .9rem;background:transparent;color:var(--tx2);border:1px solid var(--bd2);border-radius:var(--r2);font-size:.82rem;cursor:pointer;font-family:inherit}
 .bcancel:hover{background:var(--bg3)}
-.beditsm{padding:.35rem .65rem;background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.28);border-radius:var(--r2);font-size:.7rem;cursor:pointer;font-family:inherit}
-.bdelsm{padding:.35rem .65rem;background:rgba(239,68,68,.1);color:var(--r);border:1px solid rgba(239,68,68,.28);border-radius:var(--r2);font-size:.7rem;cursor:pointer;font-family:inherit}
+.beditsm{padding:.35rem .65rem;background:rgba(79,142,247,.1);color:var(--ac);border:1px solid rgba(79,142,247,.28);border-radius:var(--r2);font-size:.7rem;cursor:pointer;font-family:inherit}
+.bdelsm{padding:.35rem .65rem;background:rgba(239,68,68,.1);color:var(--rd);border:1px solid rgba(239,68,68,.28);border-radius:var(--r2);font-size:.7rem;cursor:pointer;font-family:inherit}
+/* MONTH INPUT GRID */
+.mon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
+.mcard{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.85rem;cursor:pointer;transition:border-color .15s}
+.mcard:hover{border-color:var(--bd2)}
+.mcard.editing{border-color:var(--ac);background:rgba(79,142,247,.06)}
+.mcard-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.mcard-m{font-size:.88rem;font-weight:700;color:var(--ac)}
+.mcard-e{font-size:.72rem;color:var(--tx2)}
+.mcard-d{font-size:.68rem;color:var(--tx3);margin-bottom:.32rem}
+.mbar-bg{height:3px;background:var(--bg4);border-radius:2px}
+.mbar-f{height:100%;border-radius:2px;background:var(--ac)}
+/* INLINE EDITOR */
+.ied{background:var(--bg3);border:1px solid var(--ac);border-radius:var(--r);padding:1.1rem;margin-bottom:1rem;display:none}
+.ied-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.4rem}
+.ied-title{font-size:.9rem;font-weight:700;color:var(--tx)}
+.ied-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.if-group{margin-bottom:.65rem}
+.if-group-title{font-size:.68rem;color:var(--yw);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.45rem;padding-bottom:.3rem;border-bottom:1px solid var(--bd)}
+/* RANK */
+.ri{display:flex;align-items:center;gap:.55rem;padding:.42rem 0;border-bottom:1px solid var(--bd)}
+.ri:last-child{border:none}
+.rn2{font-size:.68rem;color:var(--tx3);min-width:14px;font-family:'DM Mono',monospace}
+.rname{font-size:.76rem;color:var(--tx);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb{width:70px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;flex-shrink:0}
+.rf{height:100%;border-radius:2px}
+.rv{font-size:.72rem;font-weight:700;color:var(--tx2);min-width:28px;text-align:right;font-family:'DM Mono',monospace}
 /* TOAST */
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.7rem 1rem;font-size:.8rem;color:var(--text);z-index:9999;display:none;box-shadow:var(--sh)}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r2);padding:.7rem 1rem;font-size:.8rem;color:var(--tx);z-index:9999;display:none}
 .toast.show{display:block;animation:fin .2s}
-.toast.ok{border-color:rgba(16,185,129,.4);color:var(--g)}
-.toast.err{border-color:rgba(239,68,68,.4);color:var(--r)}
+.toast.ok{border-color:rgba(16,185,129,.4);color:var(--gn)}
+.toast.err{border-color:rgba(239,68,68,.4);color:var(--rd)}
 @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .page{display:none}.page.on{display:block}
 .cr{display:flex;gap:.4rem;margin-bottom:.7rem;flex-wrap:wrap}
 @media(max-width:900px){.kg{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.kg{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}.main{padding:.8rem}.tt{font-size:.82rem}}
+@media(max-width:640px){.kg{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}.main{padding:.8rem}.tt{font-size:.82rem}.ied-grid{grid-template-columns:repeat(2,1fr)}.mon-grid{grid-template-columns:repeat(3,1fr)}}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 </style>
 </head>
 <body>
-
 <!-- LOGIN -->
 <div id="ls">
   <div class="lc">
@@ -157,108 +178,188 @@ tbody tr.tr-tot td{background:var(--bg3);font-weight:700;color:var(--g)}
   <div class="topbar">
     <div class="tl">
       <div class="tlogo">📚</div>
-      <div><div class="tt">圖書館整合管理儀表板</div><div class="ts">Library Integrated Dashboard · 民國114年</div></div>
+      <div><div class="tt">圖書館整合管理儀表板</div><div class="ts" id="topbar-sub">民國114年</div></div>
     </div>
     <div class="tr">
       <span class="brole" id="rb">瀏覽者</span>
-      <span id="un" style="font-size:.75rem;color:var(--text2)"></span>
-      <button class="bsm dng" onclick="doLogout()">登出</button>
+      <span id="un" style="font-size:.75rem;color:var(--tx2)"></span>
+      <button class="bsm" onclick="doLogout()">登出</button>
     </div>
   </div>
+
+  <!-- 年份選擇列 -->
+  <div class="ybar">
+    <span class="ybar-label">年份</span>
+    <div id="year-tabs" style="display:flex;gap:.4rem"></div>
+    <div class="y-sep"></div>
+    <span class="ybar-label">月份</span>
+    <div id="month-tabs" style="display:flex;gap:.4rem;flex-wrap:nowrap"></div>
+    <div class="y-sep"></div>
+    <button class="ft on" id="range-all" onclick="setRange('all',this)" style="white-space:nowrap">全年</button>
+    <button class="ft" id="range-q1" onclick="setRange('Q1',this)">Q1</button>
+    <button class="ft" id="range-q2" onclick="setRange('Q2',this)">Q2</button>
+    <button class="ft" id="range-q3" onclick="setRange('Q3',this)">Q3</button>
+    <button class="ft" id="range-q4" onclick="setRange('Q4',this)">Q4</button>
+  </div>
+
   <div class="nw"><div class="nav">
     <button class="nb on" onclick="sp('ov',this)">📊 總覽</button>
-    <button class="nb" onclick="sp('coll',this)">📚 館藏統計</button>
     <button class="nb" onclick="sp('usage',this)">📈 資源使用</button>
+    <button class="nb" onclick="sp('coll',this)">📚 館藏統計</button>
     <button class="nb" onclick="sp('jrnl',this)">📰 期刊訂閱</button>
     <button class="nb" onclick="sp('unit',this)">🏥 單位分布</button>
-    <button class="nb" onclick="sp('trend',this)">📉 年度趨勢</button>
-    <button class="nb" onclick="sp('mon',this)">🗂 月報管理</button>
-      <button class="nb" onclick="sp('access',this)">🚪 進出館分析</button>
+    <button class="nb" onclick="sp('mon',this)">🗂 月報輸入</button>
+    <button class="nb" onclick="sp('access',this)">🚪 進出館</button>
   </div></div>
+
   <div class="main">
     <div class="kg" id="kpi"></div>
+
     <!-- 總覽 -->
     <div class="page on" id="page-ov">
       <div class="g3">
         <div class="card"><div class="ct">館藏語文比例</div><div class="cw" style="height:150px"><canvas id="c-lang" role="img" aria-label="語文比例"></canvas></div></div>
         <div class="card"><div class="ct">館藏類型比例</div><div class="cw" style="height:150px"><canvas id="c-type" role="img" aria-label="類型比例"></canvas></div></div>
-        <div class="card"><div class="ct">電子資源使用比例（114年）</div><div class="cw" style="height:150px"><canvas id="c-eres" role="img" aria-label="電子資源比例"></canvas></div></div>
+        <div class="card"><div class="ct">電子資源使用比例</div><div class="cw" style="height:150px"><canvas id="c-eres" role="img" aria-label="電子資源比例"></canvas></div></div>
       </div>
       <div class="g2">
-        <div class="card"><div class="ct">領域館藏分布（Top 12）</div><div class="leg" id="dleg"></div><div class="cw" style="height:210px"><canvas id="c-dom" role="img" aria-label="領域分布"></canvas></div></div>
-        <div class="card"><div class="ct">單位工具書排行（Top 10）</div><div id="ovur"></div></div>
+        <div class="card"><div class="ct">進館人次月份趨勢</div><div class="leg" id="ov-leg"></div><div class="cw" style="height:200px"><canvas id="c-entry" role="img" aria-label="進館人次趨勢"></canvas></div></div>
+        <div class="card"><div class="ct">電子資源使用趨勢</div><div class="leg" id="ov-eres-leg"></div><div class="cw" style="height:200px"><canvas id="c-ov-eres" role="img" aria-label="電子資源趨勢"></canvas></div></div>
       </div>
     </div>
-    <!-- 館藏統計 -->
-    <div class="page" id="page-coll">
-      <div class="ab" id="ab-coll">
-        <div class="aa">⚙ 管理者模式</div>
-        <div class="aas"><button class="badd" onclick="openM('coll_stat')">✏ 更新館藏數字</button><button class="badd" onclick="openM('yr_stat')">✏ 更新年度購入</button></div>
-      </div>
-      <div class="g2">
-        <div class="card"><div class="ct">館藏現有量歷年趨勢</div><div class="cw" style="height:200px"><canvas id="c-coll" role="img" aria-label="館藏趨勢"></canvas></div></div>
-        <div class="card"><div class="ct">年度購入 vs 註銷</div><div class="leg" id="dl"></div><div class="cw" style="height:200px"><canvas id="c-delta" role="img" aria-label="購入vs註銷"></canvas></div></div>
-      </div>
-      <div class="card"><div class="ct">年度購入統計明細（102–114年）</div><div class="tw" id="t-purch"></div></div>
-    </div>
+
     <!-- 資源使用 -->
     <div class="page" id="page-usage">
-      <div class="fb" id="ufb">
-        <span style="font-size:.72rem;color:var(--text2)">篩選範圍</span>
-        <button class="ft on" onclick="setUM('year',this)">全年</button>
-        <button class="ft" onclick="setUM('quarter',this)">季</button>
-        <button class="ft" onclick="setUM('month',this)">單月</button>
-        <button class="ft" onclick="setUM('range',this)">區間</button>
-        <div id="ufc" style="display:flex;align-items:center;gap:.35rem"></div>
-      </div>
-      <div class="kg" id="ukpi" style="grid-template-columns:repeat(4,1fr)"></div>
       <div class="cr" id="uct">
         <button class="ft on" onclick="suc('entry',this)">進館人次</button>
         <button class="ft" onclick="suc('eres',this)">電子資源</button>
         <button class="ft" onclick="suc('db',this)">資料庫明細</button>
         <button class="ft" onclick="suc('vend',this)">廠商提供量</button>
+        <button class="ft" onclick="suc('staff',this)">職類分布</button>
       </div>
-      <div class="card"><div class="leg" id="uleg"></div><div class="cw" style="height:240px"><canvas id="c-usage" role="img" aria-label="使用趨勢"></canvas></div></div>
+      <div class="card" style="margin-bottom:1rem"><div class="leg" id="u-leg"></div><div class="cw" style="height:250px"><canvas id="c-usage" role="img" aria-label="使用趨勢"></canvas></div></div>
+      <div class="g2">
+        <div class="card"><div class="ct">電子資源類型比例</div><div class="cw" style="height:180px"><canvas id="c-u-pie" role="img" aria-label="電子資源比例"></canvas></div></div>
+        <div class="card"><div class="ct">明細資料表</div><div class="cr" id="utbl-tabs">
+          <button class="ft on" onclick="setUTbl('mon',this)">月份</button>
+          <button class="ft" onclick="setUTbl('db',this)">資料庫</button>
+          <button class="ft" onclick="setUTbl('vend',this)">廠商</button>
+        </div><div class="tw" id="u-table" style="max-height:200px;overflow-y:auto"></div></div>
+      </div>
     </div>
+
+    <!-- 館藏統計 -->
+    <div class="page" id="page-coll">
+      <div class="ab" id="ab-coll"><div class="aa">⚙ 管理者模式</div>
+        <div class="aas"><button class="badd" onclick="openM('coll_stat')">✏ 更新館藏數字</button><button class="badd" onclick="openM('yr_stat')">✏ 更新年度數據</button></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ct">歷年館藏現有量</div><div class="cw" style="height:200px"><canvas id="c-coll" role="img" aria-label="館藏趨勢"></canvas></div></div>
+        <div class="card"><div class="ct">年度購入 vs 註銷</div><div class="leg" id="dl"></div><div class="cw" style="height:200px"><canvas id="c-delta" role="img" aria-label="購入vs註銷"></canvas></div></div>
+      </div>
+      <div class="card"><div class="ct">年度購入統計明細</div><div class="tw" id="t-purch"></div></div>
+    </div>
+
     <!-- 期刊訂閱 -->
     <div class="page" id="page-jrnl">
-      <div class="ab" id="ab-jrnl">
-        <div class="aa">⚙ 管理者模式</div>
+      <div class="ab" id="ab-jrnl"><div class="aa">⚙ 管理者模式</div>
         <div class="aas"><button class="badd" onclick="openM('journal')">＋ 新增期刊</button><button class="badd" onclick="openM('database')">＋ 新增資料庫</button></div>
       </div>
-      <div class="card" style="margin-bottom:1rem"><div class="ct">醫學期刊訂閱對照表</div><div class="tw" id="tjrnl"></div></div>
+      <div class="card" style="margin-bottom:1rem"><div class="ct">醫學期刊訂閱對照表（V=訂閱 X=未訂）</div><div class="tw" id="tjrnl"></div></div>
       <div class="g2">
         <div class="card"><div class="ct">醫學資料庫訂閱對照</div><div class="tw" id="tdb"></div></div>
         <div class="card"><div class="ct">期刊訂購數量趨勢</div><div class="cw" style="height:180px"><canvas id="c-jt" role="img" aria-label="期刊趨勢"></canvas></div></div>
       </div>
     </div>
+
     <!-- 單位分布 -->
     <div class="page" id="page-unit">
-      <div class="ab" id="ab-unit">
-        <div class="aa">⚙ 管理者模式</div>
+      <div class="ab" id="ab-unit"><div class="aa">⚙ 管理者模式</div>
         <div class="aas"><button class="badd" onclick="openM('unit')">＋ 新增/編輯單位</button></div>
       </div>
       <div class="g2">
         <div class="card"><div class="ct">各單位工具書分布（Top 15）</div><div class="cw" style="height:320px"><canvas id="c-unit" role="img" aria-label="單位分布"></canvas></div></div>
-        <div class="card"><div class="ct">各單位冊數排行（全部）</div><div id="urf"></div></div>
+        <div class="card"><div class="ct">各單位冊數排行</div><div id="urf"></div></div>
       </div>
     </div>
-    <!-- 年度趨勢 -->
-    <div class="page" id="page-trend">
-      <div class="card" style="margin-bottom:1rem"><div class="ct">歷年館藏現有量（108年前 ─ 114年）</div><div class="cw" style="height:210px"><canvas id="c-trend" role="img" aria-label="歷年館藏量"></canvas></div></div>
-      <div class="g2">
-        <div class="card"><div class="ct">年度購入總量（102–114年）</div><div class="cw" style="height:185px"><canvas id="c-buy" role="img" aria-label="年度購入量"></canvas></div></div>
-        <div class="card"><div class="ct">114年進館人次月份趨勢</div><div class="cw" style="height:185px"><canvas id="c-ent" role="img" aria-label="進館趨勢"></canvas></div></div>
-      </div>
-    </div>
-    <!-- 月報管理 -->
+
+    <!-- 月報輸入 -->
     <div class="page" id="page-mon">
       <div class="ab show" id="ab-mon" style="display:flex!important">
-        <div class="aa">📋 月報資料管理</div>
+        <div class="aa">📋 月報資料管理 — <span id="mon-year-label"></span></div>
         <div class="aas" id="mon-aa"></div>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem" id="mcards"></div>
-      <div id="med" style="display:none"></div>
+      <div class="mon-grid" id="mcards"></div>
+      <div class="ied" id="ied">
+        <div class="ied-h">
+          <div class="ied-title" id="ied-title">編輯月份資料</div>
+          <div style="display:flex;gap:.4rem">
+            <button class="bsave" id="ied-save">儲存</button>
+            <button class="bdelsm" id="ied-del" style="display:none">刪除</button>
+            <button class="bcancel" onclick="closeIED()">取消</button>
+          </div>
+        </div>
+        <div class="if-group">
+          <div class="if-group-title">一、進館人次（依職類）</div>
+          <div class="ied-grid">
+            <div class="mf"><label>醫師</label><input type="number" id="f-dr" min="0" placeholder="0"></div>
+            <div class="mf"><label>藥劑</label><input type="number" id="f-ph" min="0" placeholder="0"></div>
+            <div class="mf"><label>放射</label><input type="number" id="f-ra" min="0" placeholder="0"></div>
+            <div class="mf"><label>檢驗</label><input type="number" id="f-la" min="0" placeholder="0"></div>
+            <div class="mf"><label>護理</label><input type="number" id="f-nu" min="0" placeholder="0"></div>
+            <div class="mf"><label>物治</label><input type="number" id="f-pt" min="0" placeholder="0"></div>
+            <div class="mf"><label>其他</label><input type="number" id="f-ot" min="0" placeholder="0"></div>
+            <div class="mf"><label style="color:var(--gn)">合計（自動）</label><input id="f-e" readonly style="background:rgba(110,231,183,.06);color:var(--gn);border-color:rgba(110,231,183,.2)"></div>
+          </div>
+        </div>
+        <div class="if-group">
+          <div class="if-group-title">二、圖書借閱冊數</div>
+          <div class="ied-grid">
+            <div class="mf"><label>圖書借閱</label><input type="number" id="f-bk" min="0" placeholder="0"></div>
+            <div class="mf"><label>期刊借閱</label><input type="number" id="f-jo" min="0" placeholder="0"></div>
+          </div>
+        </div>
+        <div class="if-group">
+          <div class="if-group-title">三、電子資源使用量</div>
+          <div class="ied-grid">
+            <div class="mf"><label>電子期刊</label><input type="number" id="f-ej" min="0" placeholder="0"></div>
+            <div class="mf"><label>電子書</label><input type="number" id="f-eb" min="0" placeholder="0"></div>
+            <div class="mf"><label>電子資料庫</label><input type="number" id="f-edb" min="0" placeholder="0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 進出館 -->
+    <div class="page" id="page-access">
+      <div class="kpi-g" id="ac-kpi" style="grid-template-columns:repeat(4,1fr);display:grid;gap:.75rem;margin-bottom:1.25rem"></div>
+      <div class="g2">
+        <div class="card"><div class="ct">每日進館趨勢（職類堆疊）</div><div class="leg" id="ac-leg"></div><div class="cw" style="height:220px"><canvas id="ac-daily" role="img" aria-label="每日進館"></canvas></div></div>
+        <div class="card"><div class="ct">職類進館比例</div><div class="cw" style="height:220px"><canvas id="ac-pie" role="img" aria-label="職類比例"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ct">月份統計（職類堆疊）</div><div class="cw" style="height:180px"><canvas id="ac-month" role="img" aria-label="月份統計"></canvas></div></div>
+        <div class="card"><div class="ct">前後門使用比例</div><div class="cw" style="height:180px"><canvas id="ac-gate" role="img" aria-label="門別比例"></canvas></div></div>
+      </div>
+      <div class="card" style="margin-bottom:1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
+          <div class="ct" style="margin:0">人員進館排行 <span id="ac-pcount" style="color:var(--tx3)"></span></div>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap" id="ac-gtabs"></div>
+        </div>
+        <div class="tw" id="ac-ptable"></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
+          <div class="ct" style="margin:0">進出館明細記錄</div>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+            <select id="ac-fg" style="font-size:.75rem;padding:.28rem .5rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit" onchange="filterAC()"><option value="">全部職類</option></select>
+            <select id="ac-fgate" style="font-size:.75rem;padding:.28rem .5rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit" onchange="filterAC()"><option value="">前後門</option><option>前門</option><option>後門</option></select>
+            <input id="ac-sch" placeholder="搜尋姓名…" style="font-size:.75rem;padding:.28rem .6rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit;width:90px" oninput="filterAC()">
+            <span id="ac-cnt" style="font-size:.72rem;color:var(--tx3)"></span>
+          </div>
+        </div>
+        <div class="tw" id="ac-table" style="max-height:380px;overflow-y:auto"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -274,7 +375,9 @@ tbody tr.tr-tot td{background:var(--bg3);font-weight:700;color:var(--g)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── AUTH ───
+// ═══════════════════════════════
+//  AUTH
+// ═══════════════════════════════
 const ACCS={'admin':{pass:'lib2024',role:'admin',name:'管理員'},'lib':{pass:'view123',role:'viewer',name:'圖書館員'}};
 let CU=null;
 function doLogin(){
@@ -294,31 +397,135 @@ document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')
 function doLogout(){CU=null;document.getElementById('app').style.display='none';document.getElementById('ls').style.display='flex';document.getElementById('iu').value='';document.getElementById('ip').value='';}
 const isAdm=()=>CU&&CU.role==='admin';
 
-// ─── DATA ───
+// ═══════════════════════════════
+//  DEFAULT DATA
+// ═══════════════════════════════
 const DD={
+  years:['113','114'],
+  activeYear:'114',
   col:{total:2756,chinese:2112,english:644,unit_books:1185,doctor_books:87,cd:6,canceled:2661},
-  domains:[{n:'醫療專業',zh:906,en:279},{n:'醫學專業-核心',zh:1,en:344},{n:'病人健康教育',zh:122,en:0},{n:'醫學教育',zh:140,en:8},{n:'100哲學類',zh:129,en:0},{n:'800語文類',zh:375,en:0},{n:'490商業經營',zh:107,en:0},{n:'醫療品質',zh:40,en:1},{n:'醫療法規',zh:38,en:0},{n:'醫學人文',zh:54,en:0},{n:'312電腦科學',zh:24,en:0},{n:'實證醫學',zh:9,en:12}],
-  units:[{n:'檢驗科',v:93},{n:'護理部',v:91},{n:'復健科',v:90},{n:'護理部(6F)',v:75},{n:'護理部(9F)',v:71},{n:'護理部(7F)',v:71},{n:'護理部(ICU)',v:67},{n:'放射科',v:59},{n:'護理部(OPD)',v:55},{n:'藥劑科',v:43},{n:'護理部(8F)',v:41},{n:'護理部(OR)',v:38},{n:'護理部(ER)',v:38},{n:'感染科',v:35},{n:'外科NP',v:32},{n:'內科NP',v:24},{n:'心理室',v:8},{n:'病理科',v:10},{n:'社醫部',v:4},{n:'社醫部(居家護理)',v:4},{n:'社醫部(營養室)',v:12},{n:'社醫部(社工室)',v:4},{n:'天祥護理部',v:2}],
+  domains:[{n:'醫療專業',zh:906,en:279},{n:'醫學專業-核心',zh:1,en:344},{n:'病人健康教育',zh:122,en:0},{n:'醫學教育',zh:140,en:8},{n:'100哲學類',zh:129,en:0},{n:'800語文類',zh:375,en:0},{n:'490商業',zh:107,en:0},{n:'醫療品質',zh:40,en:1},{n:'醫療法規',zh:38,en:0},{n:'醫學人文',zh:54,en:0},{n:'312電腦',zh:24,en:0},{n:'實證醫學',zh:9,en:12}],
+  units:[{n:'檢驗科',v:93},{n:'護理部',v:91},{n:'復健科',v:90},{n:'護理部(6F)',v:75},{n:'護理部(9F)',v:71},{n:'護理部(7F)',v:71},{n:'護理部(ICU)',v:67},{n:'放射科',v:59},{n:'護理部(OPD)',v:55},{n:'藥劑科',v:43},{n:'護理部(8F)',v:41},{n:'護理部(OR)',v:38},{n:'護理部(ER)',v:38},{n:'感染科',v:35},{n:'外科NP',v:32},{n:'內科NP',v:24},{n:'心理室',v:8},{n:'病理科',v:10}],
   yl:['108年前','108年','109年','110年','111年','112年','113年','114年'],
   yt:[3075,3277,2326,2442,2516,2492,2416,2756],
-  ybz:[0,105,114,109,118,92,120,113],
-  ybe:[0,11,3,3,3,0,4,3],
-  yd:[0,0,848,116,46,73,221,0],
+  ybz:[0,105,114,109,118,92,120,113],ybe:[0,11,3,3,3,0,4,3],yd:[0,0,848,116,46,73,221,0],
   py:['102年','103年','104年','105年','106年','107年','108年','109年','110年','111年','112年','113年','114年','合計'],
   pr:[{n:'圖書',d:[156,126,235,95,53,70,116,117,112,121,92,124,116,1533]},{n:'光碟',d:[0,1,2,0,0,0,0,0,0,0,0,1,0,4]},{n:'單位工具書',d:[79,12,117,104,39,56,81,76,67,45,62,32,62,832]},{n:'醫師工具書',d:[15,4,1,30,0,0,1,3,1,0,1,0,0,56]},{n:'合計',d:[250,143,355,229,92,126,202,196,180,166,163,157,178,2437]}],
   jy:['107年','108年','109年','110年','111年','112年','113年','114年','115年'],
   jl:[{n:'NEJM',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'JAMA',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'AJRCCM',t:'電子',d:['V','V','V','V','V','X','X','X','V']},{n:'Circulation',t:'電子',d:['V','V','V','V','V','X','V','V','V']},{n:'Crit Care Med',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Clin Infect Dis',t:'電子',d:['V','V','V','V','V','V','V','V','X']},{n:'ICHE',t:'電子',d:['V','V','V','V','X','X','X','X','V']},{n:'Pediatrics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'JBJS-American',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'J Neurosurgery',t:'紙本',d:['V','V','V','X','X','X','X','X','X']},{n:'Radiographics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Clinical Chemistry',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'J Nutrition',t:'電子',d:['V','V','V','V','V','X','V','X','V']},{n:'ICD-10-CM/PCS',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'AJOT',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Physical Therapy',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Neurology',t:'紙本',d:['V','V','X','V','X','X','X','X','X']}],
   jc:[17,17,16,16,14,11,13,12,14],
   dbs:[{n:'Micromedex',d:['V','V','V','V','X','X','X','X','V']},{n:'Clinicalkey',d:['V','V','V','V','V','V','V','V','V']},{n:'DynaMed',d:['V','V','V','V','V','V','V','V','V']},{n:'STATdx',d:['V','X','X','X','X','X','V','V','V']},{n:'UpTodate',d:['V','V','V','V','V','V','V','V','V']},{n:'CEPS',d:['V','V','V','V','V','V','V','V','V']},{n:'Lexicomp',d:['X','V','V','V','V','V','V','V','V']},{n:'Sanford Guide',d:['X','X','V','V','V','V','V','V','V']},{n:'PubMed',d:['X','X','V','V','V','V','V','V','V']},{n:'Cochrane',d:['X','X','V','V','V','V','V','V','V']},{n:'Symskan',d:['X','X','X','X','V','V','V','V','V']}],
-  mon:[{m:'1月',e:609,dr:43,ph:9,ra:0,la:8,nu:107,pt:7,ot:435,bk:4,ej:45,eb:3,edb:132},{m:'2月',e:574,dr:53,ph:2,ra:0,la:8,nu:70,pt:7,ot:434,bk:19,ej:71,eb:0,edb:111},{m:'3月',e:685,dr:67,ph:3,ra:13,la:15,nu:80,pt:12,ot:495,bk:17,ej:34,eb:4,edb:254},{m:'4月',e:683,dr:69,ph:7,ra:15,la:1,nu:84,pt:5,ot:502,bk:15,ej:26,eb:7,edb:174},{m:'5月',e:680,dr:54,ph:11,ra:5,la:12,nu:73,pt:5,ot:520,bk:13,ej:27,eb:0,edb:150},{m:'6月',e:760,dr:75,ph:16,ra:5,la:18,nu:83,pt:3,ot:560,bk:15,ej:24,eb:3,edb:127},{m:'7月',e:725,dr:58,ph:11,ra:21,la:8,nu:73,pt:4,ot:550,bk:23,ej:25,eb:0,edb:141},{m:'8月',e:757,dr:73,ph:5,ra:6,la:14,nu:85,pt:0,ot:574,bk:15,ej:81,eb:4,edb:57},{m:'9月',e:770,dr:68,ph:4,ra:34,la:10,nu:58,pt:1,ot:595,bk:12,ej:48,eb:0,edb:69},{m:'10月',e:820,dr:67,ph:2,ra:22,la:23,nu:70,pt:5,ot:631,bk:9,ej:42,eb:1,edb:46},{m:'11月',e:772,dr:74,ph:8,ra:3,la:10,nu:85,pt:4,ot:588,bk:8,ej:8,eb:0,edb:76},{m:'12月',e:897,dr:68,ph:4,ra:2,la:11,nu:89,pt:1,ot:722,bk:13,ej:56,eb:3,edb:150}],
+  // 多年份月報資料
+  monthly:{
+    '113':[
+      {m:'1月',e:520,dr:35,ph:8,ra:5,la:10,nu:90,pt:6,ot:366,bk:12,jo:0,ej:38,eb:2,edb:105},
+      {m:'2月',e:480,dr:40,ph:5,ra:3,la:7,nu:62,pt:5,ot:358,bk:14,jo:0,ej:55,eb:1,edb:92},
+      {m:'3月',e:610,dr:58,ph:6,ra:10,la:12,nu:72,pt:10,ot:442,bk:16,jo:0,ej:30,eb:3,edb:198},
+      {m:'4月',e:595,dr:55,ph:5,ra:12,la:8,nu:74,pt:4,ot:437,bk:13,jo:0,ej:22,eb:5,edb:150},
+      {m:'5月',e:620,dr:48,ph:9,ra:4,la:10,nu:65,pt:4,ot:480,bk:11,jo:0,ej:24,eb:0,edb:130},
+      {m:'6月',e:680,dr:62,ph:13,ra:4,la:15,nu:74,pt:2,ot:510,bk:14,jo:0,ej:20,eb:2,edb:110},
+      {m:'7月',e:650,dr:50,ph:10,ra:18,la:7,nu:65,pt:3,ot:497,bk:20,jo:0,ej:22,eb:0,edb:120},
+      {m:'8月',e:690,dr:65,ph:4,ra:5,la:12,nu:76,pt:0,ot:528,bk:13,jo:0,ej:72,eb:3,edb:48},
+      {m:'9月',e:700,dr:60,ph:3,ra:28,la:9,nu:50,pt:1,ot:549,bk:10,jo:0,ej:42,eb:0,edb:58},
+      {m:'10月',e:750,dr:58,ph:2,ra:20,la:20,nu:62,pt:4,ot:584,bk:8,jo:0,ej:38,eb:1,edb:40},
+      {m:'11月',e:710,dr:68,ph:7,ra:2,la:9,nu:78,pt:3,ot:543,bk:7,jo:0,ej:7,eb:0,edb:65},
+      {m:'12月',e:820,dr:60,ph:3,ra:1,la:10,nu:80,pt:1,ot:665,bk:11,jo:0,ej:50,eb:2,edb:130},
+    ],
+    '114':[
+      {m:'1月',e:609,dr:43,ph:9,ra:0,la:8,nu:107,pt:7,ot:435,bk:4,jo:0,ej:45,eb:3,edb:132},
+      {m:'2月',e:574,dr:53,ph:2,ra:0,la:8,nu:70,pt:7,ot:434,bk:19,jo:0,ej:71,eb:0,edb:111},
+      {m:'3月',e:685,dr:67,ph:3,ra:13,la:15,nu:80,pt:12,ot:495,bk:17,jo:0,ej:34,eb:4,edb:254},
+      {m:'4月',e:683,dr:69,ph:7,ra:15,la:1,nu:84,pt:5,ot:502,bk:15,jo:0,ej:26,eb:7,edb:174},
+      {m:'5月',e:680,dr:54,ph:11,ra:5,la:12,nu:73,pt:5,ot:520,bk:13,jo:0,ej:27,eb:0,edb:150},
+      {m:'6月',e:760,dr:75,ph:16,ra:5,la:18,nu:83,pt:3,ot:560,bk:15,jo:0,ej:24,eb:3,edb:127},
+      {m:'7月',e:725,dr:58,ph:11,ra:21,la:8,nu:73,pt:4,ot:550,bk:23,jo:0,ej:25,eb:0,edb:141},
+      {m:'8月',e:757,dr:73,ph:5,ra:6,la:14,nu:85,pt:0,ot:574,bk:15,jo:0,ej:81,eb:4,edb:57},
+      {m:'9月',e:770,dr:68,ph:4,ra:34,la:10,nu:58,pt:1,ot:595,bk:12,jo:0,ej:48,eb:0,edb:69},
+      {m:'10月',e:820,dr:67,ph:2,ra:22,la:23,nu:70,pt:5,ot:631,bk:9,jo:0,ej:42,eb:1,edb:46},
+      {m:'11月',e:772,dr:74,ph:8,ra:3,la:10,nu:85,pt:4,ot:588,bk:8,jo:0,ej:8,eb:0,edb:76},
+      {m:'12月',e:897,dr:68,ph:4,ra:2,la:11,nu:89,pt:1,ot:722,bk:13,jo:0,ej:56,eb:3,edb:150},
+    ]
+  },
   dbm:{'Clinicalkey':[10,8,35,11,14,10,14,6,8,10,6,40],'DynaMed':[7,8,19,13,10,6,7,3,5,0,3,6],'UpTodate':[34,14,56,30,23,19,34,12,11,5,9,20],'Lexicomp':[5,11,18,16,4,4,11,1,6,0,2,4],'CEPS':[49,43,93,58,47,40,43,21,24,23,38,55],'PubMed':[17,17,21,34,43,30,19,6,6,2,16,18],'Symskan':[2,3,2,4,3,3,2,2,2,0,1,4],'Sanford Guide':[3,3,2,4,2,9,5,4,3,2,1,2],'Cochrane':[5,4,8,4,4,6,6,2,4,4,0,1]},
   vm:{'Clinical Key':[65,112,418,189,86,110,179,78,31,113,28,86],'Dynamed':[582,336,476,1337,825,1441,1396,687,307,611,1188,451],'UpTodate':[349,485,764,1009,936,707,887,649,755,574,771,867],'Lexicomp':[718,644,1049,2172,2240,1633,2112,1629,1515,1366,1514,1486],'CEPS':[695,489,1081,1130,933,674,897,333,902,593,611,717],'Kono雜誌庫':[4782,6008,5878,5698,6197,7281,7202,7155,7140,7450,7663,8165]}
 };
-function ld(){try{const s=localStorage.getItem('lib_v2');if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(DD));}
-function sd(d){try{localStorage.setItem('lib_v2',JSON.stringify(d));}catch(e){}}
+
+// ═══════════════════════════════
+//  STORAGE
+// ═══════════════════════════════
+function ld(){try{const s=localStorage.getItem('lib_v3');if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(DD));}
+function sd(d){try{localStorage.setItem('lib_v3',JSON.stringify(d));}catch(e){}}
 let D=ld();
 
-// ─── CHART ───
+// ═══════════════════════════════
+//  YEAR / MONTH FILTER STATE
+// ═══════════════════════════════
+const ALL_MONTHS=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const QS={Q1:[0,1,2],Q2:[3,4,5],Q3:[6,7,8],Q4:[9,10,11]};
+let selYear='114', selMonths=ALL_MONTHS.map((_,i)=>i), selRange='all';
+
+function buildYearTabs(){
+  const yt=document.getElementById('year-tabs');
+  yt.innerHTML=(D.years||['114']).map(y=>`<button class="ytab${y===selYear?' on':''}" onclick="selectYear('${y}')">${y}年</button>`).join('');
+  if(isAdm()) yt.innerHTML+=`<button class="ytab" onclick="addYear()" style="opacity:.6">＋年份</button>`;
+  document.getElementById('topbar-sub').textContent=`民國${selYear}年`;
+  document.getElementById('mon-year-label').textContent=`民國${selYear}年`;
+}
+function buildMonthTabs(){
+  const mt=document.getElementById('month-tabs');
+  mt.innerHTML=ALL_MONTHS.map((m,i)=>`<button class="ytab${selMonths.includes(i)&&selRange==='custom'?' on':selRange!=='custom'&&selMonths.includes(i)?'':''}" onclick="toggleMonth(${i})" id="mtab-${i}">${m}</button>`).join('');
+  updateMonthTabStyles();
+}
+function updateMonthTabStyles(){
+  ALL_MONTHS.forEach((_,i)=>{
+    const btn=document.getElementById('mtab-'+i);
+    if(btn) btn.className='ytab'+(selMonths.includes(i)?' on':'');
+  });
+}
+function selectYear(y){
+  selYear=y; selRange='all'; selMonths=ALL_MONTHS.map((_,i)=>i);
+  buildYearTabs(); updateMonthTabStyles(); updateRangeTabs(); refreshAll();
+}
+function toggleMonth(i){
+  selRange='custom';
+  if(selMonths.includes(i)) selMonths=selMonths.filter(m=>m!==i);
+  else selMonths=[...selMonths,i].sort((a,b)=>a-b);
+  if(selMonths.length===0) selMonths=[i];
+  updateMonthTabStyles(); updateRangeTabs(); refreshAll();
+}
+function setRange(r,el){
+  selRange=r;
+  if(r==='all') selMonths=ALL_MONTHS.map((_,i)=>i);
+  else if(r==='Q1') selMonths=[0,1,2];
+  else if(r==='Q2') selMonths=[3,4,5];
+  else if(r==='Q3') selMonths=[6,7,8];
+  else if(r==='Q4') selMonths=[9,10,11];
+  updateMonthTabStyles(); updateRangeTabs(); refreshAll();
+}
+function updateRangeTabs(){
+  ['all','Q1','Q2','Q3','Q4'].forEach(r=>{
+    const el=document.getElementById('range-'+r);
+    if(el) el.className='ft'+(selRange===r?' on':'');
+  });
+}
+function addYear(){
+  const y=prompt('輸入新年份（如：115）');
+  if(!y||isNaN(y)) return;
+  if(!D.years) D.years=[];
+  if(D.years.includes(y)){toast('此年份已存在','err');return;}
+  D.years.push(y);
+  D.monthly[y]=ALL_MONTHS.map(m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0}));
+  sd(D);D=ld();
+  selYear=y; buildYearTabs(); bMon(); toast(`${y}年已新增`);
+}
+function getMonData(){
+  const all=(D.monthly||{})[selYear]||[];
+  return selMonths.map(i=>all[i]).filter(Boolean);
+}
+
+// ═══════════════════════════════
+//  CHART HELPERS
+// ═══════════════════════════════
 const P=['#4f8ef7','#6ee7b7','#fbbf24','#f87171','#c084fc','#34d399','#fb923c','#a78bfa','#60a5fa','#86efac','#fcd34d','#fca5a5','#e879f9','#5eead4','#93c5fd'];
 const CH={};
 const sa=a=>(a||[]).reduce((s,v)=>s+(v||0),0);
@@ -328,7 +535,7 @@ function mkLine(id,lbs,ds,fill=false){
 }
 function mkBar(id,lbs,ds,st=false,hz=false){
   const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();
-  CH[id]=new Chart(c,{type:'bar',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,backgroundColor:(d.c||P[i])+'cc',borderWidth:0,borderRadius:3}))},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:{x:{stacked:st,ticks:{color:'#8b92a8',font:{size:10},autoSkip:false,maxRotation:45},grid:{color:'rgba(255,255,255,.05)'}},y:{stacked:st,ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+  CH[id]=new Chart(c,{type:'bar',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,backgroundColor:(d.c||P[i])+'cc',borderWidth:0,borderRadius:2}))},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:{x:{stacked:st,ticks:{color:'#8b92a8',font:{size:10},autoSkip:false,maxRotation:45},grid:{color:'rgba(255,255,255,.05)'}},y:{stacked:st,ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
 }
 function mkPie(id,lbs,vs,cs){
   const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();
@@ -336,77 +543,91 @@ function mkPie(id,lbs,vs,cs){
 }
 function legH(it){return it.map((x,i)=>`<div class="li"><span class="ld" style="background:${x.c||P[i]}"></span>${x.l}</div>`).join('');}
 function rankH(pairs,col){const mx=pairs[0]?.[1]||1;return pairs.map(([n,v],i)=>`<div class="ri"><span class="rn2">${i+1}</span><span class="rname">${n}</span><div class="rb"><div class="rf" style="width:${Math.round(v/mx*100)}%;background:${col}"></div></div><span class="rv">${v}</span></div>`).join('');}
-function tblH(cols,rows){let h=`<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;rows.forEach(r=>{h+=`<tr${r._tot?' class="tr-tot"':''}>${r.d.map(v=>`<td>${v??0}</td>`).join('')}</tr>`;});return h+'</tbody></table>';}
+function tblH(cols,rows){let h=`<table><thead><tr>${cols.map((c,i)=>`<th${i>0?' style="min-width:44px"':''}>${c}</th>`).join('')}</tr></thead><tbody>`;rows.forEach(r=>{h+=`<tr${r._t?' class="tr-tot"':''}>${r.d.map(v=>`<td>${v??0}</td>`).join('')}</tr>`;});return h+'</tbody></table>';}
 function toast(msg,t='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),2800);}
 
-// ─── KPI ───
+// ═══════════════════════════════
+//  KPI
+// ═══════════════════════════════
 function bKPI(){
-  const te=sa(D.mon.map(m=>m.e)),tv=Object.values(D.vm).reduce((s,a)=>s+sa(a),0);
+  const rows=getMonData();
+  const te=sa(rows.map(r=>r.e)),tv=Object.values(D.vm).reduce((s,a)=>s+sa(selMonths.map(i=>a[i])),0);
+  const tje=sa(rows.map(r=>r.ej)),tdb=sa(rows.map(r=>r.edb));
   document.getElementById('kpi').innerHTML=[
     {l:'現有館藏總量',v:D.col.total.toLocaleString(),s:`中文${D.col.chinese}/西文${D.col.english}`},
-    {l:'單位工具書',v:D.col.unit_books.toLocaleString(),s:`已註銷 ${D.col.canceled.toLocaleString()} 冊`},
-    {l:'114年進館人次',v:te.toLocaleString(),s:`月均 ${Math.round(te/12)}`},
-    {l:'電子資源院內',v:sa(D.mon.map(m=>m.ej+m.edb)).toLocaleString(),s:'期刊+資料庫'},
+    {l:'進館人次',v:te.toLocaleString(),s:rows.length>1?'月均 '+Math.round(te/rows.length):'單月'},
+    {l:'電子期刊使用',v:tje,s:'院內登入'},
+    {l:'電子資料庫',v:tdb,s:'院內登入'},
     {l:'廠商提供量',v:Math.round(tv/1000)+'k',s:'含院外存取'},
   ].map(x=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
 }
 
-// ─── PAGE BUILDERS ───
+// ═══════════════════════════════
+//  PAGE: 總覽
+// ═══════════════════════════════
 function bOv(){
   mkPie('c-lang',['中文','西文'],[D.col.chinese,D.col.english],['#4f8ef7','#6ee7b7']);
   mkPie('c-type',['圖書','單位工具書','醫師工具書','光碟'],[1565,D.col.unit_books,D.col.doctor_books,D.col.cd],['#4f8ef7','#6ee7b7','#fbbf24','#888780']);
-  mkPie('c-eres',['電子期刊','電子書','電子資料庫'],[sa(D.mon.map(m=>m.ej)),sa(D.mon.map(m=>m.eb)),sa(D.mon.map(m=>m.edb))],['#c084fc','#f87171','#fbbf24']);
-  const td=D.domains.slice(0,12);
-  document.getElementById('dleg').innerHTML=legH([{c:'#4f8ef7',l:'中文'},{c:'#6ee7b7',l:'西文'}]);
-  mkBar('c-dom',td.map(x=>x.n.length>6?x.n.slice(0,6)+'…':x.n),[{l:'中文',d:td.map(x=>x.zh),c:'#4f8ef7'},{l:'西文',d:td.map(x=>x.en),c:'#6ee7b7'}],true);
-  document.getElementById('ovur').innerHTML=rankH([...D.units].sort((a,b)=>b.v-a.v).slice(0,10).map(x=>[x.n,x.v]),'#c084fc');
+  const rows=getMonData();
+  const lbs=rows.map(r=>r.m);
+  const tje=sa(rows.map(r=>r.ej)),teb=sa(rows.map(r=>r.eb)),tdb=sa(rows.map(r=>r.edb));
+  mkPie('c-eres',['電子期刊','電子書','電子資料庫'],[tje,teb,tdb],['#c084fc','#f87171','#fbbf24']);
+  document.getElementById('ov-leg').innerHTML=legH([{c:'#4f8ef7',l:'進館人次'}]);
+  mkLine('c-entry',lbs,[{l:'進館人次',d:rows.map(r=>r.e),c:'#4f8ef7'}],true);
+  document.getElementById('ov-eres-leg').innerHTML=legH([{c:'#c084fc',l:'電子期刊'},{c:'#fbbf24',l:'電子資料庫'}]);
+  mkBar('c-ov-eres',lbs,[{l:'電子期刊',d:rows.map(r=>r.ej),c:'#c084fc'},{l:'電子資料庫',d:rows.map(r=>r.edb),c:'#fbbf24'}],true);
 }
+
+// ═══════════════════════════════
+//  PAGE: 資源使用
+// ═══════════════════════════════
+let cuc='entry',utbl='mon';
+function bUsage(){
+  bUC(cuc); bUTbl(utbl);
+  const rows=getMonData();
+  const tje=sa(rows.map(r=>r.ej)),teb=sa(rows.map(r=>r.eb)),tdb=sa(rows.map(r=>r.edb));
+  mkPie('c-u-pie',['電子期刊','電子書','電子資料庫'],[tje,teb,tdb],['#c084fc','#f87171','#fbbf24']);
+}
+function suc(m,el){cuc=m;document.querySelectorAll('#uct .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');bUC(m);}
+function bUC(m){
+  const rows=getMonData();const lbs=rows.map(r=>r.m);
+  if(m==='entry'){document.getElementById('u-leg').innerHTML=legH([{c:'#4f8ef7',l:'進館人次'}]);mkLine('c-usage',lbs,[{l:'進館人次',d:rows.map(r=>r.e),c:'#4f8ef7'}],true);}
+  else if(m==='eres'){document.getElementById('u-leg').innerHTML=legH([{c:'#c084fc',l:'電子期刊'},{c:'#f87171',l:'電子書'},{c:'#fbbf24',l:'電子資料庫'}]);mkBar('c-usage',lbs,[{l:'電子期刊',d:rows.map(r=>r.ej),c:'#c084fc'},{l:'電子書',d:rows.map(r=>r.eb),c:'#f87171'},{l:'電子資料庫',d:rows.map(r=>r.edb),c:'#fbbf24'}],true);}
+  else if(m==='db'){const ks=Object.keys(D.dbm);document.getElementById('u-leg').innerHTML=legH(ks.map((k,i)=>({c:P[i],l:k})));mkBar('c-usage',lbs,ks.map((k,i)=>({l:k,d:selMonths.map(idx=>D.dbm[k][idx]),c:P[i]})),true);}
+  else if(m==='vend'){const ks=Object.keys(D.vm);document.getElementById('u-leg').innerHTML=legH(ks.map((k,i)=>({c:P[i],l:k})));mkLine('c-usage',lbs,ks.map((k,i)=>({l:k,d:selMonths.map(idx=>D.vm[k][idx]),c:P[i]})));}
+  else if(m==='staff'){const ROLES=['醫師','藥劑','放射','檢驗','護理','物治','其他'];const RKEYS=['dr','ph','ra','la','nu','pt','ot'];document.getElementById('u-leg').innerHTML=legH(ROLES.map((r,i)=>({c:P[i],l:r})));mkBar('c-usage',lbs,RKEYS.map((k,i)=>({l:ROLES[i],d:rows.map(r=>r[k]||0),c:P[i]})),true);}
+}
+function setUTbl(t,el){utbl=t;document.querySelectorAll('#utbl-tabs .ft').forEach(x=>x.classList.remove('on'));el.classList.add('on');bUTbl(t);}
+function bUTbl(t){
+  const rows=getMonData();
+  let h='';
+  if(t==='mon'){
+    h=tblH(['月份','進館','電子期刊','電子書','資料庫','借閱'],rows.map(r=>({d:[r.m,r.e,r.ej,r.eb,r.edb,r.bk]})).concat([{d:['合計',sa(rows.map(r=>r.e)),sa(rows.map(r=>r.ej)),sa(rows.map(r=>r.eb)),sa(rows.map(r=>r.edb)),sa(rows.map(r=>r.bk))],_t:true}]));
+  } else if(t==='db'){
+    const ks=Object.keys(D.dbm);
+    h=tblH(['資料庫',...rows.map(r=>r.m),'合計'],ks.map(k=>({d:[k,...selMonths.map(i=>D.dbm[k][i]),sa(selMonths.map(i=>D.dbm[k][i]))]})));
+  } else {
+    const ks=Object.keys(D.vm);
+    h=tblH(['廠商',...rows.map(r=>r.m),'合計'],ks.map(k=>({d:[k,...selMonths.map(i=>D.vm[k][i]),sa(selMonths.map(i=>D.vm[k][i]))]})));
+  }
+  document.getElementById('u-table').innerHTML=h;
+}
+
+// ═══════════════════════════════
+//  PAGE: 館藏統計
+// ═══════════════════════════════
 function bColl(){
   if(isAdm())document.getElementById('ab-coll').classList.add('show');
   mkLine('c-coll',D.yl,[{l:'館藏量',d:D.yt,c:'#4f8ef7'}],true);
   document.getElementById('dl').innerHTML=legH([{c:'#6ee7b7',l:'購入中文'},{c:'#4f8ef7',l:'購入西文'},{c:'#f87171',l:'註銷'}]);
   mkBar('c-delta',D.yl,[{l:'購入中文',d:D.ybz,c:'#6ee7b7'},{l:'購入西文',d:D.ybe,c:'#4f8ef7'},{l:'註銷',d:D.yd,c:'#f87171'}]);
   const cols=['類型',...D.py];
-  document.getElementById('t-purch').innerHTML=tblH(cols,D.pr.map(r=>({d:[r.n,...r.d],_tot:r.n==='合計'})));
+  document.getElementById('t-purch').innerHTML=tblH(cols,D.pr.map(r=>({d:[r.n,...r.d],_t:r.n==='合計'})));
 }
 
-// Usage filter
-let ufm='year',ufq='Q1',ufmi=0,ufr=[0,11],cuc='entry';
-const MO=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-const QS={Q1:[0,1,2],Q2:[3,4,5],Q3:[6,7,8],Q4:[9,10,11]};
-function gi(){if(ufm==='year')return MO.map((_,i)=>i);if(ufm==='quarter')return QS[ufq];if(ufm==='month')return[ufmi];return Array.from({length:ufr[1]-ufr[0]+1},(_,i)=>ufr[0]+i);}
-function sl(a){return gi().map(i=>a[i]);}
-function buildUFC(){
-  const fc=document.getElementById('ufc');fc.innerHTML='';
-  if(ufm==='year'){fc.innerHTML='<span style="font-size:.7rem;color:#565f77">全部12個月</span>';return;}
-  if(ufm==='quarter'){const s=document.createElement('select');s.innerHTML=['Q1','Q2','Q3','Q4'].map(q=>`<option${q===ufq?' selected':''}>${q}</option>`).join('');s.onchange=e=>{ufq=e.target.value;bUKPI();bUC(cuc);};fc.appendChild(s);return;}
-  if(ufm==='month'){const s=document.createElement('select');s.innerHTML=MO.map((m,i)=>`<option value="${i}"${i===ufmi?' selected':''}>${m}</option>`).join('');s.onchange=e=>{ufmi=+e.target.value;bUKPI();bUC(cuc);};fc.appendChild(s);return;}
-  const sp=document.createElement('span');sp.textContent='起';sp.style.cssText='font-size:.7rem;color:#8b92a8';
-  const s1=document.createElement('select');s1.innerHTML=MO.map((m,i)=>`<option value="${i}"${i===ufr[0]?' selected':''}>${m}</option>`).join('');s1.onchange=e=>{ufr[0]=+e.target.value;bUKPI();bUC(cuc);};
-  const sp2=document.createElement('span');sp2.textContent='至';sp2.style.cssText='font-size:.7rem;color:#8b92a8';
-  const s2=document.createElement('select');s2.innerHTML=MO.map((m,i)=>`<option value="${i}"${i===ufr[1]?' selected':''}>${m}</option>`).join('');s2.onchange=e=>{ufr[1]=+e.target.value;bUKPI();bUC(cuc);};
-  [sp,s1,sp2,s2].forEach(x=>fc.appendChild(x));
-}
-function setUM(m,el){ufm=m;document.querySelectorAll('#ufb .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');buildUFC();bUKPI();bUC(cuc);}
-function bUKPI(){
-  const rows=gi().map(i=>D.mon[i]),n=rows.length;
-  const te=sa(rows.map(r=>r.e)),tj=sa(rows.map(r=>r.ej)),tdb=sa(rows.map(r=>r.edb));
-  const tv=Object.values(D.vm).reduce((s,a)=>s+sa(gi().map(i=>a[i])),0);
-  document.getElementById('ukpi').innerHTML=[
-    {l:'進館人次',v:te.toLocaleString(),s:n>1?'月均'+Math.round(te/n):'單月'},
-    {l:'電子期刊',v:tj,s:'院內登入'},{l:'電子資料庫',v:tdb,s:'院內登入'},
-    {l:'廠商提供量',v:tv.toLocaleString(),s:'含院外'},
-  ].map(x=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
-}
-function bUC(m){
-  cuc=m;const lbs=gi().map(i=>MO[i]),rows=gi().map(i=>D.mon[i]);
-  if(m==='entry'){document.getElementById('uleg').innerHTML=legH([{c:'#4f8ef7',l:'進館人次'}]);mkLine('c-usage',lbs,[{l:'進館人次',d:rows.map(r=>r.e),c:'#4f8ef7'}],true);}
-  else if(m==='eres'){document.getElementById('uleg').innerHTML=legH([{c:'#c084fc',l:'電子期刊'},{c:'#f87171',l:'電子書'},{c:'#fbbf24',l:'電子資料庫'}]);mkBar('c-usage',lbs,[{l:'電子期刊',d:rows.map(r=>r.ej),c:'#c084fc'},{l:'電子書',d:rows.map(r=>r.eb),c:'#f87171'},{l:'電子資料庫',d:rows.map(r=>r.edb),c:'#fbbf24'}],true);}
-  else if(m==='db'){const ks=Object.keys(D.dbm);document.getElementById('uleg').innerHTML=legH(ks.map((k,i)=>({c:P[i],l:k})));mkBar('c-usage',lbs,ks.map((k,i)=>({l:k,d:gi().map(idx=>D.dbm[k][idx]),c:P[i]})),true);}
-  else{const ks=Object.keys(D.vm);document.getElementById('uleg').innerHTML=legH(ks.map((k,i)=>({c:P[i],l:k})));mkLine('c-usage',lbs,ks.map((k,i)=>({l:k,d:gi().map(idx=>D.vm[k][idx]),c:P[i]})));}
-}
-function suc(m,el){document.querySelectorAll('#uct .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');bUC(m);}
-
+// ═══════════════════════════════
+//  PAGE: 期刊訂閱
+// ═══════════════════════════════
 function bJrnl(){
   if(isAdm())document.getElementById('ab-jrnl').classList.add('show');
   const jy=D.jy;
@@ -423,88 +644,163 @@ function bJrnl(){
 function delJ(i){if(!confirm('確定刪除？'))return;D.jl.splice(i,1);D.jc=D.jy.map((_,yi)=>D.jl.filter(j=>j.d[yi]==='V').length);sd(D);D=ld();bJrnl();toast('已刪除');}
 function delDB(i){if(!confirm('確定刪除？'))return;D.dbs.splice(i,1);sd(D);D=ld();bJrnl();toast('已刪除');}
 
+// ═══════════════════════════════
+//  PAGE: 單位分布
+// ═══════════════════════════════
 function bUnit(){
   if(isAdm())document.getElementById('ab-unit').classList.add('show');
   const s=[...D.units].sort((a,b)=>b.v-a.v);
   mkBar('c-unit',s.slice(0,15).map(x=>x.n),[{l:'冊數',d:s.slice(0,15).map(x=>x.v),c:'#c084fc'}],false,true);
   document.getElementById('urf').innerHTML=rankH(s.map(x=>[x.n,x.v]),'#c084fc');
 }
-function bTrend(){
-  mkLine('c-trend',D.yl,[{l:'館藏量',d:D.yt,c:'#4f8ef7'}],true);
-  const tot=D.pr.find(r=>r.n==='合計');
-  if(tot)mkBar('c-buy',D.py,[{l:'購入合計',d:tot.d,c:'#6ee7b7'}]);
-  mkLine('c-ent',MO,[{l:'進館人次',d:D.mon.map(m=>m.e),c:'#c084fc'}],true);
-}
-function bMon(){
-  const aa=document.getElementById('mon-aa');
-  aa.innerHTML=isAdm()?`<button class="badd" onclick="openMonEd(-1)">＋ 新增月份</button>`:'<span style="font-size:.73rem;color:#565f77">瀏覽模式，管理者可編輯</span>';
-  const maxE=Math.max(...D.mon.map(m=>m.e));
-  document.getElementById('mcards').innerHTML=D.mon.map((m,i)=>`
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rr);padding:.85rem;cursor:${isAdm()?'pointer':'default'}" onclick="${isAdm()?`openMonEd(${i})`:''}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.35rem">
-        <span style="font-size:.88rem;font-weight:700;color:var(--accent)">${m.m}</span>
-        <span style="font-size:.72rem;color:var(--text2)">${m.e} 人</span>
-      </div>
-      <div style="font-size:.68rem;color:var(--text3);margin-bottom:.32rem">電子：${m.ej+m.eb+m.edb} 次 ｜ 借閱：${m.bk} 冊</div>
-      <div style="height:3px;background:var(--bg4);border-radius:2px"><div style="height:100%;width:${Math.round(m.e/maxE*100)}%;background:var(--accent);border-radius:2px"></div></div>
-    </div>`).join('');
-  document.getElementById('med').style.display='none';
-}
-function openMonEd(idx){
-  if(!isAdm()){toast('需要管理者權限','err');return;}
-  const m=idx>=0?{...D.mon[idx]}:{m:'',e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,ej:0,eb:0,edb:0};
-  const el=document.getElementById('med');el.style.display='block';
-  const fields=[['me-e','進館人次'],['me-dr','醫師'],['me-ph','藥劑'],['me-ra','放射'],['me-la','檢驗'],['me-nu','護理'],['me-pt','物治'],['me-ot','其他'],['me-bk','圖書借閱'],['me-ej','電子期刊'],['me-eb','電子書'],['me-edb','電子資料庫']];
-  el.innerHTML=`<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem">
-    <div class="ct" style="margin:0">${idx>=0?'編輯 '+m.m+' 月資料':'新增月份資料'}</div>
-    <div style="display:flex;gap:.4rem">
-      <button class="bsave" onclick="saveMon(${idx})">儲存</button>
-      ${idx>=0?`<button class="bdelsm" onclick="delMon(${idx})">刪除</button>`:''}
-      <button class="bcancel" onclick="document.getElementById('med').style.display='none'">取消</button>
-    </div></div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem">
-      ${idx<0?`<div class="mf"><label>月份名稱</label><input id="me-m" value="${m.m}" placeholder="如：1月"></div>`:''}
-      ${fields.map(([id,lbl])=>`<div class="mf"><label>${lbl}</label><input type="number" id="${id}" value="${m[id.replace('me-','')]||0}" min="0"></div>`).join('')}
-    </div></div>`;
-}
-function saveMon(idx){
-  if(!isAdm())return;
-  const g=id=>{const el=document.getElementById(id);return el?parseInt(el.value)||0:0;};
-  const gs=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
-  const keys={e:'me-e',dr:'me-dr',ph:'me-ph',ra:'me-ra',la:'me-la',nu:'me-nu',pt:'me-pt',ot:'me-ot',bk:'me-bk',ej:'me-ej',eb:'me-eb',edb:'me-edb'};
-  const obj={m:idx>=0?D.mon[idx].m:gs('me-m')};
-  Object.entries(keys).forEach(([k,id])=>obj[k]=g(id));
-  if(!obj.m){toast('月份不可空白','err');return;}
-  if(idx>=0)D.mon[idx]=obj;else D.mon.push(obj);
-  sd(D);D=ld();bMon();bKPI();toast(idx>=0?`${obj.m} 已更新`:'新月份已新增');
-}
-function delMon(idx){if(!confirm('確定刪除此月份？'))return;D.mon.splice(idx,1);sd(D);D=ld();bMon();bKPI();document.getElementById('med').style.display='none';toast('已刪除');}
 
-// ─── MODAL ───
+// ═══════════════════════════════
+//  PAGE: 月報輸入
+// ═══════════════════════════════
+let iedIdx=-1;
+function bMon(){
+  document.getElementById('mon-year-label').textContent=`民國${selYear}年`;
+  const aa=document.getElementById('mon-aa');
+  aa.innerHTML=isAdm()?`<button class="badd" onclick="openIED(-1)">＋ 新增月份</button><button class="badd" onclick="openM('addyear')">＋ 新增年份</button>`:'<span style="font-size:.73rem;color:#565f77">瀏覽模式</span>';
+  const allMon=(D.monthly||{})[selYear]||[];
+  const maxE=Math.max(1,...allMon.map(m=>m.e||0));
+  document.getElementById('mcards').innerHTML=allMon.map((m,i)=>`
+    <div class="mcard${iedIdx===i?' editing':''}" onclick="${isAdm()?`openIED(${i})`:''}">
+      <div class="mcard-h">
+        <span class="mcard-m">${m.m}</span>
+        <span class="mcard-e">${(m.e||0).toLocaleString()} 人</span>
+      </div>
+      <div class="mcard-d">電子：${(m.ej||0)+(m.eb||0)+(m.edb||0)} ｜ 借閱：${m.bk||0}</div>
+      <div class="mbar-bg"><div class="mbar-f" style="width:${Math.round((m.e||0)/maxE*100)}%"></div></div>
+    </div>`).join('');
+  if(iedIdx<0) closeIED();
+}
+function openIED(idx){
+  if(!isAdm()){toast('需要管理者權限','err');return;}
+  iedIdx=idx;
+  const allMon=(D.monthly||{})[selYear]||[];
+  const m=idx>=0?{...allMon[idx]}:{m:'',e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0};
+  document.getElementById('ied-title').textContent=idx>=0?`編輯 ${selYear}年 ${m.m} 資料`:`新增 ${selYear}年 月份資料`;
+  ['dr','ph','ra','la','nu','pt','ot','bk','jo','ej','eb','edb'].forEach(k=>{
+    const el=document.getElementById('f-'+k);if(el) el.value=m[k]||0;
+  });
+  updateTotal();
+  const delBtn=document.getElementById('ied-del');
+  if(delBtn){delBtn.style.display=idx>=0?'':'none';delBtn.onclick=()=>delMon(idx);}
+  const saveBtn=document.getElementById('ied-save');
+  if(saveBtn) saveBtn.onclick=()=>saveMon(idx);
+  document.getElementById('ied').style.display='block';
+  bMon();
+}
+function updateTotal(){
+  const sum=['dr','ph','ra','la','nu','pt','ot'].reduce((s,k)=>{const el=document.getElementById('f-'+k);return s+(parseInt(el?.value)||0);},0);
+  const el=document.getElementById('f-e');if(el) el.value=sum;
+}
+['dr','ph','ra','la','nu','pt','ot'].forEach(k=>{
+  document.getElementById('f-'+k)?.addEventListener('input',updateTotal);
+});
+function saveMon(idx){
+  if(!isAdm()) return;
+  const g=id=>{const el=document.getElementById(id);return parseInt(el?.value)||0;};
+  if(!D.monthly) D.monthly={};
+  if(!D.monthly[selYear]) D.monthly[selYear]=[];
+  const allMon=D.monthly[selYear];
+  const obj={
+    m:idx>=0?allMon[idx].m:(document.getElementById('f-new-m')?.value||`${allMon.length+1}月`),
+    dr:g('f-dr'),ph:g('f-ph'),ra:g('f-ra'),la:g('f-la'),nu:g('f-nu'),pt:g('f-pt'),ot:g('f-ot'),
+    bk:g('f-bk'),jo:g('f-jo'),ej:g('f-ej'),eb:g('f-eb'),edb:g('f-edb'),
+  };
+  obj.e=['dr','ph','ra','la','nu','pt','ot'].reduce((s,k)=>s+obj[k],0);
+  if(idx>=0) allMon[idx]=obj; else allMon.push(obj);
+  sd(D);D=ld();iedIdx=-1;closeIED();bMon();bKPI();toast(idx>=0?`${obj.m} 已更新`:'新月份已新增');
+}
+function delMon(idx){
+  if(!confirm('確定刪除此月份資料？')) return;
+  (D.monthly[selYear]||[]).splice(idx,1);
+  sd(D);D=ld();iedIdx=-1;closeIED();bMon();bKPI();toast('已刪除');
+}
+function closeIED(){iedIdx=-1;document.getElementById('ied').style.display='none';}
+
+// ═══════════════════════════════
+//  PAGE: 進出館
+// ═══════════════════════════════
+let acGroup='全部';
+const ACCESS_DATA={total:1737,total_people:126,dates:["2026/01/13","2026/01/14","2026/01/15","2026/01/16","2026/01/19","2026/01/20","2026/01/21","2026/01/22","2026/01/23","2026/01/26","2026/01/27","2026/01/28","2026/01/29","2026/01/30","2026/01/31","2026/02/02","2026/02/03","2026/02/04","2026/02/05","2026/02/06","2026/02/07","2026/02/08","2026/02/09","2026/02/10","2026/02/11","2026/02/12","2026/02/13","2026/02/21","2026/02/23","2026/02/24","2026/02/25","2026/02/26","2026/03/02","2026/03/03","2026/03/04","2026/03/05","2026/03/06","2026/03/07","2026/03/08","2026/03/09","2026/03/10","2026/03/11","2026/03/12","2026/03/13","2026/03/16","2026/03/17","2026/03/18","2026/03/19","2026/03/20","2026/03/23","2026/03/24","2026/03/25","2026/03/26","2026/03/27","2026/03/30","2026/03/31"],groups:["PGY","其他醫事人員","實習生","復健","放射","檢驗","藥劑","行政人員","護理","醫師"],monthly:{"2026/01":{"行政人員":357,"醫師":29,"護理":88,"檢驗":14,"藥劑":11,"PGY":12,"放射":1,"其他醫事人員":1},"2026/02":{"行政人員":382,"護理":57,"醫師":40,"檢驗":6,"PGY":2,"放射":4,"復健":5,"藥劑":2,"實習生":1},"2026/03":{"行政人員":555,"醫師":59,"護理":82,"檢驗":8,"復健":6,"放射":13,"藥劑":2}},daily:{"2026/01/13":{"行政人員":5},"2026/01/14":{"行政人員":37,"醫師":3,"護理":3,"檢驗":1,"藥劑":1},"2026/01/15":{"行政人員":10},"2026/01/16":{"行政人員":45,"護理":11,"醫師":5,"藥劑":3,"檢驗":11},"2026/01/19":{"行政人員":25,"護理":2},"2026/01/20":{"行政人員":28,"醫師":5,"護理":20,"檢驗":1,"藥劑":2},"2026/01/21":{"行政人員":34,"護理":17,"藥劑":1},"2026/01/22":{"護理":4,"行政人員":16},"2026/01/23":{"行政人員":17,"護理":4,"PGY":1,"放射":1},"2026/01/26":{"行政人員":19,"藥劑":1,"護理":1},"2026/01/27":{"行政人員":30,"醫師":7,"護理":7,"藥劑":1},"2026/01/28":{"行政人員":39,"醫師":4,"護理":6,"檢驗":1,"藥劑":1},"2026/01/29":{"護理":9,"行政人員":13,"醫師":2,"藥劑":1},"2026/01/30":{"行政人員":38,"護理":4,"醫師":3,"PGY":11,"其他醫事人員":1},"2026/01/31":{"行政人員":1},"2026/02/02":{"行政人員":19,"護理":1},"2026/02/03":{"行政人員":29,"護理":10,"醫師":7,"檢驗":1},"2026/02/04":{"行政人員":35,"醫師":2,"護理":10,"檢驗":2},"2026/02/05":{"行政人員":20,"護理":5},"2026/02/06":{"行政人員":24,"醫師":5,"護理":1},"2026/02/07":{"醫師":2},"2026/02/08":{"醫師":4},"2026/02/09":{"醫師":2,"行政人員":23,"護理":1},"2026/02/10":{"行政人員":40,"護理":7,"醫師":7,"PGY":2},"2026/02/11":{"行政人員":34,"護理":3,"放射":1,"醫師":1,"檢驗":1},"2026/02/12":{"行政人員":19,"復健":5,"護理":1},"2026/02/13":{"行政人員":31,"護理":2,"醫師":2},"2026/02/21":{"行政人員":5},"2026/02/23":{"行政人員":34,"藥劑":2,"放射":1},"2026/02/24":{"行政人員":13,"醫師":4,"護理":8},"2026/02/25":{"行政人員":35,"醫師":4,"護理":8,"檢驗":2,"放射":1},"2026/02/26":{"行政人員":21,"放射":1,"實習生":1},"2026/03/02":{"行政人員":15,"醫師":1},"2026/03/03":{"行政人員":19,"醫師":4,"護理":11},"2026/03/04":{"行政人員":20},"2026/03/05":{"行政人員":17,"護理":1},"2026/03/06":{"行政人員":19,"護理":4,"醫師":2},"2026/03/07":{"行政人員":4},"2026/03/08":{"行政人員":1},"2026/03/09":{"行政人員":17},"2026/03/10":{"行政人員":26,"醫師":5,"護理":6},"2026/03/11":{"行政人員":39,"護理":2,"醫師":1,"檢驗":1},"2026/03/12":{"行政人員":12,"復健":4,"醫師":1},"2026/03/13":{"行政人員":36,"護理":4,"醫師":2,"檢驗":5},"2026/03/16":{"行政人員":25,"放射":1,"醫師":1},"2026/03/17":{"行政人員":33,"醫師":6,"護理":6},"2026/03/18":{"行政人員":23,"護理":16,"檢驗":2},"2026/03/19":{"行政人員":16,"醫師":1},"2026/03/20":{"行政人員":25,"醫師":5,"護理":5,"放射":12,"復健":2},"2026/03/23":{"行政人員":15,"護理":1,"醫師":1},"2026/03/24":{"行政人員":41,"醫師":11,"護理":5},"2026/03/25":{"行政人員":42,"護理":2,"醫師":1},"2026/03/26":{"行政人員":23,"醫師":4},"2026/03/27":{"行政人員":20,"醫師":4,"護理":4,"藥劑":2},"2026/03/30":{"行政人員":36},"2026/03/31":{"行政人員":31,"醫師":9,"護理":15}},gate:{"前門":1347,"後門":390},people:[{card:"8442837",name:"鍾蕙琦",group:"行政人員",visits:545,days:52},{card:"8401660",name:"戴珮如",group:"行政人員",visits:157,days:41},{card:"4541122",name:"王琇瑩",group:"行政人員",visits:146,days:40},{card:"5850699",name:"張家綺",group:"行政人員",visits:134,days:44},{card:"11758222",name:"黃祐珍",group:"行政人員",visits:102,days:38},{card:"48010",name:"鄭夙淇",group:"行政人員",visits:67,days:41},{card:"8461068",name:"李佳燕",group:"行政人員",visits:29,days:13},{card:"5850804",name:"游惠怡",group:"護理",visits:26,days:9},{card:"38418279",name:"王佳貞",group:"護理",visits:22,days:11},{card:"8461058",name:"翁國益",group:"醫師",visits:19,days:12},{card:"5100473",name:"鄭貴麟",group:"醫師",visits:17,days:12},{card:"5100404",name:"沈淑美",group:"護理",visits:17,days:8},{card:"5850768",name:"邱讚旺",group:"醫師",visits:16,days:10},{card:"47825",name:"廖珮玟",group:"護理",visits:16,days:9},{card:"8442816",name:"柳緒英",group:"護理",visits:15,days:9},{card:"8442896",name:"林美延",group:"護理",visits:14,days:12},{card:"48390",name:"李翊寧",group:"護理",visits:14,days:9},{card:"12219396",name:"周燕伺",group:"護理",visits:13,days:13},{card:"8461043",name:"葉如芳",group:"行政人員",visits:12,days:10},{card:"70356854",name:"利佳蓉",group:"檢驗",visits:11,days:3},{card:"11758204",name:"陳政元",group:"行政人員",visits:10,days:9},{card:"5850723",name:"林慶元",group:"檢驗",visits:9,days:7},{card:"5100464",name:"陳榮貴",group:"醫師",visits:9,days:8},{card:"12219475",name:"胡詔凱",group:"醫師",visits:9,days:9},{card:"8412101",name:"邱誌冠",group:"復健",visits:9,days:2},{card:"70356787",name:"黃盈焜",group:"藥劑",visits:8,days:7},{card:"48009",name:"李佩樺",group:"行政人員",visits:8,days:3},{card:"5100422",name:"蔡於民",group:"行政人員",visits:8,days:6},{card:"1226877",name:"吳昭頤",group:"行政人員",visits:7,days:6},{card:"13439",name:"徐慧美",group:"護理",visits:7,days:7}]};
+const ACCESS_ENTRIES=[["2026/01/13","15:37","戴珮如","行政人員","前門"],["2026/01/13","16:26","張家綺","行政人員","後門"],["2026/01/13","16:47","鍾蕙琦","行政人員","後門"],["2026/01/13","17:48","鍾蕙琦","行政人員","前門"],["2026/01/13","19:04","鍾蕙琦","行政人員","前門"],["2026/01/14","07:16","王琇瑩","行政人員","前門"],["2026/01/14","07:25","王琇瑩","行政人員","前門"],["2026/01/14","08:04","李易儒","醫師","前門"],["2026/01/14","08:04","高時貽","醫師","前門"],["2026/01/14","08:19","柳緒英","護理","前門"],["2026/01/14","09:12","鍾蕙琦","行政人員","前門"],["2026/01/14","10:56","鍾蕙琦","行政人員","前門"],["2026/01/14","11:26","黃祐珍","行政人員","前門"],["2026/01/14","11:58","張家綺","行政人員","後門"],["2026/01/14","12:04","王琇瑩","行政人員","前門"],["2026/01/14","12:04","鄭夙淇","行政人員","後門"],["2026/01/14","13:52","林慶元","檢驗","前門"],["2026/01/14","13:56","戴珮如","行政人員","前門"],["2026/01/14","13:59","鄭貴麟","醫師","前門"],["2026/01/14","13:59","林美延","護理","前門"],["2026/01/14","14:32","黃盈焜","藥劑","前門"],["2026/01/16","08:01","柳緒英","護理","前門"],["2026/01/16","08:05","周燕伺","護理","前門"],["2026/01/16","08:13","陳榮貴","醫師","前門"],["2026/01/16","10:28","利佳蓉","檢驗","前門"],["2026/01/20","07:40","游惠怡","護理","前門"],["2026/01/20","07:40","邱讚旺","醫師","前門"],["2026/01/20","07:43","沈淑美","護理","前門"],["2026/01/20","07:50","王佳貞","護理","前門"],["2026/01/20","08:37","王佳貞","護理","前門"],["2026/01/27","07:39","胡詔凱","醫師","前門"],["2026/01/27","07:41","游惠怡","護理","前門"],["2026/01/27","07:42","邱讚旺","醫師","前門"],["2026/01/27","07:46","王佳貞","護理","前門"],["2026/01/30","10:24","黃祐珍","行政人員","前門"],["2026/01/30","10:29","翁國益","醫師","前門"],["2026/02/03","07:43","沈淑美","護理","前門"],["2026/02/03","07:44","翁國益","醫師","前門"],["2026/02/03","07:44","游惠怡","護理","前門"],["2026/02/03","07:44","邱讚旺","醫師","前門"],["2026/02/03","13:30","翁國益","醫師","前門"],["2026/02/10","07:45","邱讚旺","醫師","前門"],["2026/02/10","07:47","胡詔凱","醫師","前門"],["2026/02/10","07:55","王佳貞","護理","前門"],["2026/02/25","08:01","陳榮貴","醫師","前門"],["2026/02/25","08:09","柳緒英","護理","前門"],["2026/03/03","07:34","翁國益","醫師","前門"],["2026/03/03","07:42","邱讚旺","醫師","前門"],["2026/03/03","07:42","游惠怡","護理","前門"],["2026/03/03","07:50","廖珮玟","護理","前門"],["2026/03/10","07:38","邱讚旺","醫師","前門"],["2026/03/17","07:40","邱讚旺","醫師","前門"],["2026/03/18","08:00","王佳貞","護理","前門"],["2026/03/18","08:02","游惠怡","護理","前門"],["2026/03/20","10:29","郭琬琪","放射","前門"],["2026/03/20","10:30","李孟穎","放射","前門"],["2026/03/20","10:40","翁國益","醫師","前門"],["2026/03/24","07:39","胡詔凱","醫師","前門"],["2026/03/24","07:41","邱讚旺","醫師","前門"],["2026/03/24","07:47","沈淑美","護理","前門"],["2026/03/31","07:23","翁國益","醫師","前門"],["2026/03/31","07:31","沈淑美","護理","前門"],["2026/03/31","07:38","邱讚旺","醫師","前門"],["2026/03/31","07:41","游惠怡","護理","前門"],["2026/03/31","07:44","廖珮玟","護理","前門"]];
+
+function bAccess(){
+  const d=ACCESS_DATA;
+  document.getElementById('ac-kpi').innerHTML=[
+    {l:'進館總人次',v:d.total.toLocaleString(),s:'僅計「進入」記錄'},
+    {l:'不重複人員',v:d.total_people,s:'不同卡號'},
+    {l:'前門使用',v:(d.gate['前門']||0),s:`佔${Math.round((d.gate['前門']||0)/d.total*100)}%`},
+    {l:'記錄天數',v:d.dates.length,s:`${d.dates[0].slice(5)}～${d.dates[d.dates.length-1].slice(5)}`},
+  ].map(x=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
+  const grps=d.groups;const dates=d.dates;
+  document.getElementById('ac-leg').innerHTML=legH(grps.map((g,i)=>({c:P[i],l:g})));
+  mkBar('ac-daily',dates.map(dt=>dt.slice(5)),grps.map((g,i)=>({l:g,d:dates.map(dt=>(d.daily[dt]||{})[g]||0),c:P[i]})),true);
+  const grpTot=grps.map(g=>Object.values(d.monthly).reduce((s,mv)=>s+(mv[g]||0),0));
+  mkPie('ac-pie',grps,grpTot,grps.map((_,i)=>P[i]));
+  const months=Object.keys(d.monthly).sort();
+  mkBar('ac-month',months,grps.map((g,i)=>({l:g,d:months.map(m=>(d.monthly[m]||{})[g]||0),c:P[i]})),true);
+  mkPie('ac-gate',['前門','後門'],[d.gate['前門']||0,d.gate['後門']||0],['#4f8ef7','#c084fc']);
+  document.getElementById('ac-gtabs').innerHTML=`<button class="ft${acGroup==='全部'?' on':''}" onclick="setACGroup('全部',this)">全部</button>`+grps.map(g=>`<button class="ft${acGroup===g?' on':''}" onclick="setACGroup('${g}',this)">${g}</button>`).join('');
+  document.getElementById('ac-fg').innerHTML='<option value="">全部職類</option>'+grps.map(g=>`<option>${g}</option>`).join('');
+  buildACPeople();filterAC();
+}
+function setACGroup(g,el){acGroup=g;document.querySelectorAll('#ac-gtabs .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');buildACPeople();}
+function buildACPeople(){
+  const d=ACCESS_DATA;
+  const fl=acGroup==='全部'?d.people:d.people.filter(p=>p.group===acGroup);
+  document.getElementById('ac-pcount').textContent=`（${fl.length}人）`;
+  let h=`<table><thead><tr><th style="width:28px">#</th><th style="text-align:left">姓名</th><th>職類</th><th>進館次數</th><th>出現天數</th></tr></thead><tbody>`;
+  fl.slice(0,30).forEach((p,i)=>{h+=`<tr><td>${i+1}</td><td>${p.name}</td><td>${p.group}</td><td>${p.visits}</td><td>${p.days}</td></tr>`;});
+  h+='</tbody></table>';
+  document.getElementById('ac-ptable').innerHTML=h;
+}
+function filterAC(){
+  const g=document.getElementById('ac-fg').value;
+  const gate=document.getElementById('ac-fgate').value;
+  const q=document.getElementById('ac-sch').value.trim();
+  let rows=ACCESS_ENTRIES;
+  if(g) rows=rows.filter(r=>r[3]===g);
+  if(gate) rows=rows.filter(r=>r[4]===gate);
+  if(q) rows=rows.filter(r=>r[2].includes(q));
+  document.getElementById('ac-cnt').textContent=`${rows.length} 筆`;
+  let h=`<table><thead><tr><th style="text-align:left">日期</th><th style="text-align:left">時間</th><th style="text-align:left">姓名</th><th>職類</th><th>門</th></tr></thead><tbody>`;
+  rows.slice(0,200).forEach(r=>{h+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`;});
+  if(rows.length>200) h+=`<tr><td colspan="5" style="text-align:center;color:var(--tx3);font-size:.7rem">顯示前200筆，共${rows.length}筆</td></tr>`;
+  h+='</tbody></table>';
+  document.getElementById('ac-table').innerHTML=h;
+}
+
+// ═══════════════════════════════
+//  MODAL (期刊、資料庫、館藏)
+// ═══════════════════════════════
 let mm='',mi=-1;
 function openM(mode,idx=-1){
-  if(!isAdm()&&mode!=='view'){toast('需要管理者權限','err');return;}
+  if(!isAdm()){toast('需要管理者權限','err');return;}
   mm=mode;mi=idx;const jy=D.jy;
   let title='',body='';
   if(mode==='journal'){
     const j=idx>=0?D.jl[idx]:{n:'',t:'電子',d:jy.map(()=>'V')};
     title=idx>=0?`編輯期刊：${j.n}`:'新增期刊';
-    body=`<div class="mg g1" style="margin-bottom:.65rem"><div class="mf"><label>期刊名稱</label><input id="mj-n" value="${j.n}"></div></div>
-    <div class="mg" style="margin-bottom:.65rem"><div class="mf"><label>型態</label><select id="mj-t"><option${j.t==='電子'?' selected':''}>電子</option><option${j.t==='紙本'?' selected':''}>紙本</option></select></div></div>
-    <div style="font-size:.7rem;color:#8b92a8;margin-bottom:.45rem;font-weight:600">各年度訂閱狀況</div>
+    body=`<div class="mf"><label>期刊名稱</label><input id="mj-n" value="${j.n}"></div>
+    <div class="mf"><label>型態</label><select id="mj-t"><option${j.t==='電子'?' selected':''}>電子</option><option${j.t==='紙本'?' selected':''}>紙本</option></select></div>
+    <div style="font-size:.7rem;color:var(--tx2);margin:.65rem 0 .45rem;font-weight:600">各年度訂閱狀況</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem">${jy.map((y,i)=>`<div class="mf"><label>${y}</label><select id="mj-d-${i}"><option${(j.d[i]||'V')==='V'?' selected':''}>V</option><option${(j.d[i]||'V')==='X'?' selected':''}>X</option></select></div>`).join('')}</div>`;
-  }else if(mode==='database'){
+  } else if(mode==='database'){
     const db=idx>=0?D.dbs[idx]:{n:'',d:jy.map(()=>'V')};
     title=idx>=0?`編輯資料庫：${db.n}`:'新增資料庫';
-    body=`<div class="mf" style="margin-bottom:.65rem"><label>資料庫名稱</label><input id="mdb-n" value="${db.n}"></div>
-    <div style="font-size:.7rem;color:#8b92a8;margin-bottom:.45rem;font-weight:600">各年度訂閱狀況</div>
+    body=`<div class="mf"><label>資料庫名稱</label><input id="mdb-n" value="${db.n}"></div>
+    <div style="font-size:.7rem;color:var(--tx2);margin:.65rem 0 .45rem;font-weight:600">各年度訂閱狀況</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem">${jy.map((y,i)=>`<div class="mf"><label>${y}</label><select id="mdb-d-${i}"><option${(db.d[i]||'V')==='V'?' selected':''}>V</option><option${(db.d[i]||'V')==='X'?' selected':''}>X</option></select></div>`).join('')}</div>`;
-  }else if(mode==='unit'){
+  } else if(mode==='unit'){
     title='新增單位';
-    body=`<div class="mg"><div class="mf"><label>單位名稱</label><input id="mu-n" value=""></div><div class="mf"><label>工具書冊數</label><input type="number" id="mu-v" value="0" min="0"></div></div>`;
-  }else if(mode==='coll_stat'){
+    body=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem"><div class="mf"><label>單位名稱</label><input id="mu-n"></div><div class="mf"><label>工具書冊數</label><input type="number" id="mu-v" value="0" min="0"></div></div>`;
+  } else if(mode==='coll_stat'){
     title='更新館藏統計數字';
-    body=`<div class="mg">
+    body=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
       <div class="mf"><label>現有館藏總量</label><input type="number" id="mc-tot" value="${D.col.total}" min="0"></div>
       <div class="mf"><label>中文館藏</label><input type="number" id="mc-zh" value="${D.col.chinese}" min="0"></div>
       <div class="mf"><label>西文館藏</label><input type="number" id="mc-en" value="${D.col.english}" min="0"></div>
@@ -512,11 +808,13 @@ function openM(mode,idx=-1){
       <div class="mf"><label>醫師工具書</label><input type="number" id="mc-db" value="${D.col.doctor_books}" min="0"></div>
       <div class="mf"><label>已註銷冊數</label><input type="number" id="mc-can" value="${D.col.canceled}" min="0"></div>
     </div>`;
-  }else if(mode==='yr_stat'){
-    title='更新年度館藏量';
-    const lbl=['108年前','108年','109年','110年','111年','112年','113年','114年'];
-    body=`<div style="font-size:.7rem;color:#8b92a8;margin-bottom:.45rem">各年度館藏現有量（冊）</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem">${lbl.map((y,i)=>`<div class="mf"><label>${y}</label><input type="number" id="yr-${i}" value="${D.yt[i]}" min="0"></div>`).join('')}</div>`;
+  } else if(mode==='yr_stat'){
+    title='更新歷年館藏量';
+    body=`<div style="font-size:.7rem;color:var(--tx2);margin-bottom:.5rem">各年度館藏現有量（冊）</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem">${D.yl.map((y,i)=>`<div class="mf"><label>${y}</label><input type="number" id="yr-${i}" value="${D.yt[i]}" min="0"></div>`).join('')}</div>`;
+  } else if(mode==='addyear'){
+    title='新增年份';
+    body=`<div class="mf"><label>年份（民國）</label><input id="new-year" placeholder="如：115" maxlength="3"></div>`;
   }
   document.getElementById('mt').textContent=title;
   document.getElementById('mb').innerHTML=body;
@@ -530,124 +828,63 @@ function saveM(){
     const obj={n,t:document.getElementById('mj-t').value,d:jy.map((_,i)=>document.getElementById(`mj-d-${i}`).value)};
     if(mi>=0)D.jl[mi]=obj;else D.jl.push(obj);
     D.jc=jy.map((_,yi)=>D.jl.filter(j=>j.d[yi]==='V').length);
-  }else if(mm==='database'){
+  } else if(mm==='database'){
     const n=document.getElementById('mdb-n').value.trim();if(!n){toast('名稱不可空白','err');return;}
     const obj={n,d:jy.map((_,i)=>document.getElementById(`mdb-d-${i}`).value)};
     if(mi>=0)D.dbs[mi]=obj;else D.dbs.push(obj);
-  }else if(mm==='unit'){
+  } else if(mm==='unit'){
     const n=document.getElementById('mu-n').value.trim();if(!n){toast('名稱不可空白','err');return;}
     D.units.push({n,v:parseInt(document.getElementById('mu-v').value)||0});
-  }else if(mm==='coll_stat'){
+  } else if(mm==='coll_stat'){
     D.col.total=parseInt(document.getElementById('mc-tot').value)||0;
     D.col.chinese=parseInt(document.getElementById('mc-zh').value)||0;
     D.col.english=parseInt(document.getElementById('mc-en').value)||0;
     D.col.unit_books=parseInt(document.getElementById('mc-ub').value)||0;
     D.col.doctor_books=parseInt(document.getElementById('mc-db').value)||0;
     D.col.canceled=parseInt(document.getElementById('mc-can').value)||0;
-  }else if(mm==='yr_stat'){
-    D.yt=Array.from({length:8},(_,i)=>parseInt(document.getElementById(`yr-${i}`).value)||0);
+  } else if(mm==='yr_stat'){
+    D.yt=D.yl.map((_,i)=>parseInt(document.getElementById(`yr-${i}`).value)||0);
+  } else if(mm==='addyear'){
+    const y=document.getElementById('new-year').value.trim();
+    if(!y||isNaN(y)){toast('請輸入有效年份','err');return;}
+    if(!D.years)D.years=[];
+    if(D.years.includes(y)){toast('此年份已存在','err');return;}
+    D.years.push(y.toString());
+    if(!D.monthly)D.monthly={};
+    D.monthly[y]=ALL_MONTHS.map(m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0}));
+    sd(D);D=ld();closeM();selYear=y;buildYearTabs();bMon();toast(`${y}年已新增`);return;
   }
   sd(D);D=ld();closeM();bKPI();
   if(mm==='journal'||mm==='database')bJrnl();
   else if(mm==='unit')bUnit();
-  else if(mm==='coll_stat'||mm==='yr_stat')bColl();
+  else bColl();
   toast('資料已儲存');
 }
 
-// ─── NAV ───
-const PB={ov:bOv,coll:bColl,usage:()=>{buildUFC();bUKPI();bUC(cuc);},jrnl:bJrnl,unit:bUnit,trend:bTrend,mon:bMon,access:bAccess};
+// ═══════════════════════════════
+//  NAV + INIT
+// ═══════════════════════════════
+const PB={ov:bOv,usage:bUsage,coll:bColl,jrnl:bJrnl,unit:bUnit,mon:bMon,access:bAccess};
+let curP='ov';
 function sp(p,el){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
   document.getElementById('page-'+p).classList.add('on');el.classList.add('on');
-  if(PB[p])PB[p]();
+  curP=p;if(PB[p])PB[p]();
 }
-function initApp(){bKPI();bOv();document.querySelectorAll('.ab').forEach(ab=>{if(ab.id!=='ab-mon')ab.style.display='none';});}
-
-// ─── ACCESS DATA ───
-const ACCESS = {"total":1737,"total_people":126,"dates":["2026/01/13","2026/01/14","2026/01/15","2026/01/16","2026/01/19","2026/01/20","2026/01/21","2026/01/22","2026/01/23","2026/01/26","2026/01/27","2026/01/28","2026/01/29","2026/01/30","2026/01/31","2026/02/02","2026/02/03","2026/02/04","2026/02/05","2026/02/06","2026/02/07","2026/02/08","2026/02/09","2026/02/10","2026/02/11","2026/02/12","2026/02/13","2026/02/21","2026/02/23","2026/02/24","2026/02/25","2026/02/26","2026/03/02","2026/03/03","2026/03/04","2026/03/05","2026/03/06","2026/03/07","2026/03/08","2026/03/09","2026/03/10","2026/03/11","2026/03/12","2026/03/13","2026/03/16","2026/03/17","2026/03/18","2026/03/19","2026/03/20","2026/03/23","2026/03/24","2026/03/25","2026/03/26","2026/03/27","2026/03/30","2026/03/31"],"groups":["PGY","其他醫事人員","實習生","復健","放射","檢驗","藥劑","行政人員","護理","醫師"],"monthly":{"2026/01":{"行政人員":357,"醫師":29,"護理":88,"檢驗":14,"藥劑":11,"PGY":12,"放射":1,"其他醫事人員":1},"2026/02":{"行政人員":382,"護理":57,"醫師":40,"檢驗":6,"PGY":2,"放射":4,"復健":5,"藥劑":2,"實習生":1},"2026/03":{"行政人員":555,"醫師":59,"護理":82,"檢驗":8,"復健":6,"放射":13,"藥劑":2}},"daily":{"2026/01/13":{"行政人員":5},"2026/01/14":{"行政人員":37,"醫師":3,"護理":3,"檢驗":1,"藥劑":1},"2026/01/15":{"行政人員":10},"2026/01/16":{"行政人員":45,"護理":11,"醫師":5,"藥劑":3,"檢驗":11},"2026/01/19":{"行政人員":25,"護理":2},"2026/01/20":{"行政人員":28,"醫師":5,"護理":20,"檢驗":1,"藥劑":2},"2026/01/21":{"行政人員":34,"護理":17,"藥劑":1},"2026/01/22":{"護理":4,"行政人員":16},"2026/01/23":{"行政人員":17,"護理":4,"PGY":1,"放射":1},"2026/01/26":{"行政人員":19,"藥劑":1,"護理":1},"2026/01/27":{"行政人員":30,"醫師":7,"護理":7,"藥劑":1},"2026/01/28":{"行政人員":39,"醫師":4,"護理":6,"檢驗":1,"藥劑":1},"2026/01/29":{"護理":9,"行政人員":13,"醫師":2,"藥劑":1},"2026/01/30":{"行政人員":38,"護理":4,"醫師":3,"PGY":11,"其他醫事人員":1},"2026/01/31":{"行政人員":1},"2026/02/02":{"行政人員":19,"護理":1},"2026/02/03":{"行政人員":29,"護理":10,"醫師":7,"檢驗":1},"2026/02/04":{"行政人員":35,"醫師":2,"護理":10,"檢驗":2},"2026/02/05":{"行政人員":20,"護理":5},"2026/02/06":{"行政人員":24,"醫師":5,"護理":1},"2026/02/07":{"醫師":2},"2026/02/08":{"醫師":4},"2026/02/09":{"醫師":2,"行政人員":23,"護理":1},"2026/02/10":{"行政人員":40,"護理":7,"醫師":7,"PGY":2},"2026/02/11":{"行政人員":34,"護理":3,"放射":1,"醫師":1,"檢驗":1},"2026/02/12":{"行政人員":19,"復健":5,"護理":1},"2026/02/13":{"行政人員":31,"護理":2,"醫師":2},"2026/02/21":{"行政人員":5},"2026/02/23":{"行政人員":34,"藥劑":2,"放射":1},"2026/02/24":{"行政人員":13,"醫師":4,"護理":8},"2026/02/25":{"行政人員":35,"醫師":4,"護理":8,"檢驗":2,"放射":1},"2026/02/26":{"行政人員":21,"放射":1,"實習生":1},"2026/03/02":{"行政人員":15,"醫師":1},"2026/03/03":{"行政人員":19,"醫師":4,"護理":11},"2026/03/04":{"行政人員":20},"2026/03/05":{"行政人員":17,"護理":1},"2026/03/06":{"行政人員":19,"護理":4,"醫師":2},"2026/03/07":{"行政人員":4},"2026/03/08":{"行政人員":1},"2026/03/09":{"行政人員":17},"2026/03/10":{"行政人員":26,"醫師":5,"護理":6},"2026/03/11":{"行政人員":39,"護理":2,"醫師":1,"檢驗":1},"2026/03/12":{"行政人員":12,"復健":4,"醫師":1},"2026/03/13":{"行政人員":36,"護理":4,"醫師":2,"檢驗":5},"2026/03/16":{"行政人員":25,"放射":1,"醫師":1},"2026/03/17":{"行政人員":33,"醫師":6,"護理":6},"2026/03/18":{"行政人員":23,"護理":16,"檢驗":2},"2026/03/19":{"行政人員":16,"醫師":1},"2026/03/20":{"行政人員":25,"醫師":5,"護理":5,"放射":12,"復健":2},"2026/03/23":{"行政人員":15,"護理":1,"醫師":1},"2026/03/24":{"行政人員":41,"醫師":11,"護理":5},"2026/03/25":{"行政人員":42,"護理":2,"醫師":1},"2026/03/26":{"行政人員":23,"醫師":4},"2026/03/27":{"行政人員":20,"醫師":4,"護理":4,"藥劑":2},"2026/03/30":{"行政人員":36},"2026/03/31":{"行政人員":31,"醫師":9,"護理":15}},"gate":{"前門":1347,"後門":390},"people":[{"card":"8442837","name":"鍾蕙琦","group":"行政人員","visits":545,"days":52},{"card":"8401660","name":"戴珮如","group":"行政人員","visits":157,"days":41},{"card":"4541122","name":"王琇瑩","group":"行政人員","visits":146,"days":40},{"card":"5850699","name":"張家綺","group":"行政人員","visits":134,"days":44},{"card":"11758222","name":"黃祐珍","group":"行政人員","visits":102,"days":38},{"card":"48010","name":"鄭夙淇","group":"行政人員","visits":67,"days":41},{"card":"8461068","name":"李佳燕","group":"行政人員","visits":29,"days":13},{"card":"5850804","name":"游惠怡","group":"護理","visits":26,"days":9},{"card":"38418279","name":"王佳貞","group":"護理","visits":22,"days":11},{"card":"8461058","name":"翁國益","group":"醫師","visits":19,"days":12},{"card":"5100473","name":"鄭貴麟","group":"醫師","visits":17,"days":12},{"card":"5100404","name":"沈淑美","group":"護理","visits":17,"days":8},{"card":"5850768","name":"邱讚旺","group":"醫師","visits":16,"days":10},{"card":"47825","name":"廖珮玟","group":"護理","visits":16,"days":9},{"card":"8442816","name":"柳緒英","group":"護理","visits":15,"days":9},{"card":"8442896","name":"林美延","group":"護理","visits":14,"days":12},{"card":"48390","name":"李翊寧","group":"護理","visits":14,"days":9},{"card":"12219396","name":"周燕伺","group":"護理","visits":13,"days":13},{"card":"8461043","name":"葉如芳","group":"行政人員","visits":12,"days":10},{"card":"70356854","name":"利佳蓉","group":"檢驗","visits":11,"days":3},{"card":"11758204","name":"陳政元","group":"行政人員","visits":10,"days":9},{"card":"5850723","name":"林慶元","group":"檢驗","visits":9,"days":7},{"card":"5100464","name":"陳榮貴","group":"醫師","visits":9,"days":8},{"card":"12219475","name":"胡詔凱","group":"醫師","visits":9,"days":9},{"card":"8412101","name":"邱誌冠","group":"復健","visits":9,"days":2},{"card":"70356787","name":"黃盈焜","group":"藥劑","visits":8,"days":7},{"card":"48009","name":"李佩樺","group":"行政人員","visits":8,"days":3},{"card":"5100422","name":"蔡於民","group":"行政人員","visits":8,"days":6},{"card":"1226877","name":"吳昭頤","group":"行政人員","visits":7,"days":6},{"card":"13439","name":"徐慧美","group":"護理","visits":7,"days":7},{"card":"6738753","name":"PGY醫師1","group":"PGY","visits":7,"days":2},{"card":"7156777","name":"鍾淑如","group":"行政人員","visits":7,"days":5},{"card":"12219439","name":"PGY醫師3","group":"PGY","visits":7,"days":2},{"card":"7156714","name":"林雪玲","group":"行政人員","visits":6,"days":5},{"card":"8401668","name":"吳卉榛","group":"護理","visits":6,"days":6},{"card":"8412066","name":"李芸雅","group":"檢驗","visits":6,"days":1},{"card":"5850706","name":"林宏達","group":"行政人員","visits":6,"days":6},{"card":"13403","name":"洪于涵","group":"護理","visits":6,"days":5},{"card":"40833926","name":"林育如","group":"行政人員","visits":6,"days":4},{"card":"8412074","name":"謝亞橋","group":"藥劑","visits":5,"days":3},{"card":"43407098","name":"陳嘉琪","group":"護理","visits":5,"days":4},{"card":"12219443","name":"陳銘潔","group":"行政人員","visits":5,"days":5},{"card":"6738750","name":"吳淑芬","group":"護理","visits":5,"days":4},{"card":"48194","name":"吳依萱","group":"行政人員","visits":5,"days":4},{"card":"6739335","name":"邱姵縈","group":"護理","visits":5,"days":3},{"card":"5850770","name":"唐家駿","group":"醫師","visits":5,"days":4},{"card":"48157","name":"陳宗偉","group":"醫師","visits":5,"days":3},{"card":"38418030","name":"莊雅琇","group":"護理","visits":5,"days":3},{"card":"8407925","name":"黃耀康","group":"醫師","visits":5,"days":4},{"card":"5850759","name":"高時貽","group":"醫師","visits":4,"days":4},{"card":"12219380","name":"江文榮","group":"行政人員","visits":4,"days":4},{"card":"8412084","name":"葉春枝","group":"護理","visits":4,"days":4},{"card":"8461042","name":"陳馨怡","group":"護理","visits":4,"days":4},{"card":"70356765","name":"魏玉萍","group":"護理","visits":4,"days":1},{"card":"8460727","name":"林銥霈","group":"護理","visits":4,"days":4},{"card":"12219488","name":"黃信凱","group":"醫師","visits":4,"days":4},{"card":"7156570","name":"徐逢開","group":"行政人員","visits":4,"days":4},{"card":"12219489","name":"林宜勳","group":"行政人員","visits":4,"days":4},{"card":"13534","name":"黃瑞霞","group":"護理","visits":4,"days":3},{"card":"13472","name":"黃年富","group":"醫師","visits":4,"days":2},{"card":"39996601","name":"劉君鈴","group":"放射","visits":4,"days":4},{"card":"13434","name":"謝美娟","group":"護理","visits":4,"days":2},{"card":"2761779","name":"李易儒","group":"醫師","visits":3,"days":3},{"card":"7304875","name":"劉佳琦","group":"護理","visits":3,"days":3},{"card":"8407943","name":"許嘉佑","group":"醫師","visits":3,"days":2},{"card":"2761766","name":"池若維","group":"護理","visits":3,"days":3},{"card":"1226889","name":"林淑麗","group":"護理","visits":3,"days":2},{"card":"40821087","name":"段偉凱","group":"行政人員","visits":3,"days":3},{"card":"11758158","name":"李奕慶","group":"醫師","visits":3,"days":2},{"card":"8408001","name":"羅宥羢","group":"護理","visits":3,"days":2},{"card":"2761790","name":"張琦","group":"行政人員","visits":3,"days":2},{"card":"1227290","name":"邱玟婷","group":"行政人員","visits":3,"days":3},{"card":"48299","name":"鄒承憲","group":"醫師","visits":3,"days":3},{"card":"48018","name":"溫秀惠","group":"醫師","visits":3,"days":2},{"card":"8412046","name":"康雅珍","group":"護理","visits":3,"days":2},{"card":"1227296","name":"何文豪","group":"行政人員","visits":2,"days":2},{"card":"7156858","name":"謝孟娟","group":"護理","visits":2,"days":1},{"card":"39986667","name":"范佐賓","group":"放射","visits":2,"days":2},{"card":"6739380","name":"劉嘉琳","group":"護理","visits":2,"days":1},{"card":"10910154","name":"范姜欣秀","group":"護理","visits":2,"days":2},{"card":"5850778","name":"鐘頂天","group":"醫師","visits":2,"days":2},{"card":"1227307","name":"焦建堯","group":"行政人員","visits":2,"days":2},{"card":"38417780","name":"劉昱伶","group":"檢驗","visits":2,"days":2},{"card":"48275","name":"陳禹如","group":"行政人員","visits":2,"days":2},{"card":"4541135","name":"林世惟","group":"醫師","visits":2,"days":2},{"card":"8511702","name":"蘇子凱","group":"醫師","visits":2,"days":2},{"card":"8461062","name":"黃彩華","group":"護理","visits":2,"days":2},{"card":"13402","name":"曾煌証","group":"藥劑","visits":1,"days":1},{"card":"1226874","name":"魏青青","group":"行政人員","visits":1,"days":1},{"card":"8407979","name":"黃美芳","group":"藥劑","visits":1,"days":1},{"card":"8460699","name":"黃萱","group":"護理","visits":1,"days":1},{"card":"5850786","name":"葉俊東","group":"醫師","visits":1,"days":1},{"card":"1226881","name":"彭廷揚","group":"醫師","visits":1,"days":1},{"card":"5850803","name":"涂淑惠","group":"護理","visits":1,"days":1},{"card":"40823053","name":"楊媛琇","group":"行政人員","visits":1,"days":1},{"card":"47850","name":"連麗君","group":"行政人員","visits":1,"days":1},{"card":"12219458","name":"何洋勳","group":"醫師","visits":1,"days":1},{"card":"38417391","name":"吳珮妁","group":"護理","visits":1,"days":1},{"card":"8407970","name":"李昌儒","group":"其他醫事人員","visits":1,"days":1},{"card":"8461026","name":"林書誼","group":"醫師","visits":1,"days":1},{"card":"90505000","name":"林文杰","group":"行政人員","visits":1,"days":1},{"card":"48213","name":"陸浩瑜","group":"行政人員","visits":1,"days":1},{"card":"8412063","name":"黃薏庭","group":"護理","visits":1,"days":1},{"card":"5850795","name":"陳國龍","group":"醫師","visits":1,"days":1},{"card":"6738830","name":"護理實習生","group":"實習生","visits":1,"days":1},{"card":"2761832","name":"林重道","group":"醫師","visits":1,"days":1},{"card":"90504994","name":"宋星翰","group":"行政人員","visits":1,"days":1},{"card":"11758147","name":"邱定宇","group":"醫師","visits":1,"days":1},{"card":"698775","name":"古省文","group":"行政人員","visits":1,"days":1},{"card":"8460696","name":"張家榮","group":"醫師","visits":1,"days":1},{"card":"39986217","name":"郭琬琪","group":"放射","visits":1,"days":1},{"card":"18707864","name":"李孟穎","group":"放射","visits":1,"days":1},{"card":"90505060","name":"蔡育臻","group":"放射","visits":1,"days":1},{"card":"6738736","name":"張柏湘","group":"放射","visits":1,"days":1},{"card":"5850670","name":"戴順國","group":"放射","visits":1,"days":1},{"card":"6739420","name":"廖威凱","group":"復健","visits":1,"days":1},{"card":"8442832","name":"徐榕蔚","group":"放射","visits":1,"days":1},{"card":"8407967","name":"楊智雲","group":"放射","visits":1,"days":1},{"card":"70356849","name":"林造民","group":"放射","visits":1,"days":1},{"card":"8412087","name":"張榮凱","group":"放射","visits":1,"days":1},{"card":"46189","name":"簡姿昀","group":"放射","visits":1,"days":1},{"card":"13413","name":"黃中廷","group":"放射","visits":1,"days":1},{"card":"13522","name":"蔡欣蒨","group":"放射","visits":1,"days":1},{"card":"12219431","name":"彭靖雅","group":"復健","visits":1,"days":1},{"card":"8461077","name":"黃成洲","group":"醫師","visits":1,"days":1},{"card":"8461050","name":"黃杰誠","group":"醫師","visits":1,"days":1}],"entries":[["2026/01/13","15:37","戴珮如","行政人員","前門"],["2026/01/13","16:26","張家綺","行政人員","後門"],["2026/01/13","16:47","鍾蕙琦","行政人員","後門"],["2026/01/13","17:48","鍾蕙琦","行政人員","前門"],["2026/01/13","19:04","鍾蕙琦","行政人員","前門"],["2026/01/14","07:16","王琇瑩","行政人員","前門"],["2026/01/14","07:25","王琇瑩","行政人員","前門"],["2026/01/14","08:04","李易儒","醫師","前門"],["2026/01/14","08:04","高時貽","醫師","前門"],["2026/01/14","08:19","柳緒英","護理","前門"],["2026/01/14","09:12","鍾蕙琦","行政人員","前門"],["2026/01/14","09:12","鍾蕙琦","行政人員","前門"],["2026/01/14","09:20","鍾蕙琦","行政人員","前門"],["2026/01/14","09:23","鍾蕙琦","行政人員","後門"],["2026/01/14","10:56","鍾蕙琦","行政人員","前門"],["2026/01/14","11:00","鍾蕙琦","行政人員","前門"],["2026/01/14","11:26","黃祐珍","行政人員","前門"],["2026/01/14","11:58","張家綺","行政人員","後門"],["2026/01/14","12:04","王琇瑩","行政人員","前門"],["2026/01/14","12:04","鄭夙淇","行政人員","後門"],["2026/01/14","12:14","張家綺","行政人員","前門"],["2026/01/14","12:15","戴珮如","行政人員","前門"],["2026/01/14","12:16","鍾蕙琦","行政人員","前門"],["2026/01/14","12:17","戴珮如","行政人員","前門"],["2026/01/14","12:18","鄭夙淇","行政人員","前門"],["2026/01/14","12:20","鍾蕙琦","行政人員","前門"],["2026/01/14","12:29","王琇瑩","行政人員","前門"],["2026/01/14","12:45","王琇瑩","行政人員","後門"],["2026/01/14","13:25","黃祐珍","行政人員","前門"],["2026/01/14","13:25","張家綺","行政人員","後門"],["2026/01/14","13:32","林雪玲","行政人員","前門"],["2026/01/14","13:41","王琇瑩","行政人員","後門"],["2026/01/14","13:48","張家綺","行政人員","後門"],["2026/01/14","13:52","林慶元","檢驗","前門"],["2026/01/14","13:56","戴珮如","行政人員","前門"],["2026/01/14","13:58","林雪玲","行政人員","前門"],["2026/01/14","13:59","鄭貴麟","醫師","前門"],["2026/01/14","13:59","林美延","護理","前門"],["2026/01/14","14:00","黃祐珍","行政人員","前門"],["2026/01/14","14:28","劉佳琦","護理","前門"],["2026/01/14","14:31","葉如芳","行政人員","前門"],["2026/01/14","14:32","黃盈焜","藥劑","前門"],["2026/01/14","14:40","張家綺","行政人員","後門"],["2026/01/14","14:41","江文榮","行政人員","前門"],["2026/01/14","16:26","戴珮如","行政人員","前門"],["2026/01/14","17:15","鍾蕙琦","行政人員","後門"],["2026/01/14","18:29","鍾蕙琦","行政人員","後門"],["2026/01/14","19:09","鍾蕙琦","行政人員","前門"],["2026/01/14","19:09","鍾蕙琦","行政人員","前門"],["2026/01/14","19:12","鍾蕙琦","行政人員","前門"],["2026/01/15","09:30","葉如芳","行政人員","前門"],["2026/01/15","10:15","鍾蕙琦","行政人員","後門"],["2026/01/15","11:09","鍾蕙琦","行政人員","前門"],["2026/01/15","15:08","鍾蕙琦","行政人員","後門"],["2026/01/15","15:15","鍾蕙琦","行政人員","前門"],["2026/01/15","15:17","鍾蕙琦","行政人員","前門"],["2026/01/15","15:24","鍾蕙琦","行政人員","前門"],["2026/01/15","17:10","鍾蕙琦","行政人員","後門"],["2026/01/15","18:34","鍾蕙琦","行政人員","前門"],["2026/01/15","18:43","鍾蕙琦","行政人員","前門"],["2026/01/16","07:19","王琇瑩","行政人員","後門"],["2026/01/16","07:35","王琇瑩","行政人員","前門"],["2026/01/16","08:01","柳緒英","護理","前門"],["2026/01/16","08:05","周燕伺","護理","前門"],["2026/01/16","08:05","吳卉榛","護理","前門"],["2026/01/16","08:13","陳榮貴","醫師","前門"],["2026/01/16","08:22","鄭夙淇","行政人員","後門"],["2026/01/16","08:24","許嘉佑","醫師","前門"],["2026/01/16","08:25","鄭夙淇","行政人員","後門"],["2026/01/16","08:36","王琇瑩","行政人員","後門"],["2026/01/16","08:43","王琇瑩","行政人員","前門"],["2026/01/16","08:47","王琇瑩","行政人員","後門"],["2026/01/16","08:50","劉佳琦","護理","前門"],["2026/01/16","09:05","王琇瑩","行政人員","後門"],["2026/01/16","09:09","鍾蕙琦","行政人員","前門"],["2026/01/16","09:09","鍾蕙琦","行政人員","前門"],["2026/01/16","09:20","鍾蕙琦","行政人員","後門"],["2026/01/16","10:00","李翊寧","護理","前門"],["2026/01/16","10:20","謝亞橋","藥劑","前門"],["2026/01/16","10:20","曾煌証","藥劑","前門"],["2026/01/16","10:21","魏青青","行政人員","後門"],["2026/01/16","10:24","黃祐珍","行政人員","前門"],["2026/01/16","10:25","翁國益","醫師","前門"],["2026/01/16","10:25","翁國益","醫師","前門"],["2026/01/16","10:28","李芸雅","檢驗","前門"],["2026/01/16","10:28","李芸雅","檢驗","前門"],["2026/01/16","10:28","吳昭頤","行政人員","前門"],["2026/01/16","10:28","李芸雅","檢驗","前門"],["2026/01/16","10:28","李芸雅","檢驗","前門"],["2026/01/16","10:28","李芸雅","檢驗","前門"],["2026/01/16","10:28","李芸雅","檢驗","前門"],["2026/01/16","10:28","利佳蓉","檢驗","前門"],["2026/01/16","10:28","利佳蓉","檢驗","前門"],["2026/01/16","10:28","利佳蓉","檢驗","前門"],["2026/01/16","10:28","利佳蓉","檢驗","前門"],["2026/01/16","10:28","利佳蓉","檢驗","前門"],["2026/01/16","10:30","陳嘉琪","護理","前門"],["2026/01/16","10:32","何文豪","行政人員","前門"],["2026/01/16","10:34","林美延","護理","前門"],["2026/01/16","10:59","鍾蕙琦","行政人員","前門"],["2026/01/16","11:11","黃祐珍","行政人員","前門"],["2026/01/16","11:29","鍾蕙琦","行政人員","後門"],["2026/01/16","12:06","鄭夙淇","行政人員","前門"],["2026/01/16","12:07","王琇瑩","行政人員","後門"],["2026/01/16","12:12","王琇瑩","行政人員","前門"],["2026/01/16","12:12","黃祐珍","行政人員","前門"],["2026/01/16","12:15","張家綺","行政人員","後門"],["2026/01/16","12:17","黃祐珍","行政人員","前門"],["2026/01/16","12:23","張家綺","行政人員","前門"],["2026/01/16","12:24","黃祐珍","行政人員","前門"],["2026/01/16","12:27","戴珮如","行政人員","前門"],["2026/01/16","12:27","黃祐珍","行政人員","前門"],["2026/01/16","12:28","戴珮如","行政人員","前門"],["2026/01/16","12:30","戴珮如","行政人員","前門"],["2026/01/16","12:36","王琇瑩","行政人員","前門"],["2026/01/16","12:37","鍾蕙琦","行政人員","前門"],["2026/01/16","12:40","鍾蕙琦","行政人員","前門"],["2026/01/16","14:22","黃美芳","藥劑","前門"],["2026/01/16","15:27","鍾蕙琦","行政人員","前門"],["2026/01/16","15:34","鍾蕙琦","行政人員","前門"],["2026/01/16","15:42","謝孟娟","護理","前門"],["2026/01/16","16:08","鍾蕙琦","行政人員","前門"],["2026/01/16","16:08","鍾蕙琦","行政人員","前門"],["2026/01/16","16:21","鍾蕙琦","行政人員","後門"],["2026/01/16","16:23","鍾蕙琦","行政人員","前門"],["2026/01/16","16:33","鍾蕙琦","行政人員","前門"],["2026/01/16","16:50","鍾蕙琦","行政人員","後門"],["2026/01/16","16:51","鍾蕙琦","行政人員","前門"],["2026/01/16","16:58","柳緒英","護理","前門"],["2026/01/16","17:00","柳緒英","護理","前門"],["2026/01/16","17:09","翁國益","醫師","前門"],["2026/01/16","17:15","謝孟娟","護理","前門"],["2026/01/16","17:23","鍾蕙琦","行政人員","前門"],["2026/01/16","18:07","鍾蕙琦","行政人員","前門"],["2026/01/16","18:16","鍾蕙琦","行政人員","前門"],["2026/01/19","09:27","戴珮如","行政人員","前門"],["2026/01/19","10:11","鍾蕙琦","行政人員","前門"],["2026/01/19","10:34","鍾蕙琦","行政人員","後門"],["2026/01/19","11:01","鍾蕙琦","行政人員","後門"],["2026/01/19","11:38","鍾蕙琦","行政人員","前門"],["2026/01/19","12:00","鄭夙淇","行政人員","後門"],["2026/01/19","12:10","鍾蕙琦","行政人員","前門"],["2026/01/19","12:21","王琇瑩","行政人員","前門"],["2026/01/19","12:24","張家綺","行政人員","前門"],["2026/01/19","12:26","王琇瑩","行政人員","前門"],["2026/01/19","12:28","張家綺","行政人員","後門"],["2026/01/19","12:53","鍾蕙琦","行政人員","前門"],["2026/01/19","13:26","戴珮如","行政人員","前門"],["2026/01/19","13:29","黃祐珍","行政人員","前門"],["2026/01/19","13:29","黃祐珍","行政人員","前門"],["2026/01/19","13:31","黃祐珍","行政人員","前門"],["2026/01/19","13:39","鍾蕙琦","行政人員","前門"],["2026/01/19","13:39","鍾蕙琦","行政人員","前門"],["2026/01/19","14:03","鍾蕙琦","行政人員","前門"],["2026/01/19","14:23","鍾蕙琦","行政人員","前門"],["2026/01/19","14:27","池若維","護理","前門"],["2026/01/19","15:27","黃萱","護理","前門"],["2026/01/19","16:03","鍾蕙琦","行政人員","前門"],["2026/01/19","16:05","鍾蕙琦","行政人員","前門"],["2026/01/19","17:54","鍾蕙琦","行政人員","前門"],["2026/01/19","17:54","鍾蕙琦","行政人員","前門"],["2026/01/19","18:04","鍾蕙琦","行政人員","前門"],["2026/01/20","07:03","鄭夙淇","行政人員","後門"],["2026/01/20","07:38","胡詔凱","醫師","前門"],["2026/01/20","07:40","游惠怡","護理","前門"],["2026/01/20","07:40","邱讚旺","醫師","前門"],["2026/01/20","07:43","沈淑美","護理","前門"],["2026/01/20","07:50","王佳貞","護理","前門"],["2026/01/20","07:53","徐慧美","護理","前門"],["2026/01/20","08:36","葉俊東","醫師","前門"],["2026/01/20","08:37","王佳貞","護理","前門"],["2026/01/20","08:37","沈淑美","護理","前門"],["2026/01/20","08:39","游惠怡","護理","前門"],["2026/01/20","08:44","李翊寧","護理","後門"],["2026/01/20","08:46","李佩樺","行政人員","後門"],["2026/01/20","08:47","鄭夙淇","行政人員","前門"],["2026/01/20","08:54","李翊寧","護理","後門"],["2026/01/20","09:00","葉春枝","護理","前門"],["2026/01/20","09:17","鍾蕙琦","行政人員","前門"],["2026/01/20","09:17","鍾蕙琦","行政人員","前門"],["2026/01/20","09:27","陳銘潔","行政人員","前門"],["2026/01/20","09:29","鍾蕙琦","行政人員","前門"],["2026/01/20","10:01","林宏達","行政人員","前門"],["2026/01/20","11:05","李翊寧","護理","後門"],["2026/01/20","11:21","鍾蕙琦","行政人員","前門"],["2026/01/20","11:23","李翊寧","護理","後門"],["2026/01/20","11:34","池若維","護理","前門"],["2026/01/20","11:54","王琇瑩","行政人員","後門"],["2026/01/20","11:58","王琇瑩","行政人員","後門"],["2026/01/20","12:03","戴珮如","行政人員","前門"],["2026/01/20","12:04","戴珮如","行政人員","前門"],["2026/01/20","12:05","戴珮如","行政人員","前門"],["2026/01/20","12:05","陳榮貴","醫師","前門"],["2026/01/20","12:14","王琇瑩","行政人員","後門"],["2026/01/20","12:30","吳卉榛","護理","前門"],["2026/01/20","12:30","陳馨怡","護理","前門"],["2026/01/20","12:31","彭廷揚","醫師","前門"],["2026/01/20","13:05","張家綺","行政人員","前門"],["2026/01/20","13:28","涂淑惠","護理","前門"],["2026/01/20","13:29","利佳蓉","檢驗","前門"],["2026/01/20","13:29","謝亞橋","藥劑","前門"],["2026/01/20","13:29","謝亞橋","藥劑","前門"],["2026/01/20","13:29","吳淑芬","護理","前門"],["2026/01/20","13:30","洪于涵","護理","前門"],["2026/01/20","13:35","鍾蕙琦","行政人員","前門"],["2026/01/20","13:43","張家綺","行政人員","前門"],["2026/01/20","14:00","游惠怡","護理","前門"],["2026/01/20","14:08","游惠怡","護理","前門"],["2026/01/20","15:04","張家綺","行政人員","後門"],["2026/01/20","16:51","鍾蕙琦","行政人員","後門"],["2026/01/20","16:57","鍾蕙琦","行政人員","前門"],["2026/01/20","16:58","鍾蕙琦","行政人員","前門"],["2026/01/20","16:58","鍾蕙琦","行政人員","前門"],["2026/01/20","17:00","鍾蕙琦","行政人員","後門"],["2026/01/20","17:08","鍾蕙琦","行政人員","前門"],["2026/01/20","18:02","鍾蕙琦","行政人員","前門"],["2026/01/20","18:03","鍾蕙琦","行政人員","前門"],["2026/01/20","18:06","鍾蕙琦","行政人員","前門"],["2026/01/21","07:09","鍾蕙琦","行政人員","前門"],["2026/01/21","07:24","鍾蕙琦","行政人員","前門"],["2026/01/21","07:55","游惠怡","護理","前門"],["2026/01/21","08:02","魏玉萍","護理","前門"],["2026/01/21","08:03","徐慧美","護理","前門"],["2026/01/21","08:05","周燕伺","護理","前門"],["2026/01/21","08:10","王佳貞","護理","前門"],["2026/01/21","08:12","廖珮玟","護理","前門"],["2026/01/21","08:29","魏玉萍","護理","前門"],["2026/01/21","08:29","廖珮玟","護理","前門"],["2026/01/21","08:29","王佳貞","護理","前門"],["2026/01/21","08:29","廖珮玟","護理","前門"],["2026/01/21","08:29","魏玉萍","護理","前門"],["2026/01/21","08:29","魏玉萍","護理","前門"],["2026/01/21","08:37","游惠怡","護理","前門"],["2026/01/21","09:32","鍾蕙琦","行政人員","後門"],["2026/01/21","09:32","黃祐珍","行政人員","後門"],["2026/01/21","09:33","黃祐珍","行政人員","後門"],["2026/01/21","09:57","洪于涵","護理","前門"],["2026/01/21","09:57","洪于涵","護理","前門"],["2026/01/21","10:02","李佳燕","行政人員","前門"],["2026/01/21","10:03","林宏達","行政人員","前門"],["2026/01/21","10:15","黃盈焜","藥劑","前門"],["2026/01/21","11:59","鄭夙淇","行政人員","後門"],["2026/01/21","12:02","王琇瑩","行政人員","後門"],["2026/01/21","12:06","王琇瑩","行政人員","前門"],["2026/01/21","12:06","戴珮如","行政人員","前門"],["2026/01/21","12:14","戴珮如","行政人員","前門"],["2026/01/21","12:16","戴珮如","行政人員","前門"],["2026/01/21","12:25","鄭夙淇","行政人員","後門"],["2026/01/21","12:29","鍾蕙琦","行政人員","前門"],["2026/01/21","12:32","鍾蕙琦","行政人員","前門"],["2026/01/21","12:40","王琇瑩","行政人員","前門"],["2026/01/21","12:42","張家綺","行政人員","前門"],["2026/01/21","12:48","黃祐珍","行政人員","前門"],["2026/01/21","12:48","張家綺","行政人員","前門"],["2026/01/21","12:50","張家綺","行政人員","前門"],["2026/01/21","12:50","張家綺","行政人員","前門"],["2026/01/21","13:22","戴珮如","行政人員","前門"],["2026/01/21","13:39","鍾蕙琦","行政人員","前門"],["2026/01/21","13:42","黃祐珍","行政人員","前門"],["2026/01/21","13:55","張家綺","行政人員","後門"],["2026/01/21","13:56","鄭夙淇","行政人員","後門"],["2026/01/21","13:56","王琇瑩","行政人員","後門"],["2026/01/21","13:59","吳依萱","行政人員","前門"],["2026/01/21","14:00","吳昭頤","行政人員","前門"],["2026/01/21","14:49","柳緒英","護理","前門"],["2026/01/21","15:03","柳緒英","護理","前門"],["2026/01/21","15:32","王琇瑩","行政人員","前門"],["2026/01/21","15:34","鍾蕙琦","行政人員","前門"],["2026/01/21","17:10","鍾蕙琦","行政人員","前門"],["2026/01/21","17:10","鍾蕙琦","行政人員","前門"],["2026/01/22","07:55","柳緒英","護理","前門"],["2026/01/22","07:59","柳緒英","護理","前門"],["2026/01/22","07:59","柳緒英","護理","前門"],["2026/01/22","08:05","柳緒英","護理","前門"],["2026/01/22","08:18","吳依萱","行政人員","前門"],["2026/01/22","09:02","黃祐珍","行政人員","前門"],["2026/01/22","09:13","鍾蕙琦","行政人員","前門"],["2026/01/22","09:23","鍾蕙琦","行政人員","前門"],["2026/01/22","09:58","鍾蕙琦","行政人員","後門"],["2026/01/22","11:05","鍾蕙琦","行政人員","前門"],["2026/01/22","14:23","鍾蕙琦","行政人員","後門"],["2026/01/22","14:31","鍾蕙琦","行政人員","前門"],["2026/01/22","14:39","鍾蕙琦","行政人員","前門"],["2026/01/22","15:40","吳昭頤","行政人員","前門"],["2026/01/22","16:00","戴珮如","行政人員","前門"],["2026/01/22","16:14","鍾蕙琦","行政人員","後門"],["2026/01/22","16:22","蔡於民","行政人員","前門"],["2026/01/22","16:23","王琇瑩","行政人員","前門"],["2026/01/22","16:35","鍾蕙琦","行政人員","後門"],["2026/01/22","18:21","鍾蕙琦","行政人員","前門"],["2026/01/23","07:06","王琇瑩","行政人員","後門"],["2026/01/23","07:14","王琇瑩","行政人員","前門"],["2026/01/23","07:52","洪于涵","護理","前門"],["2026/01/23","07:59","陳嘉琪","護理","前門"],["2026/01/23","07:59","林銥霈","護理","前門"],["2026/01/23","08:59","王琇瑩","行政人員","前門"],["2026/01/23","09:15","黃祐珍","行政人員","前門"],["2026/01/23","10:00","陳嘉琪","護理","前門"],["2026/01/23","10:56","PGY醫師1","PGY","前門"],["2026/01/23","12:02","張家綺","行政人員","後門"],["2026/01/23","12:06","王琇瑩","行政人員","後門"],["2026/01/23","12:07","鄭夙淇","行政人員","前門"],["2026/01/23","12:12","王琇瑩","行政人員","前門"],["2026/01/23","12:23","王琇瑩","行政人員","後門"],["2026/01/23","12:25","戴珮如","行政人員","前門"],["2026/01/23","12:26","戴珮如","行政人員","前門"],["2026/01/23","12:27","范佐賓","放射","前門"],["2026/01/23","12:27","戴珮如","行政人員","前門"],["2026/01/23","12:33","黃祐珍","行政人員","前門"],["2026/01/23","12:37","張家綺","行政人員","前門"],["2026/01/23","12:54","戴珮如","行政人員","前門"],["2026/01/23","13:09","王琇瑩","行政人員","後門"],["2026/01/23","14:21","張家綺","行政人員","後門"],["2026/01/26","09:50","鍾蕙琦","行政人員","前門"],["2026/01/26","10:31","鍾蕙琦","行政人員","後門"],["2026/01/26","11:26","戴珮如","行政人員","前門"],["2026/01/26","12:06","鍾蕙琦","行政人員","後門"],["2026/01/26","12:14","王琇瑩","行政人員","後門"],["2026/01/26","12:17","張家綺","行政人員","前門"],["2026/01/26","12:19","王琇瑩","行政人員","前門"],["2026/01/26","12:28","鄭夙淇","行政人員","前門"],["2026/01/26","12:55","鍾蕙琦","行政人員","前門"],["2026/01/26","13:05","鍾蕙琦","行政人員","前門"],["2026/01/26","13:25","黃祐珍","行政人員","前門"],["2026/01/26","13:34","黃祐珍","行政人員","前門"],["2026/01/26","14:32","黃盈焜","藥劑","前門"],["2026/01/26","14:33","葉如芳","行政人員","前門"],["2026/01/26","14:38","李佳燕","行政人員","前門"],["2026/01/26","16:29","鍾蕙琦","行政人員","後門"],["2026/01/26","16:35","鍾蕙琦","行政人員","後門"],["2026/01/26","16:40","鍾蕙琦","行政人員","前門"],["2026/01/26","16:43","鍾蕙琦","行政人員","後門"],["2026/01/26","17:16","林淑麗","護理","前門"],["2026/01/26","17:56","鍾蕙琦","行政人員","前門"],["2026/01/27","07:04","鄭夙淇","行政人員","後門"],["2026/01/27","07:39","胡詔凱","醫師","前門"],["2026/01/27","07:41","游惠怡","護理","前門"],["2026/01/27","07:42","邱讚旺","醫師","前門"],["2026/01/27","07:46","王佳貞","護理","前門"],["2026/01/27","07:55","黃信凱","醫師","前門"],["2026/01/27","08:26","王佳貞","護理","前門"],["2026/01/27","08:30","鄭夙淇","行政人員","前門"],["2026/01/27","09:19","鍾蕙琦","行政人員","前門"],["2026/01/27","09:22","鍾蕙琦","行政人員","後門"],["2026/01/27","09:26","鍾蕙琦","行政人員","後門"],["2026/01/27","09:33","鍾蕙琦","行政人員","前門"],["2026/01/27","09:51","黃盈焜","藥劑","前門"],["2026/01/27","09:59","段偉凱","行政人員","前門"],["2026/01/27","10:00","鍾淑如","行政人員","前門"],["2026/01/27","10:07","徐逢開","行政人員","前門"],["2026/01/27","10:11","李翊寧","護理","前門"],["2026/01/27","10:17","林宜勳","行政人員","前門"],["2026/01/27","10:18","葉如芳","行政人員","前門"],["2026/01/27","10:19","王琇瑩","行政人員","前門"],["2026/01/27","10:49","楊媛琇","行政人員","前門"],["2026/01/27","10:57","鍾蕙琦","行政人員","前門"],["2026/01/27","11:12","鍾蕙琦","行政人員","前門"],["2026/01/27","11:26","鍾蕙琦","行政人員","前門"],["2026/01/27","12:11","戴珮如","行政人員","前門"],["2026/01/27","12:17","戴珮如","行政人員","前門"],["2026/01/27","12:29","戴珮如","行政人員","前門"],["2026/01/27","12:32","戴珮如","行政人員","前門"],["2026/01/27","13:04","戴珮如","行政人員","前門"],["2026/01/27","13:13","戴珮如","行政人員","後門"],["2026/01/27","13:29","鍾蕙琦","行政人員","前門"],["2026/01/27","13:30","鄭貴麟","醫師","前門"],["2026/01/27","13:30","鄭貴麟","醫師","前門"],["2026/01/27","13:33","林雪玲","行政人員","前門"],["2026/01/27","14:26","鍾蕙琦","行政人員","後門"],["2026/01/27","14:29","鍾蕙琦","行政人員","前門"],["2026/01/27","14:32","黃祐珍","行政人員","前門"],["2026/01/27","15:00","游惠怡","護理","前門"],["2026/01/27","15:22","游惠怡","護理","前門"],["2026/01/27","15:41","邱讚旺","醫師","前門"],["2026/01/27","15:41","邱讚旺","醫師","前門"],["2026/01/27","16:34","鍾蕙琦","行政人員","後門"],["2026/01/27","17:01","陳馨怡","護理","前門"],["2026/01/27","17:15","鍾蕙琦","行政人員","前門"],["2026/01/27","17:33","鍾蕙琦","行政人員","前門"],["2026/01/28","07:23","王琇瑩","行政人員","前門"],["2026/01/28","07:58","李易儒","醫師","前門"],["2026/01/28","08:05","周燕伺","護理","前門"],["2026/01/28","08:49","李佳燕","行政人員","前門"],["2026/01/28","09:08","江文榮","行政人員","前門"],["2026/01/28","09:11","李佳燕","行政人員","前門"],["2026/01/28","09:15","李佳燕","行政人員","前門"],["2026/01/28","09:23","連麗君","行政人員","前門"],["2026/01/28","09:27","鍾淑如","行政人員","前門"],["2026/01/28","09:33","林雪玲","行政人員","前門"],["2026/01/28","09:40","劉嘉琳","護理","前門"],["2026/01/28","09:40","劉嘉琳","護理","前門"],["2026/01/28","10:46","鍾蕙琦","行政人員","後門"],["2026/01/28","11:12","鍾蕙琦","行政人員","後門"],["2026/01/28","11:53","鄭夙淇","行政人員","後門"],["2026/01/28","12:00","鍾蕙琦","行政人員","後門"],["2026/01/28","12:09","黃信凱","醫師","前門"],["2026/01/28","12:14","張家綺","行政人員","後門"],["2026/01/28","12:15","張家綺","行政人員","後門"],["2026/01/28","12:15","張家綺","行政人員","後門"],["2026/01/28","12:17","王琇瑩","行政人員","前門"],["2026/01/28","12:25","游惠怡","護理","前門"],["2026/01/28","12:31","鄭夙淇","行政人員","前門"],["2026/01/28","12:33","鄭夙淇","行政人員","前門"],["2026/01/28","12:39","游惠怡","護理","前門"],["2026/01/28","12:42","戴珮如","行政人員","前門"],["2026/01/28","12:45","戴珮如","行政人員","前門"],["2026/01/28","13:10","何洋勳","醫師","後門"],["2026/01/28","13:11","王琇瑩","行政人員","後門"],["2026/01/28","13:24","陳政元","行政人員","前門"],["2026/01/28","13:33","鍾蕙琦","行政人員","後門"],["2026/01/28","13:39","鍾蕙琦","行政人員","後門"],["2026/01/28","13:39","鍾蕙琦","行政人員","後門"],["2026/01/28","13:41","張家綺","行政人員","後門"],["2026/01/28","13:44","鍾蕙琦","行政人員","前門"],["2026/01/28","13:53","張家綺","行政人員","後門"],["2026/01/28","13:53","張家綺","行政人員","後門"],["2026/01/28","13:55","鄭貴麟","醫師","前門"],["2026/01/28","13:57","戴珮如","行政人員","後門"],["2026/01/28","13:58","林慶元","檢驗","前門"],["2026/01/28","14:17","戴珮如","行政人員","後門"],["2026/01/28","14:25","鍾蕙琦","行政人員","前門"],["2026/01/28","14:25","張家綺","行政人員","後門"],["2026/01/28","14:50","黃盈焜","藥劑","前門"],["2026/01/28","15:01","李佳燕","行政人員","前門"],["2026/01/28","15:03","李佳燕","行政人員","前門"],["2026/01/28","15:07","吳淑芬","護理","前門"],["2026/01/28","15:23","鍾蕙琦","行政人員","前門"],["2026/01/28","16:00","葉如芳","行政人員","前門"],["2026/01/28","16:25","鍾蕙琦","行政人員","前門"],["2026/01/28","17:03","鍾蕙琦","行政人員","前門"],["2026/01/29","07:47","游惠怡","護理","前門"],["2026/01/29","07:56","鍾蕙琦","行政人員","後門"],["2026/01/29","07:59","鍾蕙琦","行政人員","前門"],["2026/01/29","08:04","黃瑞霞","護理","後門"],["2026/01/29","08:26","陳政元","行政人員","前門"],["2026/01/29","08:37","鍾蕙琦","行政人員","前門"],["2026/01/29","08:51","游惠怡","護理","前門"],["2026/01/29","09:04","鍾蕙琦","行政人員","後門"],["2026/01/29","09:09","鍾蕙琦","行政人員","前門"],["2026/01/29","09:48","鍾蕙琦","行政人員","後門"],["2026/01/29","11:19","鍾蕙琦","行政人員","前門"],["2026/01/29","14:20","邱姵縈","護理","前門"],["2026/01/29","14:23","李奕慶","醫師","前門"],["2026/01/29","14:26","黃盈焜","藥劑","前門"],["2026/01/29","14:27","林淑麗","護理","前門"],["2026/01/29","14:29","林淑麗","護理","前門"],["2026/01/29","14:29","邱姵縈","護理","前門"],["2026/01/29","14:32","鍾蕙琦","行政人員","前門"],["2026/01/29","14:33","羅宥羢","護理","前門"],["2026/01/29","14:46","鍾蕙琦","行政人員","前門"],["2026/01/29","14:55","陳榮貴","醫師","前門"],["2026/01/29","15:08","鍾蕙琦","行政人員","後門"],["2026/01/29","15:13","邱姵縈","護理","前門"],["2026/01/29","17:18","鍾蕙琦","行政人員","後門"],["2026/01/29","17:20","鍾蕙琦","行政人員","前門"],["2026/01/30","07:23","王琇瑩","行政人員","前門"],["2026/01/30","08:01","范姜欣秀","護理","前門"],["2026/01/30","08:02","周燕伺","護理","前門"],["2026/01/30","08:06","陳榮貴","醫師","前門"],["2026/01/30","08:07","吳卉榛","護理","前門"],["2026/01/30","08:18","張家綺","行政人員","後門"],["2026/01/30","08:24","王琇瑩","行政人員","後門"],["2026/01/30","08:29","王琇瑩","行政人員","後門"],["2026/01/30","08:33","鍾蕙琦","行政人員","前門"],["2026/01/30","08:36","鍾蕙琦","行政人員","後門"],["2026/01/30","08:53","鍾蕙琦","行政人員","前門"],["2026/01/30","09:53","鍾蕙琦","行政人員","後門"],["2026/01/30","10:21","PGY醫師1","PGY","後門"],["2026/01/30","10:24","黃祐珍","行政人員","前門"],["2026/01/30","10:24","PGY醫師3","PGY","前門"],["2026/01/30","10:29","翁國益","醫師","前門"],["2026/01/30","10:29","黃祐珍","行政人員","前門"],["2026/01/30","11:31","黃祐珍","行政人員","前門"],["2026/01/30","11:38","黃祐珍","行政人員","後門"],["2026/01/30","11:40","PGY醫師1","PGY","後門"],["2026/01/30","11:41","PGY醫師3","PGY","後門"],["2026/01/30","12:02","張家綺","行政人員","後門"],["2026/01/30","12:06","鄭夙淇","行政人員","前門"],["2026/01/30","12:09","王琇瑩","行政人員","前門"],["2026/01/30","12:11","張家綺","行政人員","前門"],["2026/01/30","12:14","張家綺","行政人員","前門"],["2026/01/30","12:18","王琇瑩","行政人員","前門"],["2026/01/30","12:27","戴珮如","行政人員","前門"],["2026/01/30","12:29","張家綺","行政人員","前門"],["2026/01/30","12:30","王琇瑩","行政人員","後門"],["2026/01/30","12:32","戴珮如","行政人員","前門"],["2026/01/30","12:35","戴珮如","行政人員","前門"],["2026/01/30","13:22","PGY醫師1","PGY","後門"],["2026/01/30","13:31","鍾蕙琦","行政人員","前門"],["2026/01/30","13:33","鍾蕙琦","行政人員","前門"],["2026/01/30","13:34","張家綺","行政人員","前門"],["2026/01/30","13:37","張家綺","行政人員","前門"],["2026/01/30","13:37","PGY醫師1","PGY","後門"],["2026/01/30","13:44","鍾蕙琦","行政人員","後門"],["2026/01/30","13:49","PGY醫師3","PGY","後門"],["2026/01/30","13:57","吳珮妁","護理","前門"],["2026/01/30","14:02","鐘頂天","醫師","前門"],["2026/01/30","14:07","黃祐珍","行政人員","前門"],["2026/01/30","14:21","PGY醫師1","PGY","前門"],["2026/01/30","14:22","黃祐珍","行政人員","前門"],["2026/01/30","14:26","李昌儒","其他醫事人員","前門"],["2026/01/30","14:31","黃祐珍","行政人員","前門"],["2026/01/30","14:37","戴珮如","行政人員","前門"],["2026/01/30","15:22","黃祐珍","行政人員","後門"],["2026/01/30","15:25","黃祐珍","行政人員","後門"],["2026/01/30","15:31","黃祐珍","行政人員","後門"],["2026/01/30","15:42","PGY醫師3","PGY","前門"],["2026/01/30","15:42","PGY醫師3","PGY","前門"],["2026/01/30","15:48","PGY醫師1","PGY","前門"],["2026/01/30","16:23","王琇瑩","行政人員","前門"],["2026/01/30","17:59","鍾蕙琦","行政人員","前門"],["2026/01/30","18:07","鍾蕙琦","行政人員","前門"],["2026/01/31","12:08","王琇瑩","行政人員","後門"],["2026/02/02","09:29","鍾蕙琦","行政人員","前門"],["2026/02/02","10:18","李佳燕","行政人員","前門"],["2026/02/02","10:45","鍾蕙琦","行政人員","前門"],["2026/02/02","12:03","王琇瑩","行政人員","後門"],["2026/02/02","12:16","張家綺","行政人員","後門"],["2026/02/02","12:17","鄭夙淇","行政人員","後門"],["2026/02/02","12:25","鄭夙淇","行政人員","前門"],["2026/02/02","12:51","李佳燕","行政人員","前門"],["2026/02/02","12:54","王琇瑩","行政人員","前門"],["2026/02/02","13:03","鍾蕙琦","行政人員","前門"],["2026/02/02","13:20","黃祐珍","行政人員","前門"],["2026/02/02","13:26","戴珮如","行政人員","前門"],["2026/02/02","13:34","林銥霈","護理","前門"],["2026/02/02","13:42","黃祐珍","行政人員","前門"],["2026/02/02","14:02","鍾蕙琦","行政人員","後門"],["2026/02/02","14:30","王琇瑩","行政人員","前門"],["2026/02/02","14:59","鍾蕙琦","行政人員","前門"],["2026/02/02","15:36","鍾蕙琦","行政人員","後門"],["2026/02/02","16:29","黃祐珍","行政人員","前門"],["2026/02/02","17:08","鍾蕙琦","行政人員","前門"],["2026/02/03","06:58","鄭夙淇","行政人員","後門"],["2026/02/03","07:43","沈淑美","護理","前門"],["2026/02/03","07:44","翁國益","醫師","前門"],["2026/02/03","07:44","游惠怡","護理","前門"],["2026/02/03","07:44","邱讚旺","醫師","前門"],["2026/02/03","07:45","廖珮玟","護理","前門"],["2026/02/03","07:52","王佳貞","護理","前門"],["2026/02/03","08:22","沈淑美","護理","前門"],["2026/02/03","08:22","王佳貞","護理","前門"],["2026/02/03","08:23","游惠怡","護理","前門"],["2026/02/03","09:19","鍾蕙琦","行政人員","前門"],["2026/02/03","09:32","鍾蕙琦","行政人員","前門"],["2026/02/03","09:37","鍾蕙琦","行政人員","後門"],["2026/02/03","09:56","陳嘉琪","護理","前門"],["2026/02/03","11:36","林書誼","醫師","前門"],["2026/02/03","12:01","張家綺","行政人員","後門"],["2026/02/03","12:01","王琇瑩","行政人員","後門"],["2026/02/03","12:06","鄭夙淇","行政人員","前門"],["2026/02/03","12:11","戴珮如","行政人員","前門"],["2026/02/03","12:13","戴珮如","行政人員","前門"],["2026/02/03","12:14","戴珮如","行政人員","前門"],["2026/02/03","12:19","張家綺","行政人員","後門"],["2026/02/03","12:20","鍾蕙琦","行政人員","前門"],["2026/02/03","12:20","王琇瑩","行政人員","後門"],["2026/02/03","12:33","戴珮如","行政人員","前門"],["2026/02/03","13:15","鄭貴麟","醫師","前門"],["2026/02/03","13:21","黃祐珍","行政人員","後門"],["2026/02/03","13:25","黃祐珍","行政人員","前門"],["2026/02/03","13:25","林慶元","檢驗","前門"],["2026/02/03","13:30","翁國益","醫師","前門"],["2026/02/03","13:30","邱讚旺","醫師","前門"],["2026/02/03","13:35","張家綺","行政人員","前門"],["2026/02/03","13:35","林美延","護理","前門"],["2026/02/03","13:40","唐家駿","醫師","前門"],["2026/02/03","13:51","張家綺","行政人員","後門"],["2026/02/03","14:01","王琇瑩","行政人員","前門"],["2026/02/03","14:05","張家綺","行政人員","前門"],["2026/02/03","14:31","王琇瑩","行政人員","前門"],["2026/02/03","14:51","張家綺","行政人員","後門"],["2026/02/03","14:53","戴珮如","行政人員","後門"],["2026/02/03","15:04","李佳燕","行政人員","前門"],["2026/02/03","15:12","葉如芳","行政人員","前門"],["2026/02/03","15:40","鍾蕙琦","行政人員","前門"],["2026/02/03","15:41","鍾蕙琦","行政人員","後門"],["2026/02/03","15:48","葉如芳","行政人員","前門"],["2026/02/03","16:09","李翊寧","護理","前門"],["2026/02/03","17:13","鍾蕙琦","行政人員","前門"],["2026/02/04","07:12","鍾蕙琦","行政人員","前門"],["2026/02/04","07:18","鍾蕙琦","行政人員","前門"],["2026/02/04","07:59","鄭貴麟","醫師","前門"],["2026/02/04","08:02","沈淑美","護理","前門"],["2026/02/04","08:03","周燕伺","護理","前門"],["2026/02/04","08:09","王佳貞","護理","前門"],["2026/02/04","08:34","廖珮玟","護理","前門"],["2026/02/04","08:34","沈淑美","護理","前門"],["2026/02/04","08:34","王佳貞","護理","前門"],["2026/02/04","09:00","鍾蕙琦","行政人員","後門"],["2026/02/04","09:35","鍾蕙琦","行政人員","後門"],["2026/02/04","09:43","鍾蕙琦","行政人員","後門"],["2026/02/04","10:13","鄭夙淇","行政人員","後門"],["2026/02/04","11:11","鍾蕙琦","行政人員","前門"],["2026/02/04","11:50","李翊寧","護理","前門"],["2026/02/04","11:53","焦建堯","行政人員","後門"],["2026/02/04","12:01","王琇瑩","行政人員","前門"],["2026/02/04","12:02","王琇瑩","行政人員","後門"],["2026/02/04","12:02","張家綺","行政人員","前門"],["2026/02/04","12:03","戴珮如","行政人員","前門"],["2026/02/04","12:05","鄭夙淇","行政人員","後門"],["2026/02/04","12:06","戴珮如","行政人員","前門"],["2026/02/04","12:11","張家綺","行政人員","前門"],["2026/02/04","12:12","戴珮如","行政人員","前門"],["2026/02/04","12:15","戴珮如","行政人員","前門"],["2026/02/04","12:21","葉春枝","護理","前門"],["2026/02/04","12:21","黃祐珍","行政人員","前門"],["2026/02/04","12:35","張家綺","行政人員","前門"],["2026/02/04","12:54","王琇瑩","行政人員","後門"],["2026/02/04","12:55","張家綺","行政人員","前門"],["2026/02/04","13:32","張家綺","行政人員","前門"],["2026/02/04","13:33","張家綺","行政人員","後門"],["2026/02/04","13:34","戴珮如","行政人員","前門"],["2026/02/04","13:44","劉昱伶","檢驗","前門"],["2026/02/04","13:50","張家綺","行政人員","後門"],["2026/02/04","13:51","林文杰","行政人員","前門"],["2026/02/04","13:56","林慶元","檢驗","前門"],["2026/02/04","13:58","陸浩瑜","行政人員","前門"],["2026/02/04","14:01","林美延","護理","前門"],["2026/02/04","15:03","鄭貴麟","醫師","前門"],["2026/02/04","15:05","林宏達","行政人員","前門"],["2026/02/04","15:05","戴珮如","行政人員","前門"],["2026/02/04","15:10","戴珮如","行政人員","前門"],["2026/02/04","15:34","林宜勳","行政人員","前門"],["2026/02/04","15:43","鍾蕙琦","行政人員","前門"],["2026/02/04","16:55","戴珮如","行政人員","前門"],["2026/02/04","17:02","黃薏庭","護理","前門"],["2026/02/04","17:11","鍾蕙琦","行政人員","前門"],["2026/02/04","17:26","鍾蕙琦","行政人員","前門"],["2026/02/05","07:41","焦建堯","行政人員","後門"],["2026/02/05","07:43","陳政元","行政人員","前門"],["2026/02/05","07:52","黃瑞霞","護理","後門"],["2026/02/05","08:28","葉如芳","行政人員","前門"],["2026/02/05","08:34","黃瑞霞","護理","後門"],["2026/02/05","08:56","邱姵縈","護理","前門"],["2026/02/05","09:12","鍾蕙琦","行政人員","前門"],["2026/02/05","09:18","鍾蕙琦","行政人員","前門"],["2026/02/05","09:18","鍾蕙琦","行政人員","前門"],["2026/02/05","09:21","鍾蕙琦","行政人員","後門"],["2026/02/05","10:46","李佳燕","行政人員","前門"],["2026/02/05","11:41","鍾蕙琦","行政人員","前門"],["2026/02/05","14:48","張家綺","行政人員","前門"],["2026/02/05","14:49","黃祐珍","行政人員","前門"],["2026/02/05","14:55","李翊寧","護理","前門"],["2026/02/05","14:56","池若維","護理","前門"],["2026/02/05","14:57","王琇瑩","行政人員","前門"],["2026/02/05","15:36","黃祐珍","行政人員","前門"],["2026/02/05","15:37","張家綺","行政人員","後門"],["2026/02/05","15:43","鍾蕙琦","行政人員","前門"],["2026/02/05","15:59","鍾蕙琦","行政人員","前門"],["2026/02/05","16:36","鍾蕙琦","行政人員","前門"],["2026/02/05","17:21","鍾蕙琦","行政人員","前門"],["2026/02/05","17:58","張家綺","行政人員","前門"],["2026/02/05","18:34","鍾蕙琦","行政人員","前門"],["2026/02/06","07:11","王琇瑩","行政人員","前門"],["2026/02/06","07:52","許嘉佑","醫師","前門"],["2026/02/06","08:01","陳榮貴","醫師","前門"],["2026/02/06","08:03","范姜欣秀","護理","前門"],["2026/02/06","08:11","陳榮貴","醫師","前門"],["2026/02/06","08:38","許嘉佑","醫師","前門"],["2026/02/06","09:11","鍾蕙琦","行政人員","前門"],["2026/02/06","09:11","鍾蕙琦","行政人員","前門"],["2026/02/06","09:17","鍾蕙琦","行政人員","後門"],["2026/02/06","10:14","黃祐珍","行政人員","後門"],["2026/02/06","10:14","吳依萱","行政人員","前門"],["2026/02/06","10:20","吳依萱","行政人員","前門"],["2026/02/06","10:26","黃祐珍","行政人員","後門"],["2026/02/06","10:34","翁國益","醫師","前門"],["2026/02/06","12:01","張家綺","行政人員","後門"],["2026/02/06","12:01","張家綺","行政人員","後門"],["2026/02/06","12:04","鄭夙淇","行政人員","前門"],["2026/02/06","12:07","王琇瑩","行政人員","前門"],["2026/02/06","12:11","王琇瑩","行政人員","前門"],["2026/02/06","12:25","鍾蕙琦","行政人員","前門"],["2026/02/06","12:27","鍾蕙琦","行政人員","前門"],["2026/02/06","12:35","鍾蕙琦","行政人員","前門"],["2026/02/06","12:41","王琇瑩","行政人員","前門"],["2026/02/06","13:01","黃祐珍","行政人員","前門"],["2026/02/06","14:59","鍾蕙琦","行政人員","前門"],["2026/02/06","16:17","戴珮如","行政人員","前門"],["2026/02/06","16:36","蔡於民","行政人員","前門"],["2026/02/06","17:00","鍾蕙琦","行政人員","前門"],["2026/02/06","17:21","蔡於民","行政人員","前門"],["2026/02/06","17:29","鍾蕙琦","行政人員","前門"],["2026/02/07","08:10","黃年富","醫師","前門"],["2026/02/07","08:11","黃年富","醫師","前門"],["2026/02/08","12:08","陳宗偉","醫師","前門"],["2026/02/08","12:09","陳宗偉","醫師","前門"],["2026/02/08","12:12","陳宗偉","醫師","前門"],["2026/02/08","14:07","陳國龍","醫師","前門"],["2026/02/09","07:44","黃年富","醫師","前門"],["2026/02/09","07:46","黃年富","醫師","前門"],["2026/02/09","09:14","鍾蕙琦","行政人員","前門"],["2026/02/09","09:33","鍾蕙琦","行政人員","後門"],["2026/02/09","10:08","鍾蕙琦","行政人員","後門"],["2026/02/09","12:02","王琇瑩","行政人員","後門"],["2026/02/09","12:09","王琇瑩","行政人員","前門"],["2026/02/09","12:09","張家綺","行政人員","後門"],["2026/02/09","12:16","鄭夙淇","行政人員","後門"],["2026/02/09","12:26","張家綺","行政人員","前門"],["2026/02/09","12:26","鄭夙淇","行政人員","前門"],["2026/02/09","12:27","張家綺","行政人員","前門"],["2026/02/09","12:28","鍾蕙琦","行政人員","前門"],["2026/02/09","12:32","王琇瑩","行政人員","前門"],["2026/02/09","12:49","王琇瑩","行政人員","前門"],["2026/02/09","12:53","鍾蕙琦","行政人員","前門"],["2026/02/09","13:21","戴珮如","行政人員","前門"],["2026/02/09","13:44","鍾蕙琦","行政人員","前門"],["2026/02/09","13:44","鍾蕙琦","行政人員","前門"],["2026/02/09","13:46","鍾蕙琦","行政人員","前門"],["2026/02/09","14:05","王琇瑩","行政人員","前門"],["2026/02/09","14:33","鄭夙淇","行政人員","後門"],["2026/02/09","15:15","邱姵縈","護理","前門"],["2026/02/09","15:16","張家綺","行政人員","前門"],["2026/02/09","16:37","鍾蕙琦","行政人員","後門"],["2026/02/09","17:02","鍾蕙琦","行政人員","前門"],["2026/02/10","07:02","鄭夙淇","行政人員","後門"],["2026/02/10","07:43","沈淑美","護理","前門"],["2026/02/10","07:45","邱讚旺","醫師","前門"],["2026/02/10","07:47","胡詔凱","醫師","前門"],["2026/02/10","07:52","廖珮玟","護理","前門"],["2026/02/10","07:55","王佳貞","護理","前門"],["2026/02/10","08:02","徐慧美","護理","前門"],["2026/02/10","08:31","沈淑美","護理","前門"],["2026/02/10","08:31","王佳貞","護理","前門"],["2026/02/10","08:31","邱讚旺","醫師","前門"],["2026/02/10","08:31","廖珮玟","護理","前門"],["2026/02/10","09:20","黃祐珍","行政人員","前門"],["2026/02/10","09:20","黃祐珍","行政人員","前門"],["2026/02/10","09:26","鍾蕙琦","行政人員","前門"],["2026/02/10","09:27","陳宗偉","醫師","前門"],["2026/02/10","09:29","鍾蕙琦","行政人員","前門"],["2026/02/10","09:30","鍾蕙琦","行政人員","前門"],["2026/02/10","09:45","鍾蕙琦","行政人員","前門"],["2026/02/10","09:59","鍾蕙琦","行政人員","前門"],["2026/02/10","10:01","鍾蕙琦","行政人員","前門"],["2026/02/10","10:53","黃祐珍","行政人員","後門"],["2026/02/10","10:59","PGY醫師3","PGY","前門"],["2026/02/10","12:10","張家綺","行政人員","前門"],["2026/02/10","12:10","鄭夙淇","行政人員","前門"],["2026/02/10","12:12","戴珮如","行政人員","前門"],["2026/02/10","12:12","王琇瑩","行政人員","後門"],["2026/02/10","12:14","王琇瑩","行政人員","前門"],["2026/02/10","12:14","戴珮如","行政人員","前門"],["2026/02/10","12:15","戴珮如","行政人員","前門"],["2026/02/10","12:17","張家綺","行政人員","後門"],["2026/02/10","12:18","王琇瑩","行政人員","前門"],["2026/02/10","12:18","張家綺","行政人員","後門"],["2026/02/10","12:20","黃祐珍","行政人員","前門"],["2026/02/10","12:23","鍾蕙琦","行政人員","前門"],["2026/02/10","12:27","戴珮如","行政人員","前門"],["2026/02/10","12:27","戴珮如","行政人員","前門"],["2026/02/10","12:44","戴珮如","行政人員","前門"],["2026/02/10","13:17","黃祐珍","行政人員","前門"],["2026/02/10","13:39","張琦","行政人員","前門"],["2026/02/10","13:43","黃祐珍","行政人員","後門"],["2026/02/10","13:43","黃祐珍","行政人員","後門"],["2026/02/10","13:47","唐家駿","醫師","前門"],["2026/02/10","13:49","張琦","行政人員","前門"],["2026/02/10","13:54","PGY醫師3","PGY","前門"],["2026/02/10","13:54","翁國益","醫師","前門"],["2026/02/10","13:58","鍾蕙琦","行政人員","前門"],["2026/02/10","14:15","黃祐珍","行政人員","前門"],["2026/02/10","14:18","鍾蕙琦","行政人員","前門"],["2026/02/10","14:19","翁國益","醫師","前門"],["2026/02/10","14:21","黃祐珍","行政人員","後門"],["2026/02/10","15:30","蔡於民","行政人員","前門"],["2026/02/10","16:10","王琇瑩","行政人員","前門"],["2026/02/10","17:35","鍾蕙琦","行政人員","前門"],["2026/02/10","17:36","鍾蕙琦","行政人員","後門"],["2026/02/10","18:23","鍾蕙琦","行政人員","前門"],["2026/02/10","18:26","鍾蕙琦","行政人員","前門"],["2026/02/11","07:11","王琇瑩","行政人員","前門"],["2026/02/11","07:21","王琇瑩","行政人員","後門"],["2026/02/11","07:29","王琇瑩","行政人員","後門"],["2026/02/11","08:02","柳緒英","護理","前門"],["2026/02/11","08:02","周燕伺","護理","前門"],["2026/02/11","08:15","范佐賓","放射","前門"],["2026/02/11","08:31","王琇瑩","行政人員","後門"],["2026/02/11","08:43","王琇瑩","行政人員","後門"],["2026/02/11","09:10","鍾蕙琦","行政人員","前門"],["2026/02/11","09:28","鍾蕙琦","行政人員","前門"],["2026/02/11","09:29","鍾蕙琦","行政人員","前門"],["2026/02/11","09:36","鍾蕙琦","行政人員","前門"],["2026/02/11","09:43","鍾蕙琦","行政人員","後門"],["2026/02/11","09:52","鍾蕙琦","行政人員","前門"],["2026/02/11","10:10","鍾蕙琦","行政人員","後門"],["2026/02/11","11:16","張家綺","行政人員","後門"],["2026/02/11","11:16","張家綺","行政人員","後門"],["2026/02/11","11:27","戴珮如","行政人員","前門"],["2026/02/11","11:29","戴珮如","行政人員","前門"],["2026/02/11","11:30","鄭貴麟","醫師","前門"],["2026/02/11","11:31","林美延","護理","前門"],["2026/02/11","11:54","王琇瑩","行政人員","後門"],["2026/02/11","11:58","張家綺","行政人員","後門"],["2026/02/11","12:06","王琇瑩","行政人員","前門"],["2026/02/11","12:08","王琇瑩","行政人員","前門"],["2026/02/11","12:14","鄭夙淇","行政人員","前門"],["2026/02/11","12:23","張家綺","行政人員","前門"],["2026/02/11","12:32","戴珮如","行政人員","前門"],["2026/02/11","12:34","戴珮如","行政人員","前門"],["2026/02/11","12:38","黃祐珍","行政人員","前門"],["2026/02/11","12:45","王琇瑩","行政人員","前門"],["2026/02/11","13:05","黃祐珍","行政人員","前門"],["2026/02/11","13:59","鍾蕙琦","行政人員","前門"],["2026/02/11","14:01","張家綺","行政人員","前門"],["2026/02/11","14:47","鍾蕙琦","行政人員","前門"],["2026/02/11","14:59","王琇瑩","行政人員","後門"],["2026/02/11","15:38","黃祐珍","行政人員","前門"],["2026/02/11","15:55","鍾蕙琦","行政人員","後門"],["2026/02/11","16:15","劉昱伶","檢驗","前門"],["2026/02/11","17:41","鍾蕙琦","行政人員","前門"],["2026/02/12","09:08","鍾蕙琦","行政人員","前門"],["2026/02/12","09:18","鍾蕙琦","行政人員","前門"],["2026/02/12","09:18","鍾蕙琦","行政人員","前門"],["2026/02/12","09:19","鍾蕙琦","行政人員","前門"],["2026/02/12","09:31","鍾蕙琦","行政人員","後門"],["2026/02/12","09:45","黃祐珍","行政人員","前門"],["2026/02/12","11:34","鍾蕙琦","行政人員","前門"],["2026/02/12","14:39","邱誌冠","復健","前門"],["2026/02/12","14:39","邱誌冠","復健","前門"],["2026/02/12","14:39","邱誌冠","復健","前門"],["2026/02/12","14:39","邱誌冠","復健","前門"],["2026/02/12","14:39","邱誌冠","復健","前門"],["2026/02/12","15:18","鍾蕙琦","行政人員","前門"],["2026/02/12","15:24","鍾蕙琦","行政人員","前門"],["2026/02/12","15:24","鍾蕙琦","行政人員","前門"],["2026/02/12","15:28","鍾蕙琦","行政人員","前門"],["2026/02/12","15:35","鍾蕙琦","行政人員","前門"],["2026/02/12","16:08","鍾蕙琦","行政人員","前門"],["2026/02/12","16:15","黃祐珍","行政人員","前門"],["2026/02/12","16:19","張家綺","行政人員","後門"],["2026/02/12","17:27","鍾蕙琦","行政人員","前門"],["2026/02/12","17:46","鍾蕙琦","行政人員","前門"],["2026/02/12","18:03","林美延","護理","前門"],["2026/02/12","18:34","鍾蕙琦","行政人員","前門"],["2026/02/12","18:35","鍾蕙琦","行政人員","前門"],["2026/02/13","07:20","王琇瑩","行政人員","前門"],["2026/02/13","07:57","柳緒英","護理","前門"],["2026/02/13","08:01","周燕伺","護理","前門"],["2026/02/13","08:18","王琇瑩","行政人員","後門"],["2026/02/13","08:26","王琇瑩","行政人員","前門"],["2026/02/13","08:27","王琇瑩","行政人員","前門"],["2026/02/13","08:38","李易儒","醫師","前門"],["2026/02/13","08:40","王琇瑩","行政人員","前門"],["2026/02/13","09:02","鍾蕙琦","行政人員","前門"],["2026/02/13","09:08","鍾蕙琦","行政人員","後門"],["2026/02/13","09:16","鍾蕙琦","行政人員","前門"],["2026/02/13","10:31","翁國益","醫師","前門"],["2026/02/13","10:33","吳昭頤","行政人員","前門"],["2026/02/13","10:33","黃祐珍","行政人員","前門"],["2026/02/13","10:34","黃祐珍","行政人員","後門"],["2026/02/13","11:00","蔡於民","行政人員","前門"],["2026/02/13","12:05","鄭夙淇","行政人員","後門"],["2026/02/13","13:20","戴珮如","行政人員","前門"],["2026/02/13","13:22","戴珮如","行政人員","前門"],["2026/02/13","13:23","戴珮如","行政人員","前門"],["2026/02/13","13:45","林育如","行政人員","前門"],["2026/02/13","13:51","戴珮如","行政人員","前門"],["2026/02/13","15:20","蔡於民","行政人員","前門"],["2026/02/13","15:23","黃祐珍","行政人員","前門"],["2026/02/13","16:04","張家綺","行政人員","前門"],["2026/02/13","16:09","鍾蕙琦","行政人員","前門"],["2026/02/13","16:18","黃祐珍","行政人員","前門"],["2026/02/13","16:32","吳昭頤","行政人員","前門"],["2026/02/13","17:28","鍾蕙琦","行政人員","後門"],["2026/02/13","17:32","張家綺","行政人員","前門"],["2026/02/13","17:36","鍾蕙琦","行政人員","前門"],["2026/02/13","17:37","鍾蕙琦","行政人員","前門"],["2026/02/13","17:43","鍾蕙琦","行政人員","前門"],["2026/02/13","18:36","鍾蕙琦","行政人員","後門"],["2026/02/13","18:44","鍾蕙琦","行政人員","前門"],["2026/02/21","08:02","鍾蕙琦","行政人員","後門"],["2026/02/21","08:44","鍾蕙琦","行政人員","後門"],["2026/02/21","10:02","鍾蕙琦","行政人員","後門"],["2026/02/21","12:20","鍾蕙琦","行政人員","後門"],["2026/02/21","12:23","鍾蕙琦","行政人員","前門"],["2026/02/23","09:32","李佳燕","行政人員","前門"],["2026/02/23","09:46","鍾蕙琦","行政人員","前門"],["2026/02/23","09:54","王琇瑩","行政人員","後門"],["2026/02/23","09:54","李佳燕","行政人員","前門"],["2026/02/23","09:59","鍾蕙琦","行政人員","前門"],["2026/02/23","10:01","黃盈焜","藥劑","前門"],["2026/02/23","10:03","黃祐珍","行政人員","前門"],["2026/02/23","10:06","鍾蕙琦","行政人員","前門"],["2026/02/23","10:13","黃祐珍","行政人員","後門"],["2026/02/23","11:06","戴珮如","行政人員","前門"],["2026/02/23","11:40","劉君鈴","放射","前門"],["2026/02/23","12:10","張家綺","行政人員","前門"],["2026/02/23","12:16","王琇瑩","行政人員","前門"],["2026/02/23","12:23","鄭夙淇","行政人員","前門"],["2026/02/23","12:27","鄭夙淇","行政人員","前門"],["2026/02/23","12:32","王琇瑩","行政人員","後門"],["2026/02/23","12:40","張家綺","行政人員","後門"],["2026/02/23","12:42","張家綺","行政人員","前門"],["2026/02/23","12:52","鍾蕙琦","行政人員","前門"],["2026/02/23","12:54","鍾蕙琦","行政人員","前門"],["2026/02/23","12:55","鍾蕙琦","行政人員","前門"],["2026/02/23","12:56","張家綺","行政人員","前門"],["2026/02/23","12:57","張家綺","行政人員","前門"],["2026/02/23","12:58","鍾蕙琦","行政人員","前門"],["2026/02/23","13:05","鍾蕙琦","行政人員","後門"],["2026/02/23","13:20","黃祐珍","行政人員","前門"],["2026/02/23","13:38","鍾蕙琦","行政人員","後門"],["2026/02/23","13:40","鍾蕙琦","行政人員","前門"],["2026/02/23","14:00","黃盈焜","藥劑","前門"],["2026/02/23","14:01","蔡於民","行政人員","前門"],["2026/02/23","14:01","李佳燕","行政人員","前門"],["2026/02/23","14:03","鍾淑如","行政人員","前門"],["2026/02/23","15:05","張家綺","行政人員","前門"],["2026/02/23","15:52","鍾蕙琦","行政人員","後門"],["2026/02/23","17:48","鍾蕙琦","行政人員","前門"],["2026/02/23","18:11","鍾蕙琦","行政人員","前門"],["2026/02/23","18:16","鍾蕙琦","行政人員","前門"],["2026/02/24","06:58","鄭夙淇","行政人員","後門"],["2026/02/24","07:31","翁國益","醫師","前門"],["2026/02/24","07:38","唐家駿","醫師","前門"],["2026/02/24","07:38","唐家駿","醫師","前門"],["2026/02/24","07:44","廖珮玟","護理","前門"],["2026/02/24","07:47","王佳貞","護理","前門"],["2026/02/24","07:53","胡詔凱","醫師","前門"],["2026/02/24","07:58","謝美娟","護理","前門"],["2026/02/24","08:31","王佳貞","護理","前門"],["2026/02/24","08:31","謝美娟","護理","前門"],["2026/02/24","08:31","廖珮玟","護理","前門"],["2026/02/24","09:09","王琇瑩","行政人員","後門"],["2026/02/24","09:38","鍾蕙琦","行政人員","前門"],["2026/02/24","09:51","鍾蕙琦","行政人員","後門"],["2026/02/24","10:17","鍾蕙琦","行政人員","前門"],["2026/02/24","11:28","劉佳琦","護理","前門"],["2026/02/24","12:29","黃祐珍","行政人員","前門"],["2026/02/24","13:19","戴珮如","行政人員","前門"],["2026/02/24","13:21","戴珮如","行政人員","前門"],["2026/02/24","13:38","張家綺","行政人員","後門"],["2026/02/24","13:52","鍾蕙琦","行政人員","後門"],["2026/02/24","16:27","戴珮如","行政人員","前門"],["2026/02/24","17:14","柳緒英","護理","前門"],["2026/02/24","17:50","鍾蕙琦","行政人員","前門"],["2026/02/24","18:20","鍾蕙琦","行政人員","前門"],["2026/02/25","07:21","王琇瑩","行政人員","前門"],["2026/02/25","07:22","王琇瑩","行政人員","後門"],["2026/02/25","07:29","王琇瑩","行政人員","後門"],["2026/02/25","07:31","王琇瑩","行政人員","前門"],["2026/02/25","07:56","王琇瑩","行政人員","後門"],["2026/02/25","08:01","陳榮貴","醫師","前門"],["2026/02/25","08:03","高時貽","醫師","前門"],["2026/02/25","08:09","柳緒英","護理","前門"],["2026/02/25","09:20","鍾蕙琦","行政人員","前門"],["2026/02/25","09:33","李佳燕","行政人員","前門"],["2026/02/25","09:41","鍾蕙琦","行政人員","後門"],["2026/02/25","09:55","吳淑芬","護理","前門"],["2026/02/25","09:57","李佳燕","行政人員","前門"],["2026/02/25","10:02","李佳燕","行政人員","前門"],["2026/02/25","10:05","李佳燕","行政人員","前門"],["2026/02/25","10:13","鄭貴麟","醫師","前門"],["2026/02/25","10:19","李佳燕","行政人員","前門"],["2026/02/25","10:44","葉如芳","行政人員","前門"],["2026/02/25","10:57","李佳燕","行政人員","前門"],["2026/02/25","11:09","張家綺","行政人員","後門"],["2026/02/25","11:14","鄭貴麟","醫師","前門"],["2026/02/25","11:17","張家綺","行政人員","後門"],["2026/02/25","11:21","羅宥羢","護理","前門"],["2026/02/25","11:24","羅宥羢","護理","前門"],["2026/02/25","11:25","戴珮如","行政人員","前門"],["2026/02/25","11:25","戴珮如","行政人員","前門"],["2026/02/25","11:26","林慶元","檢驗","前門"],["2026/02/25","11:27","戴珮如","行政人員","前門"],["2026/02/25","11:28","林美延","護理","前門"],["2026/02/25","11:30","林雪玲","行政人員","前門"],["2026/02/25","11:42","劉君鈴","放射","前門"],["2026/02/25","12:03","鄭夙淇","行政人員","後門"],["2026/02/25","12:04","黃祐珍","行政人員","前門"],["2026/02/25","12:11","鄭夙淇","行政人員","前門"],["2026/02/25","12:14","張家綺","行政人員","前門"],["2026/02/25","12:16","黃祐珍","行政人員","前門"],["2026/02/25","12:17","王琇瑩","行政人員","前門"],["2026/02/25","12:34","戴珮如","行政人員","前門"],["2026/02/25","12:46","王琇瑩","行政人員","後門"],["2026/02/25","13:06","王琇瑩","行政人員","後門"],["2026/02/25","13:46","陳禹如","行政人員","後門"],["2026/02/25","13:57","林慶元","檢驗","前門"],["2026/02/25","14:01","徐逢開","行政人員","前門"],["2026/02/25","14:26","林育如","行政人員","前門"],["2026/02/25","14:35","黃祐珍","行政人員","前門"],["2026/02/25","15:35","吳淑芬","護理","前門"],["2026/02/25","15:45","張家綺","行政人員","前門"],["2026/02/25","16:36","林美延","護理","前門"],["2026/02/25","16:36","林美延","護理","前門"],["2026/02/25","17:16","鍾蕙琦","行政人員","前門"],["2026/02/26","07:30","陳政元","行政人員","前門"],["2026/02/26","09:12","鍾蕙琦","行政人員","前門"],["2026/02/26","09:15","鍾蕙琦","行政人員","後門"],["2026/02/26","09:28","鍾蕙琦","行政人員","前門"],["2026/02/26","11:38","鍾蕙琦","行政人員","後門"],["2026/02/26","11:43","劉君鈴","放射","前門"],["2026/02/26","14:05","李佳燕","行政人員","前門"],["2026/02/26","14:07","張家綺","行政人員","後門"],["2026/02/26","14:16","鍾蕙琦","行政人員","前門"],["2026/02/26","14:25","鍾蕙琦","行政人員","後門"],["2026/02/26","14:52","黃祐珍","行政人員","前門"],["2026/02/26","14:52","蔡於民","行政人員","前門"],["2026/02/26","15:19","護理實習生","實習生","前門"],["2026/02/26","15:21","鍾蕙琦","行政人員","前門"],["2026/02/26","15:39","鍾蕙琦","行政人員","前門"],["2026/02/26","15:39","鍾蕙琦","行政人員","前門"],["2026/02/26","15:39","鍾蕙琦","行政人員","前門"],["2026/02/26","15:40","鍾蕙琦","行政人員","前門"],["2026/02/26","15:40","鍾蕙琦","行政人員","前門"],["2026/02/26","15:42","鍾蕙琦","行政人員","前門"],["2026/02/26","17:02","鄭夙淇","行政人員","後門"],["2026/02/26","17:41","鍾蕙琦","行政人員","前門"],["2026/02/26","17:55","鍾蕙琦","行政人員","前門"],["2026/03/02","09:09","鍾蕙琦","行政人員","前門"],["2026/03/02","09:44","鍾蕙琦","行政人員","後門"],["2026/03/02","12:08","鄭夙淇","行政人員","後門"],["2026/03/02","13:08","林重道","醫師","前門"],["2026/03/02","13:10","王琇瑩","行政人員","後門"],["2026/03/02","13:10","張家綺","行政人員","後門"],["2026/03/02","13:10","王琇瑩","行政人員","後門"],["2026/03/02","13:18","戴珮如","行政人員","前門"],["2026/03/02","13:20","戴珮如","行政人員","前門"],["2026/03/02","13:22","黃祐珍","行政人員","前門"],["2026/03/02","14:46","鍾蕙琦","行政人員","前門"],["2026/03/02","17:14","鍾蕙琦","行政人員","前門"],["2026/03/02","17:51","王琇瑩","行政人員","前門"],["2026/03/02","18:07","王琇瑩","行政人員","前門"],["2026/03/02","18:27","鍾蕙琦","行政人員","後門"],["2026/03/02","18:36","鍾蕙琦","行政人員","前門"],["2026/03/03","07:01","鄭夙淇","行政人員","後門"],["2026/03/03","07:34","翁國益","醫師","前門"],["2026/03/03","07:42","邱讚旺","醫師","前門"],["2026/03/03","07:42","游惠怡","護理","前門"],["2026/03/03","07:50","廖珮玟","護理","前門"],["2026/03/03","07:50","胡詔凱","醫師","前門"],["2026/03/03","07:51","王佳貞","護理","前門"],["2026/03/03","07:58","徐慧美","護理","前門"],["2026/03/03","08:06","謝美娟","護理","前門"],["2026/03/03","08:26","王佳貞","護理","前門"],["2026/03/03","08:28","游惠怡","護理","前門"],["2026/03/03","08:28","謝美娟","護理","前門"],["2026/03/03","08:28","邱讚旺","醫師","前門"],["2026/03/03","08:28","廖珮玟","護理","前門"],["2026/03/03","09:10","鍾蕙琦","行政人員","前門"],["2026/03/03","09:13","邱玟婷","行政人員","後門"],["2026/03/03","09:13","鍾蕙琦","行政人員","後門"],["2026/03/03","09:57","黃祐珍","行政人員","前門"],["2026/03/03","10:01","林宏達","行政人員","前門"],["2026/03/03","10:36","王佳貞","護理","前門"],["2026/03/03","11:05","鍾蕙琦","行政人員","後門"],["2026/03/03","12:03","王琇瑩","行政人員","後門"],["2026/03/03","12:05","張家綺","行政人員","後門"],["2026/03/03","12:06","鄭夙淇","行政人員","前門"],["2026/03/03","12:12","戴珮如","行政人員","前門"],["2026/03/03","12:30","戴珮如","行政人員","前門"],["2026/03/03","12:49","戴珮如","行政人員","前門"],["2026/03/03","13:16","黃祐珍","行政人員","前門"],["2026/03/03","15:05","鍾蕙琦","行政人員","後門"],["2026/03/03","15:21","吳淑芬","護理","前門"],["2026/03/03","16:04","鍾蕙琦","行政人員","後門"],["2026/03/03","16:48","鍾蕙琦","行政人員","後門"],["2026/03/03","17:17","鍾蕙琦","行政人員","前門"],["2026/03/03","18:28","鍾蕙琦","行政人員","前門"],["2026/03/04","07:13","鍾蕙琦","行政人員","前門"],["2026/03/04","07:37","鍾蕙琦","行政人員","前門"],["2026/03/04","07:40","張家綺","行政人員","後門"],["2026/03/04","08:43","鍾蕙琦","行政人員","前門"],["2026/03/04","09:09","鍾蕙琦","行政人員","後門"],["2026/03/04","09:43","鍾蕙琦","行政人員","後門"],["2026/03/04","11:47","鍾蕙琦","行政人員","後門"],["2026/03/04","12:05","王琇瑩","行政人員","後門"],["2026/03/04","12:10","鄭夙淇","行政人員","後門"],["2026/03/04","12:18","鄭夙淇","行政人員","前門"],["2026/03/04","12:29","張家綺","行政人員","後門"],["2026/03/04","12:43","戴珮如","行政人員","前門"],["2026/03/04","12:46","戴珮如","行政人員","前門"],["2026/03/04","12:49","戴珮如","行政人員","前門"],["2026/03/04","12:50","戴珮如","行政人員","前門"],["2026/03/04","12:50","戴珮如","行政人員","前門"],["2026/03/04","12:51","張家綺","行政人員","前門"],["2026/03/04","13:03","戴珮如","行政人員","前門"],["2026/03/04","15:06","鍾蕙琦","行政人員","前門"],["2026/03/04","17:38","鍾蕙琦","行政人員","前門"],["2026/03/05","07:33","陳政元","行政人員","前門"],["2026/03/05","07:41","黃瑞霞","護理","後門"],["2026/03/05","09:31","鍾蕙琦","行政人員","後門"],["2026/03/05","09:33","鍾蕙琦","行政人員","前門"],["2026/03/05","09:35","鍾蕙琦","行政人員","後門"],["2026/03/05","09:52","鍾蕙琦","行政人員","後門"],["2026/03/05","10:07","宋星翰","行政人員","前門"],["2026/03/05","14:37","鍾蕙琦","行政人員","前門"],["2026/03/05","14:45","鍾蕙琦","行政人員","前門"],["2026/03/05","16:16","鄭夙淇","行政人員","前門"],["2026/03/05","17:10","鍾蕙琦","行政人員","後門"],["2026/03/05","17:23","鍾蕙琦","行政人員","後門"],["2026/03/05","18:02","鍾蕙琦","行政人員","後門"],["2026/03/05","18:17","鍾蕙琦","行政人員","後門"],["2026/03/05","18:19","鍾蕙琦","行政人員","後門"],["2026/03/05","18:27","鍾蕙琦","行政人員","後門"],["2026/03/05","19:21","張家綺","行政人員","前門"],["2026/03/05","19:35","鍾蕙琦","行政人員","後門"],["2026/03/06","07:08","王琇瑩","行政人員","前門"],["2026/03/06","08:01","莊雅琇","護理","前門"],["2026/03/06","08:04","陳馨怡","護理","前門"],["2026/03/06","08:04","周燕伺","護理","前門"],["2026/03/06","08:39","王琇瑩","行政人員","後門"],["2026/03/06","08:41","王琇瑩","行政人員","後門"],["2026/03/06","09:06","鍾蕙琦","行政人員","後門"],["2026/03/06","09:06","鍾蕙琦","行政人員","前門"],["2026/03/06","09:25","鍾蕙琦","行政人員","前門"],["2026/03/06","10:27","黃祐珍","行政人員","後門"],["2026/03/06","10:33","鄒承憲","醫師","前門"],["2026/03/06","10:33","翁國益","醫師","前門"],["2026/03/06","10:36","吳依萱","行政人員","後門"],["2026/03/06","11:59","鍾蕙琦","行政人員","前門"],["2026/03/06","12:03","林美延","護理","後門"],["2026/03/06","12:08","黃祐珍","行政人員","後門"],["2026/03/06","12:08","張家綺","行政人員","後門"],["2026/03/06","12:12","戴珮如","行政人員","前門"],["2026/03/06","12:18","鄭夙淇","行政人員","前門"],["2026/03/06","12:29","黃祐珍","行政人員","前門"],["2026/03/06","12:32","王琇瑩","行政人員","前門"],["2026/03/06","12:54","戴珮如","行政人員","前門"],["2026/03/06","13:30","黃祐珍","行政人員","後門"],["2026/03/06","13:37","黃祐珍","行政人員","前門"],["2026/03/06","14:41","黃祐珍","行政人員","前門"],["2026/03/07","08:11","鍾蕙琦","行政人員","前門"],["2026/03/07","10:38","鍾蕙琦","行政人員","後門"],["2026/03/07","11:19","鍾蕙琦","行政人員","後門"],["2026/03/07","12:19","鍾蕙琦","行政人員","後門"],["2026/03/08","20:07","鍾蕙琦","行政人員","後門"],["2026/03/09","10:03","鍾蕙琦","行政人員","前門"],["2026/03/09","10:09","鍾蕙琦","行政人員","後門"],["2026/03/09","11:18","陳銘潔","行政人員","前門"],["2026/03/09","11:48","鍾蕙琦","行政人員","前門"],["2026/03/09","11:56","鄭夙淇","行政人員","後門"],["2026/03/09","12:01","張家綺","行政人員","後門"],["2026/03/09","12:07","鄭夙淇","行政人員","前門"],["2026/03/09","12:15","鍾蕙琦","行政人員","前門"],["2026/03/09","12:21","鍾蕙琦","行政人員","前門"],["2026/03/09","12:31","鄭夙淇","行政人員","前門"],["2026/03/09","13:20","黃祐珍","行政人員","前門"],["2026/03/09","13:21","戴珮如","行政人員","前門"],["2026/03/09","13:22","戴珮如","行政人員","前門"],["2026/03/09","13:25","戴珮如","行政人員","前門"],["2026/03/09","15:28","鍾蕙琦","行政人員","前門"],["2026/03/09","15:57","鍾蕙琦","行政人員","前門"],["2026/03/09","15:57","鍾蕙琦","行政人員","前門"],["2026/03/10","07:00","鄭夙淇","行政人員","後門"],["2026/03/10","07:36","邱定宇","醫師","前門"],["2026/03/10","07:38","邱讚旺","醫師","前門"],["2026/03/10","07:46","胡詔凱","醫師","前門"],["2026/03/10","07:49","廖珮玟","護理","前門"],["2026/03/10","08:57","葉春枝","護理","前門"],["2026/03/10","09:07","徐逢開","行政人員","前門"],["2026/03/10","09:23","李佩樺","行政人員","前門"],["2026/03/10","09:27","陳銘潔","行政人員","前門"],["2026/03/10","09:56","鍾蕙琦","行政人員","後門"],["2026/03/10","09:59","林宏達","行政人員","前門"],["2026/03/10","10:05","鍾蕙琦","行政人員","前門"],["2026/03/10","10:28","鍾蕙琦","行政人員","前門"],["2026/03/10","10:33","鍾蕙琦","行政人員","前門"],["2026/03/10","10:40","洪于涵","護理","前門"],["2026/03/10","11:07","李翊寧","護理","後門"],["2026/03/10","11:11","李佩樺","行政人員","後門"],["2026/03/10","11:11","李佩樺","行政人員","後門"],["2026/03/10","11:12","李翊寧","護理","後門"],["2026/03/10","11:17","鍾蕙琦","行政人員","前門"],["2026/03/10","11:23","林銥霈","護理","後門"],["2026/03/10","12:00","鄭夙淇","行政人員","後門"],["2026/03/10","12:11","張家綺","行政人員","後門"],["2026/03/10","12:14","黃祐珍","行政人員","後門"],["2026/03/10","12:41","王琇瑩","行政人員","後門"],["2026/03/10","12:47","鍾蕙琦","行政人員","前門"],["2026/03/10","12:50","鍾蕙琦","行政人員","前門"],["2026/03/10","12:50","鍾蕙琦","行政人員","前門"],["2026/03/10","12:54","鍾蕙琦","行政人員","前門"],["2026/03/10","13:19","黃耀康","醫師","前門"],["2026/03/10","13:35","黃耀康","醫師","前門"],["2026/03/10","13:49","鍾蕙琦","行政人員","前門"],["2026/03/10","13:49","鍾蕙琦","行政人員","前門"],["2026/03/10","16:20","鍾蕙琦","行政人員","後門"],["2026/03/10","17:21","黃祐珍","行政人員","前門"],["2026/03/10","17:27","鍾蕙琦","行政人員","後門"],["2026/03/10","18:28","鍾蕙琦","行政人員","前門"],["2026/03/11","07:23","王琇瑩","行政人員","前門"],["2026/03/11","07:32","王琇瑩","行政人員","前門"],["2026/03/11","07:33","王琇瑩","行政人員","後門"],["2026/03/11","08:02","周燕伺","護理","前門"],["2026/03/11","08:37","王琇瑩","行政人員","前門"],["2026/03/11","09:06","鍾蕙琦","行政人員","前門"],["2026/03/11","09:19","鍾蕙琦","行政人員","後門"],["2026/03/11","09:33","鍾蕙琦","行政人員","前門"],["2026/03/11","09:38","鍾蕙琦","行政人員","前門"],["2026/03/11","11:59","鄭夙淇","行政人員","後門"],["2026/03/11","12:13","王琇瑩","行政人員","前門"],["2026/03/11","12:22","黃祐珍","行政人員","後門"],["2026/03/11","12:26","戴珮如","行政人員","前門"],["2026/03/11","12:28","戴珮如","行政人員","前門"],["2026/03/11","12:37","戴珮如","行政人員","前門"],["2026/03/11","12:42","黃祐珍","行政人員","前門"],["2026/03/11","13:27","張家綺","行政人員","後門"],["2026/03/11","13:38","王琇瑩","行政人員","後門"],["2026/03/11","13:41","張家綺","行政人員","後門"],["2026/03/11","13:49","戴珮如","行政人員","前門"],["2026/03/11","13:51","戴珮如","行政人員","前門"],["2026/03/11","13:54","鄭貴麟","醫師","前門"],["2026/03/11","13:56","何文豪","行政人員","前門"],["2026/03/11","13:57","林美延","護理","前門"],["2026/03/11","14:00","林慶元","檢驗","前門"],["2026/03/11","14:12","林雪玲","行政人員","前門"],["2026/03/11","14:36","戴珮如","行政人員","前門"],["2026/03/11","14:41","戴珮如","行政人員","前門"],["2026/03/11","15:00","鍾蕙琦","行政人員","前門"],["2026/03/11","15:31","鍾蕙琦","行政人員","後門"],["2026/03/11","15:37","鍾蕙琦","行政人員","後門"],["2026/03/11","15:39","張家綺","行政人員","後門"],["2026/03/11","15:40","鍾蕙琦","行政人員","前門"],["2026/03/11","15:48","鍾蕙琦","行政人員","前門"],["2026/03/11","17:07","鍾蕙琦","行政人員","前門"],["2026/03/11","17:07","鍾蕙琦","行政人員","前門"],["2026/03/11","17:14","鍾蕙琦","行政人員","前門"],["2026/03/11","17:16","鍾蕙琦","行政人員","前門"],["2026/03/11","17:25","鍾蕙琦","行政人員","前門"],["2026/03/11","17:27","鍾蕙琦","行政人員","前門"],["2026/03/11","17:48","張家綺","行政人員","後門"],["2026/03/11","17:54","鍾蕙琦","行政人員","前門"],["2026/03/11","17:54","鍾蕙琦","行政人員","前門"],["2026/03/12","07:34","陳政元","行政人員","前門"],["2026/03/12","10:52","鍾蕙琦","行政人員","前門"],["2026/03/12","11:23","鍾蕙琦","行政人員","前門"],["2026/03/12","11:23","鍾蕙琦","行政人員","前門"],["2026/03/12","13:33","邱誌冠","復健","前門"],["2026/03/12","13:33","邱誌冠","復健","前門"],["2026/03/12","13:33","邱誌冠","復健","前門"],["2026/03/12","13:34","邱誌冠","復健","前門"],["2026/03/12","13:42","古省文","行政人員","前門"],["2026/03/12","14:31","鍾蕙琦","行政人員","前門"],["2026/03/12","14:51","張家榮","醫師","前門"],["2026/03/12","15:05","鍾蕙琦","行政人員","後門"],["2026/03/12","15:16","鍾蕙琦","行政人員","前門"],["2026/03/12","16:37","林宜勳","行政人員","前門"],["2026/03/12","17:15","鍾蕙琦","行政人員","後門"],["2026/03/12","17:53","鍾蕙琦","行政人員","前門"],["2026/03/12","17:54","張家綺","行政人員","後門"],["2026/03/13","07:16","張家綺","行政人員","前門"],["2026/03/13","08:04","吳卉榛","護理","前門"],["2026/03/13","08:05","莊雅琇","護理","前門"],["2026/03/13","08:05","周燕伺","護理","前門"],["2026/03/13","08:26","莊雅琇","護理","前門"],["2026/03/13","08:44","張家綺","行政人員","後門"],["2026/03/13","08:55","張家綺","行政人員","前門"],["2026/03/13","09:02","鍾蕙琦","行政人員","前門"],["2026/03/13","09:07","鍾蕙琦","行政人員","後門"],["2026/03/13","09:12","鍾蕙琦","行政人員","後門"],["2026/03/13","09:26","鍾蕙琦","行政人員","前門"],["2026/03/13","09:31","葉如芳","行政人員","前門"],["2026/03/13","09:33","葉如芳","行政人員","前門"],["2026/03/13","09:35","高時貽","醫師","前門"],["2026/03/13","09:45","李佳燕","行政人員","前門"],["2026/03/13","10:18","李佳燕","行政人員","前門"],["2026/03/13","10:44","鍾蕙琦","行政人員","後門"],["2026/03/13","11:42","鍾蕙琦","行政人員","後門"],["2026/03/13","11:53","李佳燕","行政人員","前門"],["2026/03/13","12:01","鄭夙淇","行政人員","後門"],["2026/03/13","12:05","張家綺","行政人員","後門"],["2026/03/13","12:09","張家綺","行政人員","後門"],["2026/03/13","12:11","戴珮如","行政人員","前門"],["2026/03/13","12:13","戴珮如","行政人員","前門"],["2026/03/13","12:17","鍾蕙琦","行政人員","前門"],["2026/03/13","12:19","鍾蕙琦","行政人員","前門"],["2026/03/13","12:20","鍾蕙琦","行政人員","後門"],["2026/03/13","12:29","戴珮如","行政人員","前門"],["2026/03/13","12:31","鍾蕙琦","行政人員","前門"],["2026/03/13","12:41","張家綺","行政人員","前門"],["2026/03/13","12:50","黃祐珍","行政人員","前門"],["2026/03/13","12:57","戴珮如","行政人員","前門"],["2026/03/13","13:38","黃耀康","醫師","前門"],["2026/03/13","13:39","鍾蕙琦","行政人員","前門"],["2026/03/13","13:41","鍾蕙琦","行政人員","後門"],["2026/03/13","13:48","戴珮如","行政人員","前門"],["2026/03/13","13:50","鍾蕙琦","行政人員","前門"],["2026/03/13","13:50","鍾蕙琦","行政人員","前門"],["2026/03/13","14:37","利佳蓉","檢驗","前門"],["2026/03/13","14:37","利佳蓉","檢驗","前門"],["2026/03/13","14:37","利佳蓉","檢驗","前門"],["2026/03/13","14:37","利佳蓉","檢驗","前門"],["2026/03/13","14:37","利佳蓉","檢驗","前門"],["2026/03/13","15:40","鍾蕙琦","行政人員","前門"],["2026/03/13","15:59","鍾蕙琦","行政人員","前門"],["2026/03/13","17:17","鍾蕙琦","行政人員","後門"],["2026/03/13","17:52","張家綺","行政人員","前門"],["2026/03/16","10:01","鍾蕙琦","行政人員","前門"],["2026/03/16","10:17","鍾蕙琦","行政人員","前門"],["2026/03/16","10:21","鍾蕙琦","行政人員","前門"],["2026/03/16","10:23","鍾蕙琦","行政人員","前門"],["2026/03/16","10:23","鍾蕙琦","行政人員","前門"],["2026/03/16","11:12","鍾蕙琦","行政人員","前門"],["2026/03/16","11:41","劉君鈴","放射","前門"],["2026/03/16","12:00","張家綺","行政人員","後門"],["2026/03/16","12:08","王琇瑩","行政人員","前門"],["2026/03/16","12:14","鄭夙淇","行政人員","前門"],["2026/03/16","12:21","戴珮如","行政人員","前門"],["2026/03/16","12:21","戴珮如","行政人員","前門"],["2026/03/16","12:21","王琇瑩","行政人員","前門"],["2026/03/16","12:23","鍾蕙琦","行政人員","前門"],["2026/03/16","12:25","鍾蕙琦","行政人員","前門"],["2026/03/16","12:27","戴珮如","行政人員","前門"],["2026/03/16","12:35","黃耀康","醫師","前門"],["2026/03/16","12:40","戴珮如","行政人員","前門"],["2026/03/16","12:56","戴珮如","行政人員","前門"],["2026/03/16","13:07","戴珮如","行政人員","前門"],["2026/03/16","13:25","鍾蕙琦","行政人員","後門"],["2026/03/16","13:33","鍾蕙琦","行政人員","前門"],["2026/03/16","13:42","鍾蕙琦","行政人員","前門"],["2026/03/16","15:32","林育如","行政人員","前門"],["2026/03/16","16:28","鍾蕙琦","行政人員","前門"],["2026/03/16","18:12","張家綺","行政人員","前門"],["2026/03/16","18:31","鍾蕙琦","行政人員","前門"],["2026/03/17","06:53","鄭夙淇","行政人員","後門"],["2026/03/17","07:40","邱讚旺","醫師","前門"],["2026/03/17","07:46","胡詔凱","醫師","前門"],["2026/03/17","07:47","沈淑美","護理","前門"],["2026/03/17","07:49","徐慧美","護理","前門"],["2026/03/17","08:04","黃信凱","醫師","前門"],["2026/03/17","08:29","沈淑美","護理","前門"],["2026/03/17","08:49","鍾蕙琦","行政人員","前門"],["2026/03/17","09:06","李佩樺","行政人員","後門"],["2026/03/17","09:06","李翊寧","護理","後門"],["2026/03/17","09:14","葉春枝","護理","前門"],["2026/03/17","09:41","陳銘潔","行政人員","前門"],["2026/03/17","09:44","李佩樺","行政人員","前門"],["2026/03/17","09:54","李佩樺","行政人員","前門"],["2026/03/17","09:57","林宏達","行政人員","前門"],["2026/03/17","10:09","黃耀康","醫師","前門"],["2026/03/17","10:36","鍾蕙琦","行政人員","前門"],["2026/03/17","11:20","李佩樺","行政人員","前門"],["2026/03/17","11:20","王琇瑩","行政人員","前門"],["2026/03/17","11:22","李翊寧","護理","後門"],["2026/03/17","11:34","邱玟婷","行政人員","後門"],["2026/03/17","11:58","張家綺","行政人員","後門"],["2026/03/17","12:06","鄭夙淇","行政人員","前門"],["2026/03/17","12:08","張家綺","行政人員","前門"],["2026/03/17","12:10","戴珮如","行政人員","前門"],["2026/03/17","12:11","戴珮如","行政人員","前門"],["2026/03/17","12:29","王琇瑩","行政人員","後門"],["2026/03/17","12:40","鍾蕙琦","行政人員","前門"],["2026/03/17","12:41","戴珮如","行政人員","前門"],["2026/03/17","12:41","戴珮如","行政人員","前門"],["2026/03/17","12:42","鍾蕙琦","行政人員","前門"],["2026/03/17","12:45","鍾蕙琦","行政人員","前門"],["2026/03/17","12:49","鍾蕙琦","行政人員","前門"],["2026/03/17","12:50","林世惟","醫師","前門"],["2026/03/17","12:51","鍾蕙琦","行政人員","前門"],["2026/03/17","13:14","王琇瑩","行政人員","後門"],["2026/03/17","13:33","戴珮如","行政人員","前門"],["2026/03/17","13:40","戴珮如","行政人員","前門"],["2026/03/17","14:01","鍾蕙琦","行政人員","前門"],["2026/03/17","14:02","鍾蕙琦","行政人員","前門"],["2026/03/17","14:03","鍾蕙琦","行政人員","前門"],["2026/03/17","14:18","邱讚旺","醫師","前門"],["2026/03/17","14:45","鍾蕙琦","行政人員","後門"],["2026/03/17","17:12","鍾蕙琦","行政人員","前門"],["2026/03/17","18:36","鍾蕙琦","行政人員","前門"],["2026/03/18","07:12","鍾蕙琦","行政人員","前門"],["2026/03/18","08:00","王佳貞","護理","前門"],["2026/03/18","08:02","陳馨怡","護理","前門"],["2026/03/18","08:02","游惠怡","護理","前門"],["2026/03/18","08:02","徐慧美","護理","前門"],["2026/03/18","08:02","周燕伺","護理","前門"],["2026/03/18","08:06","廖珮玟","護理","前門"],["2026/03/18","08:06","沈淑美","護理","前門"],["2026/03/18","08:30","王佳貞","護理","前門"],["2026/03/18","08:30","沈淑美","護理","前門"],["2026/03/18","08:30","廖珮玟","護理","前門"],["2026/03/18","08:30","游惠怡","護理","前門"],["2026/03/18","08:30","游惠怡","護理","前門"],["2026/03/18","08:30","游惠怡","護理","前門"],["2026/03/18","08:30","游惠怡","護理","前門"],["2026/03/18","09:52","鍾蕙琦","行政人員","前門"],["2026/03/18","10:02","鍾蕙琦","行政人員","前門"],["2026/03/18","10:07","鍾淑如","行政人員","前門"],["2026/03/18","10:39","邱玟婷","行政人員","前門"],["2026/03/18","11:14","張家綺","行政人員","後門"],["2026/03/18","11:20","張家綺","行政人員","後門"],["2026/03/18","11:26","戴珮如","行政人員","前門"],["2026/03/18","11:36","戴珮如","行政人員","前門"],["2026/03/18","11:37","林慶元","檢驗","前門"],["2026/03/18","12:04","戴珮如","行政人員","前門"],["2026/03/18","12:04","鄭夙淇","行政人員","後門"],["2026/03/18","12:22","鄭夙淇","行政人員","後門"],["2026/03/18","12:24","張家綺","行政人員","後門"],["2026/03/18","12:27","張家綺","行政人員","前門"],["2026/03/18","12:30","鄭夙淇","行政人員","前門"],["2026/03/18","12:34","戴珮如","行政人員","前門"],["2026/03/18","12:47","王琇瑩","行政人員","後門"],["2026/03/18","13:44","鍾蕙琦","行政人員","後門"],["2026/03/18","14:51","游惠怡","護理","前門"],["2026/03/18","14:52","游惠怡","護理","前門"],["2026/03/18","15:27","陳禹如","行政人員","前門"],["2026/03/18","15:43","林慶元","檢驗","前門"],["2026/03/18","16:14","鍾蕙琦","行政人員","前門"],["2026/03/18","16:41","鍾蕙琦","行政人員","前門"],["2026/03/18","17:22","鍾蕙琦","行政人員","前門"],["2026/03/18","17:59","鍾蕙琦","行政人員","前門"],["2026/03/19","07:27","陳政元","行政人員","前門"],["2026/03/19","09:07","鍾蕙琦","行政人員","前門"],["2026/03/19","09:11","鍾蕙琦","行政人員","後門"],["2026/03/19","10:13","林世惟","醫師","前門"],["2026/03/19","14:16","鍾蕙琦","行政人員","前門"],["2026/03/19","14:17","黃祐珍","行政人員","前門"],["2026/03/19","14:19","鍾蕙琦","行政人員","前門"],["2026/03/19","14:24","黃祐珍","行政人員","前門"],["2026/03/19","14:31","鍾蕙琦","行政人員","後門"],["2026/03/19","15:10","戴珮如","行政人員","前門"],["2026/03/19","15:13","江文榮","行政人員","前門"],["2026/03/19","15:25","鍾蕙琦","行政人員","前門"],["2026/03/19","15:32","鍾蕙琦","行政人員","前門"],["2026/03/19","15:38","鍾蕙琦","行政人員","前門"],["2026/03/19","17:10","鍾蕙琦","行政人員","後門"],["2026/03/19","18:35","鍾蕙琦","行政人員","後門"],["2026/03/19","18:52","鍾蕙琦","行政人員","前門"],["2026/03/20","07:04","王琇瑩","行政人員","後門"],["2026/03/20","07:07","王琇瑩","行政人員","前門"],["2026/03/20","07:47","陳榮貴","醫師","前門"],["2026/03/20","08:00","周燕伺","護理","前門"],["2026/03/20","08:02","吳卉榛","護理","前門"],["2026/03/20","08:23","王琇瑩","行政人員","後門"],["2026/03/20","09:11","鍾蕙琦","行政人員","前門"],["2026/03/20","09:42","鍾蕙琦","行政人員","後門"],["2026/03/20","09:50","鍾蕙琦","行政人員","後門"],["2026/03/20","09:57","鍾蕙琦","行政人員","前門"],["2026/03/20","10:17","洪于涵","護理","前門"],["2026/03/20","10:25","黃祐珍","行政人員","後門"],["2026/03/20","10:29","郭琬琪","放射","前門"],["2026/03/20","10:30","李孟穎","放射","前門"],["2026/03/20","10:30","蔡育臻","放射","前門"],["2026/03/20","10:30","張柏湘","放射","前門"],["2026/03/20","10:30","戴順國","放射","前門"],["2026/03/20","10:30","廖威凱","復健","前門"],["2026/03/20","10:30","徐榕蔚","放射","前門"],["2026/03/20","10:30","楊智雲","放射","前門"],["2026/03/20","10:30","林造民","放射","前門"],["2026/03/20","10:30","張榮凱","放射","前門"],["2026/03/20","10:30","簡姿昀","放射","前門"],["2026/03/20","10:30","黃中廷","放射","前門"],["2026/03/20","10:31","蔡欣蒨","放射","前門"],["2026/03/20","10:32","彭靖雅","復健","前門"],["2026/03/20","10:33","陳嘉琪","護理","前門"],["2026/03/20","10:40","翁國益","醫師","前門"],["2026/03/20","10:43","鄒承憲","醫師","前門"],["2026/03/20","10:53","李翊寧","護理","前門"],["2026/03/20","11:38","翁國益","醫師","前門"],["2026/03/20","12:05","張家綺","行政人員","後門"],["2026/03/20","12:06","張家綺","行政人員","後門"],["2026/03/20","12:07","鄭夙淇","行政人員","前門"],["2026/03/20","12:07","張家綺","行政人員","後門"],["2026/03/20","12:11","王琇瑩","行政人員","後門"],["2026/03/20","12:36","鍾蕙琦","行政人員","前門"],["2026/03/20","12:45","王琇瑩","行政人員","後門"],["2026/03/20","13:26","戴珮如","行政人員","前門"],["2026/03/20","13:27","戴珮如","行政人員","前門"],["2026/03/20","13:29","戴珮如","行政人員","前門"],["2026/03/20","13:30","戴珮如","行政人員","前門"],["2026/03/20","13:44","鍾蕙琦","行政人員","前門"],["2026/03/20","13:46","鍾蕙琦","行政人員","前門"],["2026/03/20","13:47","鍾蕙琦","行政人員","前門"],["2026/03/20","16:22","鍾蕙琦","行政人員","後門"],["2026/03/20","17:20","鍾蕙琦","行政人員","前門"],["2026/03/20","17:30","蘇子凱","醫師","前門"],["2026/03/20","18:27","鍾蕙琦","行政人員","前門"],["2026/03/23","09:47","鍾蕙琦","行政人員","前門"],["2026/03/23","10:46","林美延","護理","前門"],["2026/03/23","11:54","鍾蕙琦","行政人員","後門"],["2026/03/23","12:01","張家綺","行政人員","後門"],["2026/03/23","12:03","王琇瑩","行政人員","後門"],["2026/03/23","12:07","鄭夙淇","行政人員","後門"],["2026/03/23","12:31","王琇瑩","行政人員","前門"],["2026/03/23","12:38","鍾蕙琦","行政人員","前門"],["2026/03/23","12:40","鍾蕙琦","行政人員","前門"],["2026/03/23","12:42","鍾蕙琦","行政人員","前門"],["2026/03/23","13:16","戴珮如","行政人員","前門"],["2026/03/23","13:16","黃祐珍","行政人員","前門"],["2026/03/23","13:43","鍾蕙琦","行政人員","前門"],["2026/03/23","15:44","黃成洲","醫師","前門"],["2026/03/23","16:28","鍾蕙琦","行政人員","後門"],["2026/03/23","17:29","鍾蕙琦","行政人員","前門"],["2026/03/23","18:21","鍾蕙琦","行政人員","前門"],["2026/03/24","06:57","鄭夙淇","行政人員","後門"],["2026/03/24","07:39","胡詔凱","醫師","前門"],["2026/03/24","07:41","邱讚旺","醫師","前門"],["2026/03/24","07:47","沈淑美","護理","前門"],["2026/03/24","07:55","王佳貞","護理","前門"],["2026/03/24","07:57","黃彩華","護理","前門"],["2026/03/24","08:22","沈淑美","護理","前門"],["2026/03/24","08:47","溫秀惠","醫師","前門"],["2026/03/24","09:04","鍾蕙琦","行政人員","前門"],["2026/03/24","09:14","鍾蕙琦","行政人員","前門"],["2026/03/24","09:14","鍾蕙琦","行政人員","前門"],["2026/03/24","11:56","鄭夙淇","行政人員","後門"],["2026/03/24","12:01","王琇瑩","行政人員","後門"],["2026/03/24","12:01","張家綺","行政人員","後門"],["2026/03/24","12:02","王琇瑩","行政人員","前門"],["2026/03/24","12:04","張家綺","行政人員","前門"],["2026/03/24","12:06","張家綺","行政人員","前門"],["2026/03/24","12:11","戴珮如","行政人員","前門"],["2026/03/24","12:16","戴珮如","行政人員","前門"],["2026/03/24","12:19","戴珮如","行政人員","前門"],["2026/03/24","12:28","戴珮如","行政人員","前門"],["2026/03/24","12:34","黃祐珍","行政人員","前門"],["2026/03/24","12:38","黃祐珍","行政人員","前門"],["2026/03/24","12:38","鍾蕙琦","行政人員","前門"],["2026/03/24","12:41","黃祐珍","行政人員","前門"],["2026/03/24","12:43","黃祐珍","行政人員","前門"],["2026/03/24","12:52","鄭貴麟","醫師","前門"],["2026/03/24","12:57","鄭貴麟","醫師","前門"],["2026/03/24","13:04","張家綺","行政人員","前門"],["2026/03/24","13:24","張家綺","行政人員","後門"],["2026/03/24","13:30","戴珮如","行政人員","前門"],["2026/03/24","13:32","鍾蕙琦","行政人員","前門"],["2026/03/24","13:34","李奕慶","醫師","前門"],["2026/03/24","13:37","張琦","行政人員","前門"],["2026/03/24","13:44","戴珮如","行政人員","前門"],["2026/03/24","13:46","戴珮如","行政人員","前門"],["2026/03/24","13:47","李奕慶","醫師","前門"],["2026/03/24","13:48","鄭貴麟","醫師","前門"],["2026/03/24","13:54","翁國益","醫師","前門"],["2026/03/24","13:54","黃祐珍","行政人員","前門"],["2026/03/24","13:58","鍾蕙琦","行政人員","前門"],["2026/03/24","14:04","鄒承憲","醫師","前門"],["2026/03/24","14:05","吳昭頤","行政人員","前門"],["2026/03/24","14:29","林美延","護理","前門"],["2026/03/24","14:50","鍾蕙琦","行政人員","前門"],["2026/03/24","15:09","戴珮如","行政人員","前門"],["2026/03/24","15:30","翁國益","醫師","前門"],["2026/03/24","15:37","鍾蕙琦","行政人員","前門"],["2026/03/24","15:38","黃祐珍","行政人員","前門"],["2026/03/24","15:42","鍾蕙琦","行政人員","前門"],["2026/03/24","16:43","鍾蕙琦","行政人員","後門"],["2026/03/24","17:30","戴珮如","行政人員","前門"],["2026/03/24","17:51","戴珮如","行政人員","前門"],["2026/03/24","17:52","鍾蕙琦","行政人員","前門"],["2026/03/24","17:52","鍾蕙琦","行政人員","前門"],["2026/03/24","18:08","戴珮如","行政人員","前門"],["2026/03/24","18:10","戴珮如","行政人員","前門"],["2026/03/25","07:30","陳政元","行政人員","前門"],["2026/03/25","07:31","陳政元","行政人員","前門"],["2026/03/25","07:48","王琇瑩","行政人員","前門"],["2026/03/25","08:01","柳緒英","護理","前門"],["2026/03/25","08:55","鍾淑如","行政人員","前門"],["2026/03/25","08:57","鍾蕙琦","行政人員","前門"],["2026/03/25","10:30","鍾蕙琦","行政人員","後門"],["2026/03/25","11:19","張家綺","行政人員","後門"],["2026/03/25","11:20","鍾蕙琦","行政人員","後門"],["2026/03/25","11:27","戴珮如","行政人員","前門"],["2026/03/25","11:30","鄭貴麟","醫師","前門"],["2026/03/25","11:49","林美延","護理","前門"],["2026/03/25","12:00","鄭夙淇","行政人員","後門"],["2026/03/25","12:04","張家綺","行政人員","後門"],["2026/03/25","12:08","張家綺","行政人員","後門"],["2026/03/25","12:10","戴珮如","行政人員","前門"],["2026/03/25","12:10","黃祐珍","行政人員","前門"],["2026/03/25","12:10","王琇瑩","行政人員","後門"],["2026/03/25","12:11","張家綺","行政人員","前門"],["2026/03/25","12:12","王琇瑩","行政人員","前門"],["2026/03/25","12:13","戴珮如","行政人員","前門"],["2026/03/25","12:13","張家綺","行政人員","前門"],["2026/03/25","12:38","鍾蕙琦","行政人員","前門"],["2026/03/25","12:42","鍾蕙琦","行政人員","前門"],["2026/03/25","12:56","戴珮如","行政人員","前門"],["2026/03/25","13:24","黃祐珍","行政人員","前門"],["2026/03/25","13:26","鍾蕙琦","行政人員","前門"],["2026/03/25","13:26","鍾蕙琦","行政人員","前門"],["2026/03/25","13:40","段偉凱","行政人員","前門"],["2026/03/25","13:43","鍾淑如","行政人員","前門"],["2026/03/25","13:54","江文榮","行政人員","前門"],["2026/03/25","14:24","鍾蕙琦","行政人員","前門"],["2026/03/25","14:49","葉如芳","行政人員","前門"],["2026/03/25","15:04","鍾蕙琦","行政人員","前門"],["2026/03/25","15:07","李佳燕","行政人員","前門"],["2026/03/25","15:34","鍾蕙琦","行政人員","前門"],["2026/03/25","15:45","戴珮如","行政人員","前門"],["2026/03/25","16:43","王琇瑩","行政人員","前門"],["2026/03/25","16:44","鍾蕙琦","行政人員","前門"],["2026/03/25","17:05","黃祐珍","行政人員","後門"],["2026/03/25","17:10","鍾蕙琦","行政人員","前門"],["2026/03/25","17:35","鍾蕙琦","行政人員","後門"],["2026/03/25","17:35","鍾蕙琦","行政人員","後門"],["2026/03/25","17:53","鍾蕙琦","行政人員","前門"],["2026/03/25","20:55","鍾淑如","行政人員","前門"],["2026/03/26","07:31","陳政元","行政人員","前門"],["2026/03/26","08:24","吳昭頤","行政人員","後門"],["2026/03/26","08:59","鍾蕙琦","行政人員","前門"],["2026/03/26","09:12","鍾蕙琦","行政人員","前門"],["2026/03/26","09:26","鍾蕙琦","行政人員","後門"],["2026/03/26","10:01","陳銘潔","行政人員","前門"],["2026/03/26","12:15","黃祐珍","行政人員","前門"],["2026/03/26","12:31","黃祐珍","行政人員","前門"],["2026/03/26","12:52","溫秀惠","醫師","後門"],["2026/03/26","12:55","鄭貴麟","醫師","前門"],["2026/03/26","12:55","李佳燕","行政人員","前門"],["2026/03/26","13:01","邱讚旺","醫師","前門"],["2026/03/26","14:26","鍾蕙琦","行政人員","前門"],["2026/03/26","14:37","鍾蕙琦","行政人員","後門"],["2026/03/26","14:44","鍾蕙琦","行政人員","前門"],["2026/03/26","14:45","鍾蕙琦","行政人員","前門"],["2026/03/26","14:47","鍾蕙琦","行政人員","前門"],["2026/03/26","15:33","溫秀惠","醫師","前門"],["2026/03/26","15:35","鍾蕙琦","行政人員","前門"],["2026/03/26","15:45","李佳燕","行政人員","前門"],["2026/03/26","16:00","徐逢開","行政人員","前門"],["2026/03/26","16:10","林宜勳","行政人員","前門"],["2026/03/26","16:26","李佳燕","行政人員","前門"],["2026/03/26","17:01","鍾蕙琦","行政人員","前門"],["2026/03/26","17:21","鍾蕙琦","行政人員","前門"],["2026/03/26","17:23","鍾蕙琦","行政人員","前門"],["2026/03/26","17:33","鍾蕙琦","行政人員","前門"],["2026/03/27","07:00","王琇瑩","行政人員","後門"],["2026/03/27","07:16","王琇瑩","行政人員","前門"],["2026/03/27","07:29","王琇瑩","行政人員","前門"],["2026/03/27","07:53","陳榮貴","醫師","前門"],["2026/03/27","08:02","康雅珍","護理","前門"],["2026/03/27","08:02","周燕伺","護理","前門"],["2026/03/27","08:05","吳卉榛","護理","前門"],["2026/03/27","08:41","王琇瑩","行政人員","前門"],["2026/03/27","09:04","鍾蕙琦","行政人員","前門"],["2026/03/27","09:13","鍾蕙琦","行政人員","前門"],["2026/03/27","09:15","鍾蕙琦","行政人員","後門"],["2026/03/27","09:15","林育如","行政人員","前門"],["2026/03/27","09:33","林育如","行政人員","前門"],["2026/03/27","09:41","段偉凱","行政人員","前門"],["2026/03/27","09:42","鍾蕙琦","行政人員","前門"],["2026/03/27","09:56","謝亞橋","藥劑","前門"],["2026/03/27","09:56","謝亞橋","藥劑","前門"],["2026/03/27","10:04","李佳燕","行政人員","前門"],["2026/03/27","12:06","戴珮如","行政人員","前門"],["2026/03/27","12:07","鄭夙淇","行政人員","前門"],["2026/03/27","12:24","王琇瑩","行政人員","後門"],["2026/03/27","12:39","張家綺","行政人員","後門"],["2026/03/27","12:45","黃杰誠","醫師","前門"],["2026/03/27","13:45","林育如","行政人員","前門"],["2026/03/27","14:14","鐘頂天","醫師","前門"],["2026/03/27","15:57","黃祐珍","行政人員","前門"],["2026/03/27","16:03","林銥霈","護理","前門"],["2026/03/27","16:35","鍾蕙琦","行政人員","後門"],["2026/03/27","17:21","鍾蕙琦","行政人員","前門"],["2026/03/27","17:34","蘇子凱","醫師","前門"],["2026/03/30","09:06","鍾蕙琦","行政人員","前門"],["2026/03/30","09:18","鍾蕙琦","行政人員","前門"],["2026/03/30","10:04","鍾蕙琦","行政人員","前門"],["2026/03/30","10:04","鍾蕙琦","行政人員","前門"],["2026/03/30","10:41","鍾蕙琦","行政人員","後門"],["2026/03/30","10:50","鍾蕙琦","行政人員","後門"],["2026/03/30","11:04","鍾蕙琦","行政人員","前門"],["2026/03/30","11:13","鍾蕙琦","行政人員","前門"],["2026/03/30","11:50","鍾蕙琦","行政人員","前門"],["2026/03/30","12:00","王琇瑩","行政人員","後門"],["2026/03/30","12:08","王琇瑩","行政人員","前門"],["2026/03/30","12:19","鄭夙淇","行政人員","前門"],["2026/03/30","12:36","張家綺","行政人員","後門"],["2026/03/30","12:41","張家綺","行政人員","前門"],["2026/03/30","12:42","王琇瑩","行政人員","前門"],["2026/03/30","12:43","鍾蕙琦","行政人員","前門"],["2026/03/30","12:44","王琇瑩","行政人員","前門"],["2026/03/30","12:45","鍾蕙琦","行政人員","前門"],["2026/03/30","12:52","鍾蕙琦","行政人員","前門"],["2026/03/30","13:23","戴珮如","行政人員","前門"],["2026/03/30","13:28","戴珮如","行政人員","前門"],["2026/03/30","13:28","黃祐珍","行政人員","前門"],["2026/03/30","13:30","戴珮如","行政人員","前門"],["2026/03/30","13:30","戴珮如","行政人員","前門"],["2026/03/30","13:32","戴珮如","行政人員","前門"],["2026/03/30","13:34","戴珮如","行政人員","前門"],["2026/03/30","13:40","鍾蕙琦","行政人員","前門"],["2026/03/30","13:40","鍾蕙琦","行政人員","前門"],["2026/03/30","13:40","鍾蕙琦","行政人員","前門"],["2026/03/30","13:40","鍾蕙琦","行政人員","前門"],["2026/03/30","13:45","戴珮如","行政人員","前門"],["2026/03/30","16:12","鍾蕙琦","行政人員","後門"],["2026/03/30","16:16","鍾蕙琦","行政人員","後門"],["2026/03/30","17:07","鍾蕙琦","行政人員","前門"],["2026/03/30","17:57","鍾蕙琦","行政人員","前門"],["2026/03/30","17:59","鍾蕙琦","行政人員","前門"],["2026/03/31","06:53","鄭夙淇","行政人員","後門"],["2026/03/31","07:23","翁國益","醫師","前門"],["2026/03/31","07:29","康雅珍","護理","前門"],["2026/03/31","07:31","沈淑美","護理","前門"],["2026/03/31","07:36","黃彩華","護理","前門"],["2026/03/31","07:38","王佳貞","護理","前門"],["2026/03/31","07:38","邱讚旺","醫師","前門"],["2026/03/31","07:41","游惠怡","護理","前門"],["2026/03/31","07:43","莊雅琇","護理","前門"],["2026/03/31","07:44","廖珮玟","護理","前門"],["2026/03/31","07:46","胡詔凱","醫師","前門"],["2026/03/31","07:49","徐慧美","護理","前門"],["2026/03/31","07:52","黃信凱","醫師","前門"],["2026/03/31","08:14","王佳貞","護理","前門"],["2026/03/31","08:14","莊雅琇","護理","前門"],["2026/03/31","08:14","康雅珍","護理","前門"],["2026/03/31","08:14","沈淑美","護理","前門"],["2026/03/31","08:14","沈淑美","護理","前門"],["2026/03/31","08:15","游惠怡","護理","前門"],["2026/03/31","08:15","廖珮玟","護理","前門"],["2026/03/31","09:06","鍾蕙琦","行政人員","前門"],["2026/03/31","09:15","鍾蕙琦","行政人員","後門"],["2026/03/31","10:21","陳宗偉","醫師","前門"],["2026/03/31","10:23","鍾蕙琦","行政人員","前門"],["2026/03/31","11:17","王琇瑩","行政人員","後門"],["2026/03/31","12:00","戴珮如","行政人員","前門"],["2026/03/31","12:05","戴珮如","行政人員","前門"],["2026/03/31","12:08","戴珮如","行政人員","前門"],["2026/03/31","12:10","黃祐珍","行政人員","前門"],["2026/03/31","12:13","戴珮如","行政人員","前門"],["2026/03/31","12:17","戴珮如","行政人員","前門"],["2026/03/31","12:23","鍾蕙琦","行政人員","前門"],["2026/03/31","12:37","戴珮如","行政人員","前門"],["2026/03/31","12:54","鍾蕙琦","行政人員","前門"],["2026/03/31","13:13","戴珮如","行政人員","前門"],["2026/03/31","13:22","張家綺","行政人員","後門"],["2026/03/31","13:23","張家綺","行政人員","後門"],["2026/03/31","13:24","張家綺","行政人員","後門"],["2026/03/31","13:25","鍾蕙琦","行政人員","前門"],["2026/03/31","13:25","鍾蕙琦","行政人員","前門"],["2026/03/31","13:26","張家綺","行政人員","後門"],["2026/03/31","13:26","鍾蕙琦","行政人員","前門"],["2026/03/31","13:28","張家綺","行政人員","後門"],["2026/03/31","13:28","翁國益","醫師","前門"],["2026/03/31","13:30","唐家駿","醫師","前門"],["2026/03/31","13:30","鄭貴麟","醫師","前門"],["2026/03/31","13:35","高時貽","醫師","前門"],["2026/03/31","14:25","王琇瑩","行政人員","後門"],["2026/03/31","14:33","張家綺","行政人員","後門"],["2026/03/31","14:44","王琇瑩","行政人員","前門"],["2026/03/31","15:04","鍾蕙琦","行政人員","後門"],["2026/03/31","16:16","鍾蕙琦","行政人員","後門"],["2026/03/31","17:02","鍾蕙琦","行政人員","前門"],["2026/03/31","17:36","鍾蕙琦","行政人員","前門"],["2026/03/31","17:43","鍾蕙琦","行政人員","後門"]]};
-
-
-// ─── ACCESS PAGE ───
-let acGroup = '全部';
-function bAccess(){
-  // KPI
-  const d=ACCESS;
-  document.getElementById('ac-kpi').innerHTML=[
-    {l:'進館總人次',v:d.total.toLocaleString(),s:'僅計「進入」記錄'},
-    {l:'不重複人員',v:d.total_people,s:'不同卡號'},
-    {l:'前門使用',v:(d.gate['前門']||0),s:`佔${Math.round((d.gate['前門']||0)/d.total*100)}%`},
-    {l:'記錄天數',v:d.dates.length,s:`${d.dates[0].slice(5)} ～ ${d.dates[d.dates.length-1].slice(5)}`},
-  ].map(x=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
-
-  // Daily chart - stacked by group
-  const grps=d.groups;
-  const dates=d.dates;
-  const legItems=grps.map((g,i)=>({c:P[i%P.length],l:g}));
-  document.getElementById('ac-leg').innerHTML=legH(legItems);
-  mkBar('ac-daily',dates.map(dt=>dt.slice(5)),grps.map((g,i)=>({l:g,d:dates.map(dt=>(d.daily[dt]||{})[g]||0),c:P[i%P.length]})),true);
-
-  // Pie - groups
-  const grpTotals=grps.map(g=>Object.values(d.monthly).reduce((s,mv)=>s+(mv[g]||0),0));
-  mkPie('ac-pie',grps,grpTotals,grps.map((_,i)=>P[i%P.length]));
-
-  // Monthly chart
-  const months=Object.keys(d.monthly).sort();
-  mkBar('ac-month',months.map(m=>m.slice(5)),grps.map((g,i)=>({l:g,d:months.map(m=>(d.monthly[m]||{})[g]||0),c:P[i%P.length]})),true);
-
-  // Gate pie
-  mkPie('ac-gate',['前門','後門'],[d.gate['前門']||0,d.gate['後門']||0],['#4f8ef7','#c084fc']);
-
-  // Group filter tabs
-  const tabs=document.getElementById('ac-gtabs');
-  tabs.innerHTML=`<button class="ft${acGroup==='全部'?' on':''}" onclick="setACGroup('全部',this)">全部</button>`+
-    grps.map(g=>`<button class="ft${acGroup===g?' on':''}" onclick="setACGroup('${g}',this)">${g}</button>`).join('');
-
-  // People table
-  buildACPeopleTable();
-
-  // Detail table
-  const gSel=document.getElementById('ac-filter-group');
-  gSel.innerHTML='<option value="">全部職類</option>'+grps.map(g=>`<option>${g}</option>`).join('');
-  filterACTable();
+function refreshAll(){
+  bKPI();if(PB[curP])PB[curP]();
 }
-function setACGroup(g,el){
-  acGroup=g;
-  document.querySelectorAll('#ac-gtabs .ft').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
-  buildACPeopleTable();
+function initApp(){
+  if(!D.years||!D.years.length) D.years=['113','114'];
+  if(!D.monthly) D.monthly={};
+  if(!D.monthly['113']) D.monthly['113']=DD.monthly['113'];
+  if(!D.monthly['114']) D.monthly['114']=DD.monthly['114'];
+  selYear=D.years[D.years.length-1]||'114';
+  buildYearTabs();buildMonthTabs();
+  document.querySelectorAll('.ab').forEach(ab=>{if(ab.id!=='ab-mon')ab.style.display='none';});
+  bKPI();bOv();
 }
-function buildACPeopleTable(){
-  const d=ACCESS;
-  const filtered=acGroup==='全部'?d.people:d.people.filter(p=>p.group===acGroup);
-  document.getElementById('ac-pcount').textContent=filtered.length;
-  let h=`<table><thead><tr><th style="width:28px">#</th><th style="text-align:left">姓名</th><th>職類</th><th>進館次數</th><th>使用天數</th></tr></thead><tbody>`;
-  filtered.slice(0,50).forEach((p,i)=>{
-    h+=`<tr><td>${i+1}</td><td>${p.name}</td><td>${p.group}</td><td>${p.visits}</td><td>${p.days}</td></tr>`;
-  });
-  if(filtered.length>50) h+=`<tr><td colspan="5" style="text-align:center;color:var(--text3);font-size:.72rem">顯示前50筆，共${filtered.length}筆</td></tr>`;
-  h+='</tbody></table>';
-  document.getElementById('ac-ptable').innerHTML=h;
-}
-function filterACTable(){
-  const d=ACCESS;
-  const g=document.getElementById('ac-filter-group').value;
-  const gate=document.getElementById('ac-filter-gate').value;
-  const q=document.getElementById('ac-search').value.trim();
-  let rows=d.entries;
-  if(g) rows=rows.filter(r=>r[3]===g);
-  if(gate) rows=rows.filter(r=>r[4]===gate);
-  if(q) rows=rows.filter(r=>r[2].includes(q));
-  document.getElementById('ac-count').textContent=`${rows.length} 筆`;
-  let h=`<table><thead><tr><th style="text-align:left">日期</th><th style="text-align:left">時間</th><th style="text-align:left">姓名</th><th>職類</th><th>門</th></tr></thead><tbody>`;
-  rows.slice(0,200).forEach(r=>{
-    h+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`;
-  });
-  if(rows.length>200) h+=`<tr><td colspan="5" style="text-align:center;color:var(--text3);font-size:.72rem">顯示前200筆，共${rows.length}筆</td></tr>`;
-  h+='</tbody></table>';
-  document.getElementById('ac-table').innerHTML=h;
-}
-
 </script>
 </body>
 </html>
