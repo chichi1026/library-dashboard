@@ -2,888 +2,1259 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>圖書館整合管理儀表板</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>圖書館整合管理儀表板 · 天晟醫院</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#242d42;--bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.14);--tx:#e8eaf0;--tx2:#8b92a8;--tx3:#565f77;--ac:#4f8ef7;--gn:#6ee7b7;--yw:#fbbf24;--rd:#f87171;--pp:#c084fc;--r:10px;--r2:6px}
+:root{--bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#242d42;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#e8eaf0;--text2:#8b92a8;--text3:#565f77;--accent:#4f8ef7;--g:#6ee7b7;--y:#fbbf24;--r:#f87171;--p:#c084fc;--rr:10px;--r2:6px;--sh:0 4px 24px rgba(0,0,0,.4)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
-/* LOGIN */
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+/* ── 登入 ── */
 #ls{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-.lc{background:var(--bg2);border:1px solid var(--bd2);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:400px}
+.lc{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:400px;box-shadow:var(--sh)}
 .ll{text-align:center;margin-bottom:2rem}
-.ll .ic{width:60px;height:60px;background:linear-gradient(135deg,var(--ac),var(--pp));border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:.75rem}
-.ll h1{font-size:1.3rem;font-weight:700}
-.ll p{font-size:.8rem;color:var(--tx2);margin-top:.2rem}
-.fg{margin-bottom:1rem}
-.fg label{display:block;font-size:.78rem;color:var(--tx2);margin-bottom:.4rem;font-weight:500}
-.fg input{width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r2);padding:.7rem 1rem;color:var(--tx);font-size:.9rem;font-family:inherit}
-.fg input:focus{outline:none;border-color:var(--ac)}
-.bl{width:100%;background:var(--ac);color:#fff;border:none;border-radius:var(--r2);padding:.8rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.5rem}
-.bl:hover{opacity:.88}
-.le{color:var(--rd);font-size:.78rem;text-align:center;margin-top:.6rem;display:none}
-.lh{font-size:.72rem;color:var(--tx3);text-align:center;margin-top:1rem;line-height:1.6}
-/* APP */
+.ll .ic{width:60px;height:60px;background:linear-gradient(135deg,var(--accent),var(--p));border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:.75rem}
+.ll h1{font-size:1.3rem;font-weight:700}.ll p{font-size:.8rem;color:var(--text2);margin-top:.25rem}
+.fg{margin-bottom:1rem}.fg label{display:block;font-size:.78rem;color:var(--text2);margin-bottom:.4rem;font-weight:500}
+.fg input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.7rem 1rem;color:var(--text);font-size:.9rem;font-family:inherit;transition:border-color .2s}
+.fg input:focus{outline:none;border-color:var(--accent)}
+.bl{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--r2);padding:.8rem;font-size:.95rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:.5rem}
+.bl:hover{opacity:.88}.bl:disabled{opacity:.5;cursor:default}
+.le{color:var(--r);font-size:.78rem;text-align:center;margin-top:.6rem;display:none}
+.lh{font-size:.72rem;color:var(--text3);text-align:center;margin-top:1rem;line-height:1.6}
+/* ── Topbar ── */
 #app{display:none}
-.topbar{position:sticky;top:0;z-index:100;background:rgba(15,17,23,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--bd);padding:.65rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(15,17,23,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.6rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
 .tl{display:flex;align-items:center;gap:.75rem}
-.tlogo{width:36px;height:36px;background:linear-gradient(135deg,var(--ac),var(--pp));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.tt{font-size:.9rem;font-weight:700;white-space:nowrap}
-.ts{font-size:.68rem;color:var(--tx2)}
-.tr{display:flex;align-items:center;gap:.6rem}
-.brole{font-size:.7rem;padding:.22rem .6rem;border-radius:20px;font-weight:700;background:rgba(79,142,247,.15);color:var(--ac);border:1px solid rgba(79,142,247,.3)}
-.brole.adm{background:rgba(251,191,36,.12);color:var(--yw);border-color:rgba(251,191,36,.3)}
-.bsm{font-size:.73rem;padding:.32rem .7rem;border-radius:var(--r2);border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;font-family:inherit}
-.bsm:hover{background:var(--bg3);color:var(--tx)}
-/* YEAR BAR */
-.ybar{background:var(--bg2);border-bottom:1px solid var(--bd);padding:.5rem 1.25rem;display:flex;align-items:center;gap:.75rem;overflow-x:auto;scrollbar-width:none}
-.ybar::-webkit-scrollbar{display:none}
-.ybar-label{font-size:.72rem;color:var(--tx3);white-space:nowrap;font-weight:600;letter-spacing:.04em}
-.ytab{font-size:.78rem;padding:.32rem .85rem;border-radius:20px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
-.ytab.on{background:rgba(79,142,247,.2);color:var(--ac);border-color:rgba(79,142,247,.4);font-weight:600}
-.y-sep{width:1px;height:18px;background:var(--bd2);flex-shrink:0}
-/* NAV */
-.nw{background:var(--bg2);border-bottom:1px solid var(--bd);padding:0 1.25rem;overflow-x:auto;scrollbar-width:none}
-.nw::-webkit-scrollbar{display:none}
-.nav{display:flex}
-.nb{padding:.6rem .95rem;font-size:.8rem;font-weight:500;color:var(--tx2);background:transparent;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
-.nb:hover{color:var(--tx)}
-.nb.on{color:var(--ac);border-bottom-color:var(--ac)}
-/* MAIN */
-.main{padding:1.25rem;max-width:1400px;margin:0 auto}
-/* KPI */
-.kg{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1.25rem}
-.kc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1rem 1.1rem;position:relative;overflow:hidden}
-.kc::before{content:'';position:absolute;top:-10px;right:-10px;width:60px;height:60px;border-radius:50%;opacity:.1}
-.kc:nth-child(1)::before{background:var(--ac)}
-.kc:nth-child(2)::before{background:var(--gn)}
-.kc:nth-child(3)::before{background:var(--yw)}
-.kc:nth-child(4)::before{background:var(--pp)}
-.kc:nth-child(5)::before{background:var(--rd)}
-.kl{font-size:.7rem;color:var(--tx2);margin-bottom:.3rem;font-weight:500}
-.kv{font-size:1.5rem;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-.02em}
-.ks{font-size:.67rem;color:var(--tx3);margin-top:.15rem}
-/* GRID */
+.tlogo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--p));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.tt{font-size:.9rem;font-weight:700}.ts{font-size:.65rem;color:var(--text2)}
+.tr{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.brole{font-size:.68rem;padding:.2rem .55rem;border-radius:20px;font-weight:700;background:rgba(79,142,247,.15);color:var(--accent);border:1px solid rgba(79,142,247,.3)}
+.brole.adm{background:rgba(251,191,36,.12);color:var(--y);border-color:rgba(251,191,36,.3)}
+.bsm{font-size:.7rem;padding:.28rem .65rem;border-radius:var(--r2);border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
+.bsm:hover{background:var(--bg3);color:var(--text)}.bsm.dng{border-color:rgba(239,68,68,.4);color:var(--r)}
+/* ── 年度切換 ── */
+.yr-sw{display:flex;align-items:center;gap:.25rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.15rem .2rem}
+.yr-btn{font-size:.68rem;padding:.2rem .5rem;border-radius:4px;border:none;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap}
+.yr-btn.on{background:var(--accent);color:#fff;font-weight:700}
+.yr-btn.partial{position:relative}.yr-btn.partial::after{content:'Q1';position:absolute;top:-3px;right:-3px;font-size:.45rem;background:var(--y);color:#000;border-radius:3px;padding:0 2px;font-weight:700}
+/* ── 匯出按鈕 ── */
+.export-group{display:flex;gap:.35rem}
+.bexp{font-size:.68rem;padding:.25rem .6rem;border-radius:var(--r2);border:1px solid rgba(110,231,183,.3);background:rgba(110,231,183,.07);color:var(--g);cursor:pointer;font-family:inherit;white-space:nowrap}
+.bexp:hover{background:rgba(110,231,183,.16)}
+.bexp.pdf{border-color:rgba(248,113,113,.3);background:rgba(248,113,113,.07);color:var(--r)}
+.bexp.kiosk{border-color:rgba(192,132,252,.3);background:rgba(192,132,252,.07);color:var(--p)}
+/* ── Nav ── */
+.nw{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 1.25rem;overflow-x:auto;scrollbar-width:none}
+.nw::-webkit-scrollbar{display:none}.nav{display:flex}
+.nb{padding:.58rem .9rem;font-size:.78rem;font-weight:500;color:var(--text2);background:transparent;border:none;cursor:pointer;font-family:inherit;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
+.nb:hover{color:var(--text)}.nb.on{color:var(--accent);border-bottom-color:var(--accent)}
+/* ── Main ── */
+.main{padding:1.1rem;max-width:1400px;margin:0 auto}
+.kg{display:grid;grid-template-columns:repeat(5,1fr);gap:.7rem;margin-bottom:1.1rem}
+.kc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rr);padding:.9rem 1rem;position:relative;overflow:hidden}
+.kc::before{content:'';position:absolute;top:-10px;right:-10px;width:55px;height:55px;border-radius:50%;opacity:.1}
+.kc:nth-child(1)::before{background:var(--accent)}.kc:nth-child(2)::before{background:var(--g)}
+.kc:nth-child(3)::before{background:var(--y)}.kc:nth-child(4)::before{background:var(--p)}.kc:nth-child(5)::before{background:var(--r)}
+.kl{font-size:.67rem;color:var(--text2);margin-bottom:.25rem;font-weight:500;letter-spacing:.02em}
+.kv{font-size:1.45rem;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-.02em}
+.ks{font-size:.62rem;color:var(--text3);margin-top:.12rem}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
-/* CARD */
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:1.1rem}
-.ct{font-size:.7rem;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.85rem}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rr);padding:1rem}
+.ct{font-size:.67rem;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.8rem}
 .cw{position:relative;width:100%}
-/* FILTER */
-.fb{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;padding:.55rem .85rem;background:var(--bg3);border-radius:var(--r2)}
-.fb select,.fb-sel{font-size:.75rem;padding:.28rem .55rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit}
-.ft{font-size:.73rem;padding:.26rem .65rem;border-radius:20px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
-.ft.on{background:rgba(79,142,247,.18);color:var(--ac);border-color:rgba(79,142,247,.35)}
-/* LEGEND */
-.leg{display:flex;flex-wrap:wrap;gap:.55rem;margin-bottom:.55rem}
-.li{display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--tx2)}
+/* ── 篩選 ── */
+.fb{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:1rem;padding:.5rem .8rem;background:var(--bg3);border-radius:var(--r2)}
+.fb select{font-size:.72rem;padding:.25rem .5rem;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg4);color:var(--text);font-family:inherit}
+.ft{font-size:.7rem;padding:.22rem .6rem;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap}
+.ft.on{background:rgba(79,142,247,.18);color:var(--accent);border-color:rgba(79,142,247,.35)}
+.leg{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
+.li{display:flex;align-items:center;gap:.3rem;font-size:.68rem;color:var(--text2)}
 .ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
-/* TABLE */
+/* ── Rank ── */
+.ri{display:flex;align-items:center;gap:.5rem;padding:.38rem 0;border-bottom:1px solid var(--border)}
+.ri:last-child{border:none}
+.rn2{font-size:.65rem;color:var(--text3);min-width:14px;font-family:'DM Mono',monospace}
+.rname{font-size:.73rem;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rb{width:65px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;flex-shrink:0}
+.rf{height:100%;border-radius:2px}
+.rv{font-size:.68rem;font-weight:700;color:var(--text2);min-width:28px;text-align:right;font-family:'DM Mono',monospace}
+/* ── Table ── */
 .tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.76rem}
-thead th{background:var(--bg3);color:var(--tx2);font-weight:600;padding:.5rem .65rem;text-align:right;white-space:nowrap;border-bottom:1px solid var(--bd2);font-size:.68rem;letter-spacing:.02em;position:sticky;top:0}
+table{width:100%;border-collapse:collapse;font-size:.74rem}
+thead th{background:var(--bg3);color:var(--text2);font-weight:600;padding:.45rem .6rem;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border2);font-size:.65rem;letter-spacing:.02em}
 thead th:first-child{text-align:left}
-tbody td{padding:.44rem .65rem;text-align:right;border-bottom:1px solid var(--bd);color:var(--tx);font-size:.78rem}
+tbody td{padding:.4rem .6rem;text-align:right;border-bottom:1px solid var(--border);color:var(--text)}
 tbody td:first-child{text-align:left;font-weight:500}
 tbody tr:hover{background:rgba(255,255,255,.02)}
-tbody tr.tr-tot td{background:var(--bg3);font-weight:700;color:var(--gn)}
-.bv{display:inline-flex;align-items:center;justify-content:center;width:20px;height:16px;border-radius:3px;font-size:.68rem;font-weight:700}
-.bvv{background:rgba(16,185,129,.18);color:#34d399}
-.bvx{background:rgba(239,68,68,.1);color:rgba(239,68,68,.55)}
-/* ADMIN BAR */
-.ab{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:var(--r2);padding:.55rem .9rem;margin-bottom:1rem;display:none;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.ab.show{display:flex}
-.aa{font-size:.73rem;color:var(--yw);font-weight:700}
-.aas{display:flex;gap:.45rem;flex-wrap:wrap}
-.badd{font-size:.73rem;padding:.3rem .75rem;border-radius:var(--r2);border:1px solid rgba(110,231,183,.35);background:rgba(110,231,183,.08);color:var(--gn);cursor:pointer;font-family:inherit}
+tbody tr.tr-tot td{background:var(--bg3);font-weight:700;color:var(--g)}
+.bv{display:inline-flex;align-items:center;justify-content:center;width:20px;height:16px;border-radius:3px;font-size:.66rem;font-weight:700}
+.bvv{background:rgba(16,185,129,.18);color:#34d399}.bvx{background:rgba(239,68,68,.1);color:rgba(239,68,68,.55)}
+/* ── 管理者欄 ── */
+.ab{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:var(--r2);padding:.5rem .85rem;margin-bottom:1rem;display:none;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.ab.show{display:flex}.aa{font-size:.7rem;color:var(--y);font-weight:700}
+.aas{display:flex;gap:.4rem;flex-wrap:wrap}
+.badd{font-size:.7rem;padding:.28rem .7rem;border-radius:var(--r2);border:1px solid rgba(110,231,183,.35);background:rgba(110,231,183,.08);color:var(--g);cursor:pointer;font-family:inherit}
 .badd:hover{background:rgba(110,231,183,.18)}
-/* MODAL */
+/* ── Key In 月報表單 ── */
+#keyin-panel{background:var(--bg2);border:1px solid rgba(79,142,247,.25);border-radius:var(--rr);padding:1.1rem;margin-bottom:1rem;display:none}
+#keyin-panel.show{display:block}
+.ki-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem;flex-wrap:wrap;gap:.5rem}
+.ki-title{font-size:.82rem;font-weight:700;color:var(--accent)}
+.ki-selectors{display:flex;gap:.5rem;align-items:center}
+.ki-selectors select{font-size:.75rem;padding:.28rem .55rem;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-family:inherit}
+.ki-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-bottom:.85rem}
+.ki-section{grid-column:1/-1;font-size:.65rem;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.06em;border-top:1px solid var(--border);padding-top:.55rem;margin-top:.1rem}
+.ki-field{display:flex;flex-direction:column;gap:.22rem}
+.ki-field label{font-size:.67rem;color:var(--text2);font-weight:500}
+.ki-field input{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.4rem .6rem;color:var(--text);font-size:.82rem;font-family:'DM Mono',monospace;text-align:right}
+.ki-field input:focus{outline:none;border-color:var(--accent)}
+.ki-field input.has-data{border-color:rgba(110,231,183,.4);background:rgba(110,231,183,.04)}
+.ki-actions{display:flex;gap:.45rem;justify-content:flex-end;padding-top:.75rem;border-top:1px solid var(--border)}
+.bki-save{padding:.45rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r2);font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+.bki-save:hover{opacity:.88}
+.bki-clear{padding:.45rem .8rem;background:transparent;color:var(--r);border:1px solid rgba(239,68,68,.3);border-radius:var(--r2);font-size:.8rem;cursor:pointer;font-family:inherit}
+.bki-cancel{padding:.45rem .8rem;background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r2);font-size:.8rem;cursor:pointer;font-family:inherit}
+/* ── Excel 上傳 ── */
+.upload-zone{border:2px dashed rgba(79,142,247,.3);border-radius:var(--r2);padding:1.2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:.75rem}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(79,142,247,.05)}
+.upload-zone input{display:none}
+.upload-zone .uz-icon{font-size:1.5rem;margin-bottom:.35rem}
+.upload-zone .uz-text{font-size:.75rem;color:var(--text2)}
+.upload-zone .uz-hint{font-size:.65rem;color:var(--text3);margin-top:.2rem}
+/* ── 跨年趨勢 ── */
+.yr-range-bar{display:flex;gap:.3rem;margin-bottom:.75rem;flex-wrap:wrap}
+.yr-range-btn{font-size:.68rem;padding:.2rem .5rem;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
+.yr-range-btn.on{background:rgba(79,142,247,.18);color:var(--accent);border-color:rgba(79,142,247,.35)}
+/* ── 月報總覽 ── */
+.mon-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:.5rem;margin-bottom:1rem}
+.mon-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:.65rem .75rem;cursor:pointer;transition:border-color .15s;position:relative}
+.mon-card:hover{border-color:rgba(79,142,247,.4)}
+.mon-card.has-data{border-color:rgba(110,231,183,.25)}
+.mon-card.selected{border-color:var(--accent);background:rgba(79,142,247,.06)}
+.mon-card .mc-mo{font-size:.8rem;font-weight:700;color:var(--accent)}
+.mon-card .mc-e{font-size:.72rem;color:var(--text2);margin-top:.15rem}
+.mon-card .mc-sub{font-size:.6rem;color:var(--text3);margin-top:.1rem}
+.mon-card .mc-bar{height:2px;background:var(--bg4);border-radius:2px;margin-top:.3rem;overflow:hidden}
+.mon-card .mc-fill{height:100%;background:var(--accent);border-radius:2px}
+.mon-card .mc-empty{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:rgba(248,113,113,.5)}
+.mon-card .mc-full{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:rgba(110,231,183,.6)}
+/* ── Modal ── */
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
 .mo.show{display:flex}
-.md{background:var(--bg2);border:1px solid var(--bd2);border-radius:var(--r);padding:1.5rem;width:100%;max-width:560px;max-height:90vh;overflow-y:auto}
-.mh{font-size:.95rem;font-weight:700;margin-bottom:1.1rem;display:flex;align-items:center;justify-content:space-between}
-.mc2{background:none;border:none;color:var(--tx2);font-size:1.2rem;cursor:pointer;line-height:1}
-.mf{display:flex;flex-direction:column;gap:.28rem;margin-bottom:.6rem}
-.mf label{font-size:.7rem;color:var(--tx2);font-weight:500}
-.mf input,.mf select,.mf textarea{background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r2);padding:.5rem .7rem;color:var(--tx);font-size:.82rem;font-family:inherit;width:100%}
-.mf input:focus,.mf select:focus{outline:none;border-color:var(--ac)}
-.mfoot{display:flex;gap:.45rem;justify-content:flex-end;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid var(--bd)}
-.bsave{padding:.5rem 1.1rem;background:var(--ac);color:#fff;border:none;border-radius:var(--r2);font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit}
+.md{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rr);padding:1.4rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh)}
+.mh{font-size:.92rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+.mc2{background:none;border:none;color:var(--text2);font-size:1.2rem;cursor:pointer;line-height:1}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.mf{display:flex;flex-direction:column;gap:.25rem}
+.mf label{font-size:.67rem;color:var(--text2);font-weight:500}
+.mf input,.mf select{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.45rem .65rem;color:var(--text);font-size:.8rem;font-family:inherit}
+.mf input:focus,.mf select:focus{outline:none;border-color:var(--accent)}
+.mfoot{display:flex;gap:.4rem;justify-content:flex-end;margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--border)}
+.bsave{padding:.45rem 1rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r2);font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
 .bsave:hover{opacity:.88}
-.bcancel{padding:.5rem .9rem;background:transparent;color:var(--tx2);border:1px solid var(--bd2);border-radius:var(--r2);font-size:.82rem;cursor:pointer;font-family:inherit}
-.bcancel:hover{background:var(--bg3)}
-.beditsm{padding:.35rem .65rem;background:rgba(79,142,247,.1);color:var(--ac);border:1px solid rgba(79,142,247,.28);border-radius:var(--r2);font-size:.7rem;cursor:pointer;font-family:inherit}
-.bdelsm{padding:.35rem .65rem;background:rgba(239,68,68,.1);color:var(--rd);border:1px solid rgba(239,68,68,.28);border-radius:var(--r2);font-size:.7rem;cursor:pointer;font-family:inherit}
-/* MONTH INPUT GRID */
-.mon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1rem}
-.mcard{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:.85rem;cursor:pointer;transition:border-color .15s}
-.mcard:hover{border-color:var(--bd2)}
-.mcard.editing{border-color:var(--ac);background:rgba(79,142,247,.06)}
-.mcard-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
-.mcard-m{font-size:.88rem;font-weight:700;color:var(--ac)}
-.mcard-e{font-size:.72rem;color:var(--tx2)}
-.mcard-d{font-size:.68rem;color:var(--tx3);margin-bottom:.32rem}
-.mbar-bg{height:3px;background:var(--bg4);border-radius:2px}
-.mbar-f{height:100%;border-radius:2px;background:var(--ac)}
-/* INLINE EDITOR */
-.ied{background:var(--bg3);border:1px solid var(--ac);border-radius:var(--r);padding:1.1rem;margin-bottom:1rem;display:none}
-.ied-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;flex-wrap:wrap;gap:.4rem}
-.ied-title{font-size:.9rem;font-weight:700;color:var(--tx)}
-.ied-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
-.if-group{margin-bottom:.65rem}
-.if-group-title{font-size:.68rem;color:var(--yw);font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.45rem;padding-bottom:.3rem;border-bottom:1px solid var(--bd)}
-/* RANK */
-.ri{display:flex;align-items:center;gap:.55rem;padding:.42rem 0;border-bottom:1px solid var(--bd)}
-.ri:last-child{border:none}
-.rn2{font-size:.68rem;color:var(--tx3);min-width:14px;font-family:'DM Mono',monospace}
-.rname{font-size:.76rem;color:var(--tx);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rb{width:70px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;flex-shrink:0}
-.rf{height:100%;border-radius:2px}
-.rv{font-size:.72rem;font-weight:700;color:var(--tx2);min-width:28px;text-align:right;font-family:'DM Mono',monospace}
-/* TOAST */
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--bd2);border-radius:var(--r2);padding:.7rem 1rem;font-size:.8rem;color:var(--tx);z-index:9999;display:none}
+.bcancel{padding:.45rem .8rem;background:transparent;color:var(--text2);border:1px solid var(--border2);border-radius:var(--r2);font-size:.8rem;cursor:pointer;font-family:inherit}
+.beditsm{padding:.3rem .6rem;background:rgba(79,142,247,.1);color:var(--accent);border:1px solid rgba(79,142,247,.28);border-radius:var(--r2);font-size:.67rem;cursor:pointer;font-family:inherit}
+.bdelsm{padding:.3rem .6rem;background:rgba(239,68,68,.1);color:var(--r);border:1px solid rgba(239,68,68,.28);border-radius:var(--r2);font-size:.67rem;cursor:pointer;font-family:inherit}
+/* ── Toast ── */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.65rem .95rem;font-size:.78rem;color:var(--text);z-index:9999;display:none;box-shadow:var(--sh)}
 .toast.show{display:block;animation:fin .2s}
-.toast.ok{border-color:rgba(16,185,129,.4);color:var(--gn)}
-.toast.err{border-color:rgba(239,68,68,.4);color:var(--rd)}
+.toast.ok{border-color:rgba(16,185,129,.4);color:var(--g)}
+.toast.err{border-color:rgba(239,68,68,.4);color:var(--r)}
+.toast.info{border-color:rgba(79,142,247,.4);color:var(--accent)}
 @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+#exp-progress{position:fixed;bottom:5rem;right:1.5rem;background:var(--bg3);border:1px solid rgba(110,231,183,.3);border-radius:8px;padding:.6rem .95rem;font-size:.76rem;color:var(--g);z-index:9998;display:none;box-shadow:var(--sh)}
+#exp-progress.show{display:block}
 .page{display:none}.page.on{display:block}
-.cr{display:flex;gap:.4rem;margin-bottom:.7rem;flex-wrap:wrap}
-@media(max-width:900px){.kg{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:1fr 1fr}}
-@media(max-width:640px){.kg{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}.main{padding:.8rem}.tt{font-size:.82rem}.ied-grid{grid-template-columns:repeat(2,1fr)}.mon-grid{grid-template-columns:repeat(3,1fr)}}
+.cr{display:flex;gap:.38rem;margin-bottom:.65rem;flex-wrap:wrap}
+/* ── 大屏 Overlay ── */
+#kiosk-overlay{position:fixed;inset:0;z-index:200;background:#0a0c12;display:none;flex-direction:column}
+body.kiosk-mode #kiosk-overlay{display:flex}
+#kiosk-header{padding:.6rem 1.4rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(79,142,247,.2);flex-shrink:0;background:rgba(10,12,18,.97)}
+.kh-left{display:flex;align-items:center;gap:.75rem}
+.kh-logo{width:36px;height:36px;background:linear-gradient(135deg,#4f8ef7,#c084fc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.kh-title{font-size:.95rem;font-weight:700}.kh-sub{font-size:.67rem;color:#8b92a8;margin-top:.08rem}
+.kh-right{display:flex;align-items:center;gap:1rem}
+#kiosk-clock{font-size:1.1rem;font-weight:700;font-family:'DM Mono',monospace;color:#6ee7b7;letter-spacing:.04em}
+#kiosk-date{font-size:.65rem;color:#8b92a8;text-align:right;margin-top:.08rem}
+.kiosk-exit-btn{font-size:.7rem;padding:.28rem .75rem;border-radius:5px;border:1px solid rgba(239,68,68,.4);background:rgba(239,68,68,.08);color:#f87171;cursor:pointer;font-family:inherit}
+#kiosk-body{flex:1;overflow:hidden;position:relative}
+.kslide{position:absolute;inset:0;padding:.75rem 1.2rem;display:none;flex-direction:column;gap:.6rem;animation:kfadein .5s ease}
+.kslide.active{display:flex}
+@keyframes kfadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.kslide-title{font-size:.7rem;font-weight:700;color:#6b7494;text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid rgba(79,142,247,.15);padding-bottom:.35rem;flex-shrink:0}
+.kg-k{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem;flex-shrink:0}
+.kc-k{background:rgba(22,27,39,.97);border:1px solid rgba(79,142,247,.15);border-radius:9px;padding:.75rem .9rem}
+.kc-k .kl{font-size:.6rem;color:#8b92a8;margin-bottom:.22rem;font-weight:500}
+.kc-k .kv{font-size:1.9rem;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-.02em;line-height:1}
+.kc-k .ks{font-size:.58rem;color:#565f77;margin-top:.1rem}
+.kslide-grid{display:grid;gap:.6rem;flex:1;min-height:0}
+.kslide-grid.g2{grid-template-columns:1fr 1fr}
+.kslide-grid.g3{grid-template-columns:1fr 1fr 1fr}
+.kcard{background:rgba(22,27,39,.97);border:1px solid rgba(79,142,247,.14);border-radius:9px;padding:.75rem .9rem;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.kcard-label{font-size:.6rem;color:#8b92a8;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem;flex-shrink:0}
+.kcard-chart{flex:1;min-height:0;position:relative}
+.kcard-rank{overflow-y:auto;flex:1;min-height:0}
+#kiosk-footer{padding:.4rem 1.4rem;display:flex;align-items:center;gap:.7rem;border-top:1px solid rgba(79,142,247,.13);flex-shrink:0;background:rgba(10,12,18,.9)}
+.kprog-dots{display:flex;gap:.3rem}
+.kprog-dot{width:22px;height:3px;border-radius:2px;background:rgba(255,255,255,.1);transition:all .3s}
+.kprog-dot.active{background:#4f8ef7;width:30px}
+.kprog-dot.done{background:rgba(79,142,247,.3)}
+#kprog-bar-wrap{flex:1;height:2px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+#kprog-bar{height:100%;background:linear-gradient(90deg,#4f8ef7,#c084fc);width:0%;transition:width .1s linear}
+#kiosk-ctrl{display:flex;gap:.3rem}
+.kctrl-btn{width:25px;height:25px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#8b92a8;cursor:pointer;font-size:.75rem;display:flex;align-items:center;justify-content:center}
+.kctrl-btn:hover{background:rgba(255,255,255,.07);color:#fff}
+#kiosk-slide-label{font-size:.62rem;color:#565f77;min-width:80px}
+/* ── 完成度指示 ── */
+.completeness-bar{display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;background:var(--bg3);border-radius:var(--r2);margin-bottom:.75rem;font-size:.7rem}
+.cb-label{color:var(--text2);min-width:60px}
+.cb-track{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.cb-fill{height:100%;border-radius:3px;transition:width .3s}
+.cb-count{color:var(--text3);min-width:50px;text-align:right;font-family:'DM Mono',monospace}
+/* ── RWD ── */
+@media(max-width:900px){.kg{grid-template-columns:repeat(3,1fr)}.g3{grid-template-columns:1fr 1fr}.mon-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:640px){.kg{grid-template-columns:repeat(2,1fr)}.g2,.g3{grid-template-columns:1fr}.main{padding:.75rem}.ki-grid{grid-template-columns:1fr 1fr}.mon-grid{grid-template-columns:repeat(3,1fr)}}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 </style>
 </head>
 <body>
-<!-- LOGIN -->
+
 <div id="ls">
   <div class="lc">
-    <div class="ll">
-      <div class="ic">📚</div>
-      <h1>圖書館管理系統</h1>
-      <p>Library Integrated Dashboard</p>
-    </div>
+    <div class="ll"><div class="ic">📚</div><h1>圖書館管理系統</h1><p>天晟醫院教研中心 · Library Dashboard</p></div>
     <div class="fg"><label>帳號</label><input type="text" id="iu" placeholder="請輸入帳號" autocomplete="username"></div>
     <div class="fg"><label>密碼</label><input type="password" id="ip" placeholder="請輸入密碼" autocomplete="current-password"></div>
-    <button class="bl" onclick="doLogin()">登入系統</button>
+    <button class="bl" id="loginBtn" onclick="doLogin()">登入系統</button>
     <div class="le" id="lerr">帳號或密碼錯誤，請重試</div>
-    <div class="lh">管理者帳號：admin / lib2024<br>瀏覽帳號：lib / view123</div>
+    <div class="lh">請輸入您的帳號與密碼<br><span style="color:var(--accent);font-size:.67rem">⚠ 已通過 Cloudflare Access 驗證後仍需輸入此帳號</span></div>
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
-  <div class="topbar">
-    <div class="tl">
-      <div class="tlogo">📚</div>
-      <div><div class="tt">圖書館整合管理儀表板</div><div class="ts" id="topbar-sub">民國114年</div></div>
+  <!-- 大屏 Overlay -->
+  <div id="kiosk-overlay">
+    <div id="kiosk-header">
+      <div class="kh-left"><div class="kh-logo">📚</div><div><div class="kh-title">天晟醫院教研中心 · 圖書館資源管理儀表板</div><div class="kh-sub" id="kh-yr-sub">民國114年</div></div></div>
+      <div class="kh-right"><div style="text-align:right"><div id="kiosk-clock">--:--:--</div><div id="kiosk-date"></div></div><button class="kiosk-exit-btn" onclick="exitKiosk()">✕ 離開大屏</button></div>
     </div>
-    <div class="tr">
-      <span class="brole" id="rb">瀏覽者</span>
-      <span id="un" style="font-size:.75rem;color:var(--tx2)"></span>
-      <button class="bsm" onclick="doLogout()">登出</button>
+    <div id="kiosk-body"></div>
+    <div id="kiosk-footer">
+      <div class="kprog-dots" id="kprog-dots"></div>
+      <div id="kprog-bar-wrap"><div id="kprog-bar"></div></div>
+      <div id="kiosk-slide-label"></div>
+      <div id="kiosk-ctrl">
+        <button class="kctrl-btn" onclick="kioskPrev()">◀</button>
+        <button class="kctrl-btn" id="kpause-btn" onclick="kioskToggle()">⏸</button>
+        <button class="kctrl-btn" onclick="kioskNext()">▶</button>
+      </div>
     </div>
   </div>
 
-  <!-- 年份選擇列 -->
-  <div class="ybar">
-    <span class="ybar-label">年份</span>
-    <div id="year-tabs" style="display:flex;gap:.4rem"></div>
-    <div class="y-sep"></div>
-    <span class="ybar-label">月份</span>
-    <div id="month-tabs" style="display:flex;gap:.4rem;flex-wrap:nowrap"></div>
-    <div class="y-sep"></div>
-    <button class="ft on" id="range-all" onclick="setRange('all',this)" style="white-space:nowrap">全年</button>
-    <button class="ft" id="range-q1" onclick="setRange('Q1',this)">Q1</button>
-    <button class="ft" id="range-q2" onclick="setRange('Q2',this)">Q2</button>
-    <button class="ft" id="range-q3" onclick="setRange('Q3',this)">Q3</button>
-    <button class="ft" id="range-q4" onclick="setRange('Q4',this)">Q4</button>
+  <div class="topbar">
+    <div class="tl">
+      <div class="tlogo">📚</div>
+      <div><div class="tt">圖書館整合管理儀表板</div><div class="ts" id="yr-sub">天晟醫院教研中心 · 民國114年</div></div>
+    </div>
+    <div class="tr">
+      <!-- 年度切換 -->
+      <div class="yr-sw" id="yr-sw"></div>
+      <!-- 匯出 -->
+      <div class="export-group">
+        <button class="bexp kiosk" onclick="enterKiosk()">🖥 大屏</button>
+        <button class="bexp" onclick="exportCSV()">⬇ CSV</button>
+        <button class="bexp" onclick="exportExcel()">📊 Excel</button>
+        <button class="bexp pdf" onclick="exportPDF()">🖨 PDF</button>
+      </div>
+      <span class="brole" id="rb">瀏覽者</span>
+      <span id="un" style="font-size:.72rem;color:var(--text2)"></span>
+      <button class="bsm dng" onclick="doLogout()">登出</button>
+    </div>
   </div>
 
   <div class="nw"><div class="nav">
     <button class="nb on" onclick="sp('ov',this)">📊 總覽</button>
+    <button class="nb" onclick="sp('mon',this)">📋 月報管理</button>
     <button class="nb" onclick="sp('usage',this)">📈 資源使用</button>
-    <button class="nb" onclick="sp('coll',this)">📚 館藏統計</button>
+    <button class="nb" onclick="sp('role',this)">👥 職類分析</button>
     <button class="nb" onclick="sp('jrnl',this)">📰 期刊訂閱</button>
     <button class="nb" onclick="sp('unit',this)">🏥 單位分布</button>
-    <button class="nb" onclick="sp('mon',this)">🗂 月報輸入</button>
-    <button class="nb" onclick="sp('access',this)">🚪 進出館</button>
+    <button class="nb" onclick="sp('trend',this)">📉 跨年趨勢</button>
+    <button class="nb" onclick="sp('coll',this)">📚 館藏統計</button>
   </div></div>
 
   <div class="main">
     <div class="kg" id="kpi"></div>
 
-    <!-- 總覽 -->
+    <!-- ── 總覽 ── -->
     <div class="page on" id="page-ov">
       <div class="g3">
-        <div class="card"><div class="ct">館藏語文比例</div><div class="cw" style="height:150px"><canvas id="c-lang" role="img" aria-label="語文比例"></canvas></div></div>
-        <div class="card"><div class="ct">館藏類型比例</div><div class="cw" style="height:150px"><canvas id="c-type" role="img" aria-label="類型比例"></canvas></div></div>
-        <div class="card"><div class="ct">電子資源使用比例</div><div class="cw" style="height:150px"><canvas id="c-eres" role="img" aria-label="電子資源比例"></canvas></div></div>
+        <div class="card"><div class="ct">館藏語文比例</div><div class="cw" style="height:145px"><canvas id="c-lang"></canvas></div></div>
+        <div class="card"><div class="ct">館藏類型比例</div><div class="cw" style="height:145px"><canvas id="c-type"></canvas></div></div>
+        <div class="card"><div class="ct">電子資源使用比例</div><div class="cw" style="height:145px"><canvas id="c-eres"></canvas></div></div>
       </div>
       <div class="g2">
-        <div class="card"><div class="ct">進館人次月份趨勢</div><div class="leg" id="ov-leg"></div><div class="cw" style="height:200px"><canvas id="c-entry" role="img" aria-label="進館人次趨勢"></canvas></div></div>
-        <div class="card"><div class="ct">電子資源使用趨勢</div><div class="leg" id="ov-eres-leg"></div><div class="cw" style="height:200px"><canvas id="c-ov-eres" role="img" aria-label="電子資源趨勢"></canvas></div></div>
+        <div class="card"><div class="ct">領域館藏分布</div><div class="leg" id="dleg"></div><div class="cw" style="height:200px"><canvas id="c-dom"></canvas></div></div>
+        <div class="card"><div class="ct">職類進館比例</div><div class="cw" style="height:200px"><canvas id="c-role-pie"></canvas></div></div>
       </div>
     </div>
 
-    <!-- 資源使用 -->
+    <!-- ── 月報管理（核心功能）── -->
+    <div class="page" id="page-mon">
+      <div class="ab show" id="ab-mon" style="display:flex!important">
+        <div class="aa">📋 月報資料管理 <span id="mon-yr-badge" style="font-size:.65rem;margin-left:.4rem;padding:.1rem .4rem;border-radius:4px;background:rgba(79,142,247,.2);color:var(--accent)"></span></div>
+        <div class="aas" id="mon-aa"></div>
+      </div>
+      <!-- 完成度 -->
+      <div class="completeness-bar" id="completeness-bar"></div>
+      <!-- 月份卡片格 -->
+      <div class="mon-grid" id="mon-cards"></div>
+      <!-- Key In 表單 -->
+      <div id="keyin-panel">
+        <div class="ki-header">
+          <div class="ki-title" id="ki-title">📝 填入月報資料</div>
+          <div class="ki-selectors">
+            <select id="ki-yr-sel" onchange="kiSyncYrMo()"></select>
+            <select id="ki-mo-sel" onchange="kiSyncYrMo()"></select>
+          </div>
+        </div>
+        <div class="ki-grid" id="ki-grid"></div>
+        <div class="ki-actions">
+          <button class="bki-clear" onclick="kiClear()">清除本月</button>
+          <button class="bki-cancel" onclick="kiClose()">取消</button>
+          <button class="bki-save" onclick="kiSave()">💾 儲存</button>
+        </div>
+      </div>
+      <!-- Excel 上傳區 -->
+      <div id="excel-upload-area" style="display:none">
+        <div class="card">
+          <div class="ct">📤 上傳月報 Excel 匯入</div>
+          <div class="upload-zone" id="upload-zone" onclick="document.getElementById('excel-file').click()" ondragover="uzDrag(event,true)" ondragleave="uzDrag(event,false)" ondrop="uzDrop(event)">
+            <input type="file" id="excel-file" accept=".xlsx,.xls" onchange="handleExcelUpload(event)">
+            <div class="uz-icon">📂</div>
+            <div class="uz-text">點擊或拖曳月報 Excel 至此</div>
+            <div class="uz-hint">支援格式：每月月報 xlsx / 115年各項資源統計_月報_.xlsx</div>
+          </div>
+          <div id="upload-status" style="font-size:.75rem;color:var(--text2);text-align:center"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 資源使用 ── -->
     <div class="page" id="page-usage">
+      <div class="fb" id="ufb">
+        <span style="font-size:.7rem;color:var(--text2)">篩選</span>
+        <button class="ft on" onclick="setUM('year',this)">全年</button>
+        <button class="ft" onclick="setUM('quarter',this)">季</button>
+        <button class="ft" onclick="setUM('month',this)">單月</button>
+        <div id="ufc" style="display:flex;align-items:center;gap:.35rem"></div>
+      </div>
+      <div class="kg" id="ukpi" style="grid-template-columns:repeat(4,1fr)"></div>
       <div class="cr" id="uct">
         <button class="ft on" onclick="suc('entry',this)">進館人次</button>
         <button class="ft" onclick="suc('eres',this)">電子資源</button>
         <button class="ft" onclick="suc('db',this)">資料庫明細</button>
-        <button class="ft" onclick="suc('vend',this)">廠商提供量</button>
-        <button class="ft" onclick="suc('staff',this)">職類分布</button>
       </div>
-      <div class="card" style="margin-bottom:1rem"><div class="leg" id="u-leg"></div><div class="cw" style="height:250px"><canvas id="c-usage" role="img" aria-label="使用趨勢"></canvas></div></div>
+      <div class="card"><div class="leg" id="uleg"></div><div class="cw" style="height:240px"><canvas id="c-usage"></canvas></div></div>
+    </div>
+
+    <!-- ── 職類分析 ── -->
+    <div class="page" id="page-role">
+      <div style="font-size:.68rem;color:var(--text3);background:var(--bg3);padding:.4rem .75rem;border-radius:var(--r2);margin-bottom:.75rem" id="role-note"></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-bottom:1rem" id="role-cards"></div>
       <div class="g2">
-        <div class="card"><div class="ct">電子資源類型比例</div><div class="cw" style="height:180px"><canvas id="c-u-pie" role="img" aria-label="電子資源比例"></canvas></div></div>
-        <div class="card"><div class="ct">明細資料表</div><div class="cr" id="utbl-tabs">
-          <button class="ft on" onclick="setUTbl('mon',this)">月份</button>
-          <button class="ft" onclick="setUTbl('db',this)">資料庫</button>
-          <button class="ft" onclick="setUTbl('vend',this)">廠商</button>
-        </div><div class="tw" id="u-table" style="max-height:200px;overflow-y:auto"></div></div>
+        <div class="card"><div class="ct">各月職類進館人次</div><div class="cw" style="height:250px"><canvas id="c-role-stack"></canvas></div></div>
+        <div class="card"><div class="ct">職類電子資源使用</div><div class="cw" style="height:250px"><canvas id="c-role-eres"></canvas></div></div>
       </div>
     </div>
 
-    <!-- 館藏統計 -->
-    <div class="page" id="page-coll">
-      <div class="ab" id="ab-coll"><div class="aa">⚙ 管理者模式</div>
-        <div class="aas"><button class="badd" onclick="openM('coll_stat')">✏ 更新館藏數字</button><button class="badd" onclick="openM('yr_stat')">✏ 更新年度數據</button></div>
-      </div>
-      <div class="g2">
-        <div class="card"><div class="ct">歷年館藏現有量</div><div class="cw" style="height:200px"><canvas id="c-coll" role="img" aria-label="館藏趨勢"></canvas></div></div>
-        <div class="card"><div class="ct">年度購入 vs 註銷</div><div class="leg" id="dl"></div><div class="cw" style="height:200px"><canvas id="c-delta" role="img" aria-label="購入vs註銷"></canvas></div></div>
-      </div>
-      <div class="card"><div class="ct">年度購入統計明細</div><div class="tw" id="t-purch"></div></div>
-    </div>
-
-    <!-- 期刊訂閱 -->
+    <!-- ── 期刊訂閱 ── -->
     <div class="page" id="page-jrnl">
-      <div class="ab" id="ab-jrnl"><div class="aa">⚙ 管理者模式</div>
+      <div class="ab" id="ab-jrnl">
+        <div class="aa">⚙ 管理者模式</div>
         <div class="aas"><button class="badd" onclick="openM('journal')">＋ 新增期刊</button><button class="badd" onclick="openM('database')">＋ 新增資料庫</button></div>
       </div>
-      <div class="card" style="margin-bottom:1rem"><div class="ct">醫學期刊訂閱對照表（V=訂閱 X=未訂）</div><div class="tw" id="tjrnl"></div></div>
+      <div class="card" style="margin-bottom:1rem"><div class="ct">醫學期刊訂閱對照表</div><div class="tw" id="tjrnl"></div></div>
       <div class="g2">
         <div class="card"><div class="ct">醫學資料庫訂閱對照</div><div class="tw" id="tdb"></div></div>
-        <div class="card"><div class="ct">期刊訂購數量趨勢</div><div class="cw" style="height:180px"><canvas id="c-jt" role="img" aria-label="期刊趨勢"></canvas></div></div>
+        <div class="card">
+          <div class="ct">期刊訂購趨勢 ＆ 使用排行</div>
+          <div class="cw" style="height:130px;margin-bottom:.65rem"><canvas id="c-jt"></canvas></div>
+          <div class="ct" style="margin-top:.5rem">電子期刊使用排行（<span id="jrnl-yr-label"></span>）</div>
+          <div id="jrnl-rank"></div>
+        </div>
       </div>
     </div>
 
-    <!-- 單位分布 -->
+    <!-- ── 單位分布 ── -->
     <div class="page" id="page-unit">
-      <div class="ab" id="ab-unit"><div class="aa">⚙ 管理者模式</div>
-        <div class="aas"><button class="badd" onclick="openM('unit')">＋ 新增/編輯單位</button></div>
+      <div class="ab" id="ab-unit">
+        <div class="aa">⚙ 管理者模式</div>
+        <div class="aas"><button class="badd" onclick="openM('unit')">＋ 新增單位</button></div>
       </div>
       <div class="g2">
-        <div class="card"><div class="ct">各單位工具書分布（Top 15）</div><div class="cw" style="height:320px"><canvas id="c-unit" role="img" aria-label="單位分布"></canvas></div></div>
-        <div class="card"><div class="ct">各單位冊數排行</div><div id="urf"></div></div>
+        <div class="card"><div class="ct">各單位工具書分布（Top 15）</div><div class="cw" style="height:310px"><canvas id="c-unit"></canvas></div></div>
+        <div class="card"><div class="ct">各單位冊數排行（全部）</div><div id="urf"></div></div>
       </div>
     </div>
 
-    <!-- 月報輸入 -->
-    <div class="page" id="page-mon">
-      <div class="ab show" id="ab-mon" style="display:flex!important">
-        <div class="aa">📋 月報資料管理 — <span id="mon-year-label"></span></div>
-        <div class="aas" id="mon-aa"></div>
-      </div>
-      <div class="mon-grid" id="mcards"></div>
-      <div class="ied" id="ied">
-        <div class="ied-h">
-          <div class="ied-title" id="ied-title">編輯月份資料</div>
-          <div style="display:flex;gap:.4rem">
-            <button class="bsave" id="ied-save">儲存</button>
-            <button class="bdelsm" id="ied-del" style="display:none">刪除</button>
-            <button class="bcancel" onclick="closeIED()">取消</button>
-          </div>
-        </div>
-        <div class="if-group">
-          <div class="if-group-title">一、進館人次（依職類）</div>
-          <div class="ied-grid">
-            <div class="mf"><label>醫師</label><input type="number" id="f-dr" min="0" placeholder="0"></div>
-            <div class="mf"><label>藥劑</label><input type="number" id="f-ph" min="0" placeholder="0"></div>
-            <div class="mf"><label>放射</label><input type="number" id="f-ra" min="0" placeholder="0"></div>
-            <div class="mf"><label>檢驗</label><input type="number" id="f-la" min="0" placeholder="0"></div>
-            <div class="mf"><label>護理</label><input type="number" id="f-nu" min="0" placeholder="0"></div>
-            <div class="mf"><label>物治</label><input type="number" id="f-pt" min="0" placeholder="0"></div>
-            <div class="mf"><label>其他</label><input type="number" id="f-ot" min="0" placeholder="0"></div>
-            <div class="mf"><label style="color:var(--gn)">合計（自動）</label><input id="f-e" readonly style="background:rgba(110,231,183,.06);color:var(--gn);border-color:rgba(110,231,183,.2)"></div>
-          </div>
-        </div>
-        <div class="if-group">
-          <div class="if-group-title">二、圖書借閱冊數</div>
-          <div class="ied-grid">
-            <div class="mf"><label>圖書借閱</label><input type="number" id="f-bk" min="0" placeholder="0"></div>
-            <div class="mf"><label>期刊借閱</label><input type="number" id="f-jo" min="0" placeholder="0"></div>
-          </div>
-        </div>
-        <div class="if-group">
-          <div class="if-group-title">三、電子資源使用量</div>
-          <div class="ied-grid">
-            <div class="mf"><label>電子期刊</label><input type="number" id="f-ej" min="0" placeholder="0"></div>
-            <div class="mf"><label>電子書</label><input type="number" id="f-eb" min="0" placeholder="0"></div>
-            <div class="mf"><label>電子資料庫</label><input type="number" id="f-edb" min="0" placeholder="0"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 進出館 -->
-    <div class="page" id="page-access">
-      <div class="kpi-g" id="ac-kpi" style="grid-template-columns:repeat(4,1fr);display:grid;gap:.75rem;margin-bottom:1.25rem"></div>
-      <div class="g2">
-        <div class="card"><div class="ct">每日進館趨勢（職類堆疊）</div><div class="leg" id="ac-leg"></div><div class="cw" style="height:220px"><canvas id="ac-daily" role="img" aria-label="每日進館"></canvas></div></div>
-        <div class="card"><div class="ct">職類進館比例</div><div class="cw" style="height:220px"><canvas id="ac-pie" role="img" aria-label="職類比例"></canvas></div></div>
-      </div>
-      <div class="g2">
-        <div class="card"><div class="ct">月份統計（職類堆疊）</div><div class="cw" style="height:180px"><canvas id="ac-month" role="img" aria-label="月份統計"></canvas></div></div>
-        <div class="card"><div class="ct">前後門使用比例</div><div class="cw" style="height:180px"><canvas id="ac-gate" role="img" aria-label="門別比例"></canvas></div></div>
-      </div>
+    <!-- ── 跨年趨勢 ── -->
+    <div class="page" id="page-trend">
       <div class="card" style="margin-bottom:1rem">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
-          <div class="ct" style="margin:0">人員進館排行 <span id="ac-pcount" style="color:var(--tx3)"></span></div>
-          <div style="display:flex;gap:.4rem;flex-wrap:wrap" id="ac-gtabs"></div>
-        </div>
-        <div class="tw" id="ac-ptable"></div>
-      </div>
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
-          <div class="ct" style="margin:0">進出館明細記錄</div>
-          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-            <select id="ac-fg" style="font-size:.75rem;padding:.28rem .5rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit" onchange="filterAC()"><option value="">全部職類</option></select>
-            <select id="ac-fgate" style="font-size:.75rem;padding:.28rem .5rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit" onchange="filterAC()"><option value="">前後門</option><option>前門</option><option>後門</option></select>
-            <input id="ac-sch" placeholder="搜尋姓名…" style="font-size:.75rem;padding:.28rem .6rem;border-radius:var(--r2);border:1px solid var(--bd2);background:var(--bg4);color:var(--tx);font-family:inherit;width:90px" oninput="filterAC()">
-            <span id="ac-cnt" style="font-size:.72rem;color:var(--tx3)"></span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <div class="ct" style="margin:0">進館人次跨年趨勢（109–<span id="trend-max-yr">115</span>年）</div>
+          <div class="yr-range-bar" id="trend-metric">
+            <button class="yr-range-btn on" onclick="setTrendMetric('e',this)">進館人次</button>
+            <button class="yr-range-btn" onclick="setTrendMetric('ej',this)">電子期刊</button>
+            <button class="yr-range-btn" onclick="setTrendMetric('edb',this)">電子資料庫</button>
+            <button class="yr-range-btn" onclick="setTrendMetric('bk',this)">圖書借閱</button>
           </div>
         </div>
-        <div class="tw" id="ac-table" style="max-height:380px;overflow-y:auto"></div>
+        <div class="cw" style="height:220px"><canvas id="c-trend-yr"></canvas></div>
       </div>
+      <div class="g2">
+        <div class="card"><div class="ct">歷年館藏現有量</div><div class="cw" style="height:180px"><canvas id="c-trend-coll"></canvas></div></div>
+        <div class="card"><div class="ct">年度購入合計（102–114年）</div><div class="cw" style="height:180px"><canvas id="c-trend-buy"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- ── 館藏統計 ── -->
+    <div class="page" id="page-coll">
+      <div class="ab" id="ab-coll">
+        <div class="aa">⚙ 管理者模式</div>
+        <div class="aas"><button class="badd" onclick="openM('coll_stat')">✏ 更新館藏數字</button></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="ct">館藏現有量趨勢</div><div class="cw" style="height:190px"><canvas id="c-coll"></canvas></div></div>
+        <div class="card"><div class="ct">年度購入 vs 註銷</div><div class="leg" id="dl"></div><div class="cw" style="height:190px"><canvas id="c-delta"></canvas></div></div>
+      </div>
+      <div class="card"><div class="ct">年度購入統計明細（102–114年）</div><div class="tw" id="t-purch"></div></div>
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
-<div class="mo" id="mo">
-  <div class="md">
-    <div class="mh"><span id="mt"></span><button class="mc2" onclick="closeM()">✕</button></div>
-    <div id="mb"></div>
-    <div class="mfoot"><button class="bcancel" onclick="closeM()">取消</button><button class="bsave" onclick="saveM()">儲存</button></div>
-  </div>
-</div>
+<!-- Modal -->
+<div class="mo" id="mo"><div class="md">
+  <div class="mh"><span id="mt"></span><button class="mc2" onclick="closeM()">✕</button></div>
+  <div id="mb"></div>
+  <div class="mfoot"><button class="bcancel" onclick="closeM()">取消</button><button class="bsave" onclick="saveM()">儲存</button></div>
+</div></div>
 <div class="toast" id="toast"></div>
+<div id="exp-progress"></div>
 
 <script>
-// ═══════════════════════════════
-//  AUTH
-// ═══════════════════════════════
-const ACCS={'admin':{pass:'lib2024',role:'admin',name:'管理員'},'lib':{pass:'view123',role:'viewer',name:'圖書館員'}};
+// ════════════════════════════════════════════════════════════
+//  AUTH（SHA-256 雜湊，密碼不明文存放）
+// ════════════════════════════════════════════════════════════
+const ACCS={
+  'admin':{hash:'922bbae92a89bd33c42ae1195392c11cabe1762c7b105a298e64f64dde9e4022',role:'admin',name:'管理員'},
+  'lib':  {hash:'656d604dfdba41a262963cce53699bbc56cd7a2c0da1ad5ead45fc49214159d6',role:'viewer',name:'圖書館員'}
+};
 let CU=null;
-function doLogin(){
+async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function doLogin(){
   const u=document.getElementById('iu').value.trim(),p=document.getElementById('ip').value;
-  const e=document.getElementById('lerr');
-  if(ACCS[u]&&ACCS[u].pass===p){
-    CU={id:u,...ACCS[u]};e.style.display='none';
-    document.getElementById('ls').style.display='none';
-    document.getElementById('app').style.display='block';
-    document.getElementById('rb').textContent=CU.role==='admin'?'管理者':'瀏覽者';
-    document.getElementById('rb').className='brole'+(CU.role==='admin'?' adm':'');
-    document.getElementById('un').textContent=CU.name;
-    initApp();
-  }else{e.style.display='block';}
+  const e=document.getElementById('lerr'),btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.textContent='驗證中…';
+  try{
+    const h=await sha256(p);
+    const fails=parseInt(sessionStorage.getItem('lib_fails')||'0');
+    if(fails>=5){toast('連續錯誤過多，請等待30秒','err');btn.disabled=false;btn.textContent='登入系統';return;}
+    if(ACCS[u]&&ACCS[u].hash===h){
+      CU={id:u,role:ACCS[u].role,name:ACCS[u].name};
+      sessionStorage.setItem('lib_sess',JSON.stringify({...CU,at:Date.now()}));
+      sessionStorage.setItem('lib_fails','0');
+      e.style.display='none';
+      enterApp();
+    }else{
+      e.style.display='block';
+      const f=fails+1;sessionStorage.setItem('lib_fails',f);
+      if(f>=5){btn.disabled=true;btn.textContent='鎖定30秒';setTimeout(()=>{sessionStorage.setItem('lib_fails','0');btn.disabled=false;btn.textContent='登入系統';},30000);}
+    }
+  }catch(err){e.textContent='驗證錯誤，請重整';e.style.display='block';}
+  finally{if(!btn.disabled)btn.textContent='登入系統';}
+}
+function enterApp(){
+  document.getElementById('ls').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('rb').textContent=CU.role==='admin'?'管理者':'瀏覽者';
+  document.getElementById('rb').className='brole'+(CU.role==='admin'?' adm':'');
+  document.getElementById('un').textContent=CU.name;
+  initApp();
 }
 document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-function doLogout(){CU=null;document.getElementById('app').style.display='none';document.getElementById('ls').style.display='flex';document.getElementById('iu').value='';document.getElementById('ip').value='';}
+function doLogout(){CU=null;sessionStorage.removeItem('lib_sess');document.getElementById('app').style.display='none';document.getElementById('ls').style.display='flex';document.getElementById('iu').value='';document.getElementById('ip').value='';}
 const isAdm=()=>CU&&CU.role==='admin';
+(function(){try{const s=sessionStorage.getItem('lib_sess');if(s){const d=JSON.parse(s);if(Date.now()-d.at<8*60*60*1000){CU={id:d.id,role:d.role,name:d.name};window.addEventListener('DOMContentLoaded',enterApp);}}}catch(e){}})();
 
-// ═══════════════════════════════
-//  DEFAULT DATA
-// ═══════════════════════════════
-const DD={
-  years:['113','114'],
-  activeYear:'114',
-  col:{total:2756,chinese:2112,english:644,unit_books:1185,doctor_books:87,cd:6,canceled:2661},
-  domains:[{n:'醫療專業',zh:906,en:279},{n:'醫學專業-核心',zh:1,en:344},{n:'病人健康教育',zh:122,en:0},{n:'醫學教育',zh:140,en:8},{n:'100哲學類',zh:129,en:0},{n:'800語文類',zh:375,en:0},{n:'490商業',zh:107,en:0},{n:'醫療品質',zh:40,en:1},{n:'醫療法規',zh:38,en:0},{n:'醫學人文',zh:54,en:0},{n:'312電腦',zh:24,en:0},{n:'實證醫學',zh:9,en:12}],
-  units:[{n:'檢驗科',v:93},{n:'護理部',v:91},{n:'復健科',v:90},{n:'護理部(6F)',v:75},{n:'護理部(9F)',v:71},{n:'護理部(7F)',v:71},{n:'護理部(ICU)',v:67},{n:'放射科',v:59},{n:'護理部(OPD)',v:55},{n:'藥劑科',v:43},{n:'護理部(8F)',v:41},{n:'護理部(OR)',v:38},{n:'護理部(ER)',v:38},{n:'感染科',v:35},{n:'外科NP',v:32},{n:'內科NP',v:24},{n:'心理室',v:8},{n:'病理科',v:10}],
+// ════════════════════════════════════════════════════════════
+//  靜態資料（館藏、期刊、單位等）
+// ════════════════════════════════════════════════════════════
+const SD={
+  col:{total:2756,chinese:2112,english:644,books:1565,cd:6,unit_books:1185,doctor_books:87,canceled:2661},
+  domains:[
+    {n:'醫療專業',zh:906,en:279},{n:'醫學專業-核心',zh:1,en:344},
+    {n:'病人健康教育',zh:122,en:0},{n:'醫學教育',zh:140,en:8},
+    {n:'100哲學類',zh:129,en:0},{n:'800語文類',zh:375,en:0},
+    {n:'490商業經營',zh:107,en:0},{n:'醫療品質',zh:40,en:1},
+    {n:'醫療法規',zh:38,en:0},{n:'醫學人文',zh:54,en:0},
+    {n:'312電腦科學',zh:24,en:0},{n:'實證醫學',zh:9,en:12},
+  ],
+  units:[
+    {n:'檢驗科',v:93},{n:'護理部',v:91},{n:'復健科',v:90},
+    {n:'護理部(6F)',v:75},{n:'護理部(9F)',v:71},{n:'護理部(7F)',v:71},
+    {n:'護理部(ICU)',v:67},{n:'放射科',v:59},{n:'護理部(OPD)',v:55},
+    {n:'藥劑科',v:43},{n:'護理部(8F)',v:41},{n:'護理部(OR)',v:38},
+    {n:'護理部(ER)',v:38},{n:'感染科',v:35},{n:'外科NP',v:32},
+    {n:'內科NP',v:24},{n:'社醫部(營養室)',v:12},{n:'病理科',v:10},
+    {n:'心理室',v:8},{n:'社醫部(居家護理)',v:4},{n:'社醫部(社工室)',v:4},
+    {n:'社醫部',v:4},{n:'天祥護理部',v:2},
+  ],
   yl:['108年前','108年','109年','110年','111年','112年','113年','114年'],
   yt:[3075,3277,2326,2442,2516,2492,2416,2756],
   ybz:[0,105,114,109,118,92,120,113],ybe:[0,11,3,3,3,0,4,3],yd:[0,0,848,116,46,73,221,0],
   py:['102年','103年','104年','105年','106年','107年','108年','109年','110年','111年','112年','113年','114年','合計'],
-  pr:[{n:'圖書',d:[156,126,235,95,53,70,116,117,112,121,92,124,116,1533]},{n:'光碟',d:[0,1,2,0,0,0,0,0,0,0,0,1,0,4]},{n:'單位工具書',d:[79,12,117,104,39,56,81,76,67,45,62,32,62,832]},{n:'醫師工具書',d:[15,4,1,30,0,0,1,3,1,0,1,0,0,56]},{n:'合計',d:[250,143,355,229,92,126,202,196,180,166,163,157,178,2437]}],
+  pr:[
+    {n:'圖書',      d:[156,126,235,95,53,70,116,117,112,121,92,124,116,1533]},
+    {n:'光碟',      d:[0,1,2,0,0,0,0,0,0,0,0,1,0,4]},
+    {n:'單位工具書',d:[79,12,117,104,39,56,81,76,67,45,62,32,62,832]},
+    {n:'醫師工具書',d:[15,4,1,30,0,0,1,3,1,0,1,0,0,56]},
+    {n:'合計',      d:[250,143,355,229,92,126,202,196,180,166,163,157,178,2437]},
+  ],
   jy:['107年','108年','109年','110年','111年','112年','113年','114年','115年'],
-  jl:[{n:'NEJM',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'JAMA',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'AJRCCM',t:'電子',d:['V','V','V','V','V','X','X','X','V']},{n:'Circulation',t:'電子',d:['V','V','V','V','V','X','V','V','V']},{n:'Crit Care Med',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Clin Infect Dis',t:'電子',d:['V','V','V','V','V','V','V','V','X']},{n:'ICHE',t:'電子',d:['V','V','V','V','X','X','X','X','V']},{n:'Pediatrics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'JBJS-American',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'J Neurosurgery',t:'紙本',d:['V','V','V','X','X','X','X','X','X']},{n:'Radiographics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Clinical Chemistry',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'J Nutrition',t:'電子',d:['V','V','V','V','V','X','V','X','V']},{n:'ICD-10-CM/PCS',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'AJOT',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Physical Therapy',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Neurology',t:'紙本',d:['V','V','X','V','X','X','X','X','X']}],
+  jl:[
+    {n:'NEJM',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'JAMA',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'AJRCCM',t:'電子',d:['V','V','V','V','V','X','X','X','V']},
+    {n:'Circulation',t:'電子',d:['V','V','V','V','V','X','V','V','V']},
+    {n:'Crit Care Med',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'Clin Infect Dis',t:'電子',d:['V','V','V','V','V','V','V','V','X']},
+    {n:'ICHE',t:'電子',d:['V','V','V','V','X','X','X','X','V']},
+    {n:'Pediatrics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'JBJS-American',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'J Neurosurgery',t:'紙本',d:['V','V','V','X','X','X','X','X','X']},
+    {n:'Radiographics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'Clinical Chemistry',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'J Nutrition',t:'電子',d:['V','V','V','V','V','X','V','X','V']},
+    {n:'ICD-10-CM/PCS',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'AJOT',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'Physical Therapy',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'Neurology',t:'紙本',d:['V','V','X','V','X','X','X','X','X']},
+  ],
   jc:[17,17,16,16,14,11,13,12,14],
-  dbs:[{n:'Micromedex',d:['V','V','V','V','X','X','X','X','V']},{n:'Clinicalkey',d:['V','V','V','V','V','V','V','V','V']},{n:'DynaMed',d:['V','V','V','V','V','V','V','V','V']},{n:'STATdx',d:['V','X','X','X','X','X','V','V','V']},{n:'UpTodate',d:['V','V','V','V','V','V','V','V','V']},{n:'CEPS',d:['V','V','V','V','V','V','V','V','V']},{n:'Lexicomp',d:['X','V','V','V','V','V','V','V','V']},{n:'Sanford Guide',d:['X','X','V','V','V','V','V','V','V']},{n:'PubMed',d:['X','X','V','V','V','V','V','V','V']},{n:'Cochrane',d:['X','X','V','V','V','V','V','V','V']},{n:'Symskan',d:['X','X','X','X','V','V','V','V','V']}],
-  // 多年份月報資料
-  monthly:{
-    '113':[
-      {m:'1月',e:520,dr:35,ph:8,ra:5,la:10,nu:90,pt:6,ot:366,bk:12,jo:0,ej:38,eb:2,edb:105},
-      {m:'2月',e:480,dr:40,ph:5,ra:3,la:7,nu:62,pt:5,ot:358,bk:14,jo:0,ej:55,eb:1,edb:92},
-      {m:'3月',e:610,dr:58,ph:6,ra:10,la:12,nu:72,pt:10,ot:442,bk:16,jo:0,ej:30,eb:3,edb:198},
-      {m:'4月',e:595,dr:55,ph:5,ra:12,la:8,nu:74,pt:4,ot:437,bk:13,jo:0,ej:22,eb:5,edb:150},
-      {m:'5月',e:620,dr:48,ph:9,ra:4,la:10,nu:65,pt:4,ot:480,bk:11,jo:0,ej:24,eb:0,edb:130},
-      {m:'6月',e:680,dr:62,ph:13,ra:4,la:15,nu:74,pt:2,ot:510,bk:14,jo:0,ej:20,eb:2,edb:110},
-      {m:'7月',e:650,dr:50,ph:10,ra:18,la:7,nu:65,pt:3,ot:497,bk:20,jo:0,ej:22,eb:0,edb:120},
-      {m:'8月',e:690,dr:65,ph:4,ra:5,la:12,nu:76,pt:0,ot:528,bk:13,jo:0,ej:72,eb:3,edb:48},
-      {m:'9月',e:700,dr:60,ph:3,ra:28,la:9,nu:50,pt:1,ot:549,bk:10,jo:0,ej:42,eb:0,edb:58},
-      {m:'10月',e:750,dr:58,ph:2,ra:20,la:20,nu:62,pt:4,ot:584,bk:8,jo:0,ej:38,eb:1,edb:40},
-      {m:'11月',e:710,dr:68,ph:7,ra:2,la:9,nu:78,pt:3,ot:543,bk:7,jo:0,ej:7,eb:0,edb:65},
-      {m:'12月',e:820,dr:60,ph:3,ra:1,la:10,nu:80,pt:1,ot:665,bk:11,jo:0,ej:50,eb:2,edb:130},
-    ],
-    '114':[
-      {m:'1月',e:609,dr:43,ph:9,ra:0,la:8,nu:107,pt:7,ot:435,bk:4,jo:0,ej:45,eb:3,edb:132},
-      {m:'2月',e:574,dr:53,ph:2,ra:0,la:8,nu:70,pt:7,ot:434,bk:19,jo:0,ej:71,eb:0,edb:111},
-      {m:'3月',e:685,dr:67,ph:3,ra:13,la:15,nu:80,pt:12,ot:495,bk:17,jo:0,ej:34,eb:4,edb:254},
-      {m:'4月',e:683,dr:69,ph:7,ra:15,la:1,nu:84,pt:5,ot:502,bk:15,jo:0,ej:26,eb:7,edb:174},
-      {m:'5月',e:680,dr:54,ph:11,ra:5,la:12,nu:73,pt:5,ot:520,bk:13,jo:0,ej:27,eb:0,edb:150},
-      {m:'6月',e:760,dr:75,ph:16,ra:5,la:18,nu:83,pt:3,ot:560,bk:15,jo:0,ej:24,eb:3,edb:127},
-      {m:'7月',e:725,dr:58,ph:11,ra:21,la:8,nu:73,pt:4,ot:550,bk:23,jo:0,ej:25,eb:0,edb:141},
-      {m:'8月',e:757,dr:73,ph:5,ra:6,la:14,nu:85,pt:0,ot:574,bk:15,jo:0,ej:81,eb:4,edb:57},
-      {m:'9月',e:770,dr:68,ph:4,ra:34,la:10,nu:58,pt:1,ot:595,bk:12,jo:0,ej:48,eb:0,edb:69},
-      {m:'10月',e:820,dr:67,ph:2,ra:22,la:23,nu:70,pt:5,ot:631,bk:9,jo:0,ej:42,eb:1,edb:46},
-      {m:'11月',e:772,dr:74,ph:8,ra:3,la:10,nu:85,pt:4,ot:588,bk:8,jo:0,ej:8,eb:0,edb:76},
-      {m:'12月',e:897,dr:68,ph:4,ra:2,la:11,nu:89,pt:1,ot:722,bk:13,jo:0,ej:56,eb:3,edb:150},
-    ]
+  dbs:[
+    {n:'Micromedex',d:['V','V','V','V','X','X','X','X','V']},{n:'Clinicalkey',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'DynaMed',d:['V','V','V','V','V','V','V','V','V']},{n:'STATdx',d:['V','X','X','X','X','X','V','V','V']},
+    {n:'UpTodate',d:['V','V','V','V','V','V','V','V','V']},{n:'CEPS',d:['V','V','V','V','V','V','V','V','V']},
+    {n:'Lexicomp',d:['X','V','V','V','V','V','V','V','V']},{n:'Sanford Guide',d:['X','X','V','V','V','V','V','V','V']},
+    {n:'PubMed',d:['X','X','V','V','V','V','V','V','V']},{n:'Cochrane',d:['X','X','V','V','V','V','V','V','V']},
+    {n:'Symskan',d:['X','X','X','X','V','V','V','V','V']},
+  ],
+  jrnl_rank:{
+    114:[{n:'Clinical Chemistry',v:159},{n:'NEJM',v:53},{n:'JBJS-American',v:42},{n:'Physical Therapy',v:42},{n:'Radiographics',v:37},{n:'AJOT',v:31},{n:'JAMA',v:24},{n:'NEJM AI（試用）',v:19},{n:'Kono雜誌庫',v:18},{n:'社區發展季刊',v:13}],
+    115:[{n:'NEJM',v:19},{n:'Clinical Chemistry',v:9},{n:'Crit Care Med',v:11},{n:'JAMA',v:8},{n:'Circulation',v:7},{n:'Physical Therapy',v:7},{n:'Radiographics',v:7},{n:'Clin Infect Dis',v:6},{n:'Pediatrics',v:6},{n:'JBJS-American',v:4}],
   },
-  dbm:{'Clinicalkey':[10,8,35,11,14,10,14,6,8,10,6,40],'DynaMed':[7,8,19,13,10,6,7,3,5,0,3,6],'UpTodate':[34,14,56,30,23,19,34,12,11,5,9,20],'Lexicomp':[5,11,18,16,4,4,11,1,6,0,2,4],'CEPS':[49,43,93,58,47,40,43,21,24,23,38,55],'PubMed':[17,17,21,34,43,30,19,6,6,2,16,18],'Symskan':[2,3,2,4,3,3,2,2,2,0,1,4],'Sanford Guide':[3,3,2,4,2,9,5,4,3,2,1,2],'Cochrane':[5,4,8,4,4,6,6,2,4,4,0,1]},
-  vm:{'Clinical Key':[65,112,418,189,86,110,179,78,31,113,28,86],'Dynamed':[582,336,476,1337,825,1441,1396,687,307,611,1188,451],'UpTodate':[349,485,764,1009,936,707,887,649,755,574,771,867],'Lexicomp':[718,644,1049,2172,2240,1633,2112,1629,1515,1366,1514,1486],'CEPS':[695,489,1081,1130,933,674,897,333,902,593,611,717],'Kono雜誌庫':[4782,6008,5878,5698,6197,7281,7202,7155,7140,7450,7663,8165]}
+  dbm114:{'Clinicalkey':[10,8,35,11,14,10,14,6,8,10,6,40],'DynaMed':[7,8,19,13,10,6,7,3,5,0,3,6],'UpTodate':[34,14,56,30,23,19,34,12,11,5,9,20],'Lexicomp':[5,11,18,16,4,4,11,1,6,0,2,4],'CEPS(華藝)':[49,43,93,58,47,40,43,21,24,23,38,55],'PubMed':[17,17,21,34,43,30,19,6,6,2,16,18],'Symskan':[2,3,2,4,3,3,2,2,2,0,1,4],'Sanford Guide':[3,3,2,4,2,9,5,4,3,2,1,2],'Cochrane':[5,4,8,4,4,6,6,2,4,4,0,1]},
+  dbm115q1:{'Clinicalkey':[10,2,5],'DynaMed':[1,2,1],'UpTodate':[9,1,5],'Lexicomp':[8,1,1],'CEPS(華藝)':[42,28,28],'PubMed':[7,7,14],'Symskan':[0,1,0],'Sanford Guide':[2,1,0],'Cochrane':[1,0,1]},
 };
 
-// ═══════════════════════════════
-//  STORAGE
-// ═══════════════════════════════
-function ld(){try{const s=localStorage.getItem('lib_v3');if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(DD));}
-function sd(d){try{localStorage.setItem('lib_v3',JSON.stringify(d));}catch(e){}}
-let D=ld();
+// ════════════════════════════════════════════════════════════
+//  月報資料層（多年度，存 localStorage）
+// ════════════════════════════════════════════════════════════
+const YEARS=[109,110,111,112,113,114,115]; // 支援年度
+const MO=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const BLANK_MON=m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,ej:0,eb:0,edb:0});
 
-// ═══════════════════════════════
-//  YEAR / MONTH FILTER STATE
-// ═══════════════════════════════
-const ALL_MONTHS=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-const QS={Q1:[0,1,2],Q2:[3,4,5],Q3:[6,7,8],Q4:[9,10,11]};
-let selYear='114', selMonths=ALL_MONTHS.map((_,i)=>i), selRange='all';
+// 內建已知資料（114年完整、115年Q1）
+const BUILTIN={
+  114:[
+    {m:'1月',e:609,dr:43,ph:9,ra:0,la:8,nu:107,pt:7,ot:435,bk:4,ej:45,eb:3,edb:132},
+    {m:'2月',e:574,dr:53,ph:2,ra:0,la:8,nu:70,pt:7,ot:434,bk:19,ej:71,eb:0,edb:111},
+    {m:'3月',e:685,dr:67,ph:3,ra:13,la:15,nu:80,pt:12,ot:495,bk:17,ej:34,eb:4,edb:254},
+    {m:'4月',e:683,dr:69,ph:7,ra:15,la:1,nu:84,pt:5,ot:502,bk:15,ej:26,eb:7,edb:174},
+    {m:'5月',e:680,dr:54,ph:11,ra:5,la:12,nu:73,pt:5,ot:520,bk:13,ej:27,eb:0,edb:150},
+    {m:'6月',e:760,dr:75,ph:16,ra:5,la:18,nu:83,pt:3,ot:560,bk:15,ej:24,eb:3,edb:127},
+    {m:'7月',e:725,dr:58,ph:11,ra:21,la:8,nu:73,pt:4,ot:550,bk:23,ej:25,eb:0,edb:141},
+    {m:'8月',e:757,dr:73,ph:5,ra:6,la:14,nu:85,pt:0,ot:574,bk:15,ej:81,eb:4,edb:57},
+    {m:'9月',e:770,dr:68,ph:4,ra:34,la:10,nu:58,pt:1,ot:595,bk:12,ej:48,eb:0,edb:69},
+    {m:'10月',e:820,dr:67,ph:2,ra:22,la:23,nu:70,pt:5,ot:631,bk:9,ej:42,eb:1,edb:46},
+    {m:'11月',e:772,dr:74,ph:8,ra:3,la:10,nu:85,pt:4,ot:588,bk:8,ej:8,eb:0,edb:76},
+    {m:'12月',e:897,dr:68,ph:4,ra:2,la:11,nu:89,pt:1,ot:722,bk:13,ej:56,eb:3,edb:150},
+  ],
+  115:[
+    {m:'1月',e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,ej:27,eb:1,edb:80},
+    {m:'2月',e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,ej:22,eb:0,edb:43},
+    {m:'3月',e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,ej:46,eb:2,edb:55},
+    ...MO.slice(3).map(BLANK_MON),
+  ],
+};
 
-function buildYearTabs(){
-  const yt=document.getElementById('year-tabs');
-  yt.innerHTML=(D.years||['114']).map(y=>`<button class="ytab${y===selYear?' on':''}" onclick="selectYear('${y}')">${y}年</button>`).join('');
-  if(isAdm()) yt.innerHTML+=`<button class="ytab" onclick="addYear()" style="opacity:.6">＋年份</button>`;
-  document.getElementById('topbar-sub').textContent=`民國${selYear}年`;
-  document.getElementById('mon-year-label').textContent=`民國${selYear}年`;
+function loadAllMon(){
+  try{const s=localStorage.getItem('lib_mon_v5');if(s)return JSON.parse(s);}catch(e){}
+  // 初始化：109–113空白，114–115用內建
+  const init={};
+  for(const yr of YEARS){
+    if(BUILTIN[yr]) init[yr]=JSON.parse(JSON.stringify(BUILTIN[yr]));
+    else init[yr]=MO.map(BLANK_MON);
+  }
+  return init;
 }
-function buildMonthTabs(){
-  const mt=document.getElementById('month-tabs');
-  mt.innerHTML=ALL_MONTHS.map((m,i)=>`<button class="ytab${selMonths.includes(i)&&selRange==='custom'?' on':selRange!=='custom'&&selMonths.includes(i)?'':''}" onclick="toggleMonth(${i})" id="mtab-${i}">${m}</button>`).join('');
-  updateMonthTabStyles();
-}
-function updateMonthTabStyles(){
-  ALL_MONTHS.forEach((_,i)=>{
-    const btn=document.getElementById('mtab-'+i);
-    if(btn) btn.className='ytab'+(selMonths.includes(i)?' on':'');
-  });
-}
-function selectYear(y){
-  selYear=y; selRange='all'; selMonths=ALL_MONTHS.map((_,i)=>i);
-  buildYearTabs(); updateMonthTabStyles(); updateRangeTabs(); refreshAll();
-}
-function toggleMonth(i){
-  selRange='custom';
-  if(selMonths.includes(i)) selMonths=selMonths.filter(m=>m!==i);
-  else selMonths=[...selMonths,i].sort((a,b)=>a-b);
-  if(selMonths.length===0) selMonths=[i];
-  updateMonthTabStyles(); updateRangeTabs(); refreshAll();
-}
-function setRange(r,el){
-  selRange=r;
-  if(r==='all') selMonths=ALL_MONTHS.map((_,i)=>i);
-  else if(r==='Q1') selMonths=[0,1,2];
-  else if(r==='Q2') selMonths=[3,4,5];
-  else if(r==='Q3') selMonths=[6,7,8];
-  else if(r==='Q4') selMonths=[9,10,11];
-  updateMonthTabStyles(); updateRangeTabs(); refreshAll();
-}
-function updateRangeTabs(){
-  ['all','Q1','Q2','Q3','Q4'].forEach(r=>{
-    const el=document.getElementById('range-'+r);
-    if(el) el.className='ft'+(selRange===r?' on':'');
-  });
-}
-function addYear(){
-  const y=prompt('輸入新年份（如：115）');
-  if(!y||isNaN(y)) return;
-  if(!D.years) D.years=[];
-  if(D.years.includes(y)){toast('此年份已存在','err');return;}
-  D.years.push(y);
-  D.monthly[y]=ALL_MONTHS.map(m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0}));
-  sd(D);D=ld();
-  selYear=y; buildYearTabs(); bMon(); toast(`${y}年已新增`);
-}
-function getMonData(){
-  const all=(D.monthly||{})[selYear]||[];
-  return selMonths.map(i=>all[i]).filter(Boolean);
-}
+function saveAllMon(){try{localStorage.setItem('lib_mon_v5',JSON.stringify(ALLMON));}catch(e){}}
+let ALLMON=loadAllMon();
+let CYR=114; // 當前顯示年度
 
-// ═══════════════════════════════
-//  CHART HELPERS
-// ═══════════════════════════════
-const P=['#4f8ef7','#6ee7b7','#fbbf24','#f87171','#c084fc','#34d399','#fb923c','#a78bfa','#60a5fa','#86efac','#fcd34d','#fca5a5','#e879f9','#5eead4','#93c5fd'];
+function getMon(yr){return ALLMON[yr]||MO.map(BLANK_MON);}
+function setMon(yr,mi,data){if(!ALLMON[yr])ALLMON[yr]=MO.map(BLANK_MON);ALLMON[yr][mi]={...data};saveAllMon();}
+function isMonFilled(mon){return mon.e>0||mon.ej>0||mon.edb>0||mon.bk>0;}
+
+// ════════════════════════════════════════════════════════════
+//  CHART 工具
+// ════════════════════════════════════════════════════════════
+const P=['#4f8ef7','#6ee7b7','#fbbf24','#f87171','#c084fc','#34d399','#fb923c','#a78bfa','#60a5fa','#86efac','#fcd34d','#fca5a5'];
 const CH={};
-const sa=a=>(a||[]).reduce((s,v)=>s+(v||0),0);
-function mkLine(id,lbs,ds,fill=false){
+const sa=a=>(a||[]).reduce((s,v)=>s+(+v||0),0);
+function mkLine(id,lbs,ds,fill=false,opts={}){
   const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();
-  CH[id]=new Chart(c,{type:'line',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,borderColor:d.c||P[i],backgroundColor:fill?(d.c||P[i])+'22':'transparent',borderWidth:2,fill,tension:.35,pointRadius:3}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10},autoSkip:false,maxRotation:45},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+  CH[id]=new Chart(c,{
+    type:'line',
+    data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,borderColor:d.c||P[i],backgroundColor:fill?(d.c||P[i])+'22':'transparent',borderWidth:2,fill,tension:.35,pointRadius:3}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:opts.legend||false}},scales:{x:{ticks:{color:'#8b92a8',font:{size:10},autoSkip:false,maxRotation:45},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
 }
 function mkBar(id,lbs,ds,st=false,hz=false){
   const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();
-  CH[id]=new Chart(c,{type:'bar',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,backgroundColor:(d.c||P[i])+'cc',borderWidth:0,borderRadius:2}))},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:{x:{stacked:st,ticks:{color:'#8b92a8',font:{size:10},autoSkip:false,maxRotation:45},grid:{color:'rgba(255,255,255,.05)'}},y:{stacked:st,ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
+  CH[id]=new Chart(c,{type:'bar',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,backgroundColor:(d.c||P[i])+'cc',borderWidth:0,borderRadius:hz?0:3}))},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:{x:{stacked:st,ticks:{color:'#8b92a8',font:{size:10},autoSkip:false,maxRotation:hz?0:45},grid:{color:'rgba(255,255,255,.05)'}},y:{stacked:st,ticks:{color:'#8b92a8',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'}}}}});
 }
 function mkPie(id,lbs,vs,cs){
   const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();
-  CH[id]=new Chart(c,{type:'doughnut',data:{labels:lbs,datasets:[{data:vs,backgroundColor:cs,borderWidth:2,borderColor:'#161b27'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8b92a8',font:{size:10},boxWidth:10,boxHeight:10,padding:8}}}}});
+  CH[id]=new Chart(c,{type:'doughnut',data:{labels:lbs,datasets:[{data:vs,backgroundColor:cs,borderWidth:2,borderColor:'#161b27'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8b92a8',font:{size:10},boxWidth:10,boxHeight:10,padding:7}}}}});
 }
 function legH(it){return it.map((x,i)=>`<div class="li"><span class="ld" style="background:${x.c||P[i]}"></span>${x.l}</div>`).join('');}
 function rankH(pairs,col){const mx=pairs[0]?.[1]||1;return pairs.map(([n,v],i)=>`<div class="ri"><span class="rn2">${i+1}</span><span class="rname">${n}</span><div class="rb"><div class="rf" style="width:${Math.round(v/mx*100)}%;background:${col}"></div></div><span class="rv">${v}</span></div>`).join('');}
-function tblH(cols,rows){let h=`<table><thead><tr>${cols.map((c,i)=>`<th${i>0?' style="min-width:44px"':''}>${c}</th>`).join('')}</tr></thead><tbody>`;rows.forEach(r=>{h+=`<tr${r._t?' class="tr-tot"':''}>${r.d.map(v=>`<td>${v??0}</td>`).join('')}</tr>`;});return h+'</tbody></table>';}
-function toast(msg,t='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),2800);}
+function tblH(cols,rows){let h=`<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;rows.forEach(r=>{h+=`<tr${r._tot?' class="tr-tot"':''}>${r.d.map(v=>`<td>${v??0}</td>`).join('')}</tr>`;});return h+'</tbody></table>';}
+function toast(msg,t='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3000);}
+function showProg(m){const el=document.getElementById('exp-progress');el.textContent=m;el.classList.add('show');}
+function hideProg(){setTimeout(()=>document.getElementById('exp-progress').classList.remove('show'),2200);}
 
-// ═══════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  年度切換按鈕
+// ════════════════════════════════════════════════════════════
+function buildYrSw(){
+  const sw=document.getElementById('yr-sw');
+  sw.innerHTML=YEARS.map(yr=>{
+    const mon=getMon(yr);
+    const filled=mon.filter(isMonFilled).length;
+    const isQ1=yr===115&&filled<=3&&filled>0;
+    return `<button class="yr-btn${yr===CYR?' on':''}${isQ1?' partial':''}" id="yrbtn-${yr}" onclick="setYr(${yr},this)">${yr}年</button>`;
+  }).join('');
+}
+function setYr(yr,el){
+  CYR=yr;
+  document.querySelectorAll('.yr-btn').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  const mon=getMon(yr);
+  const filled=mon.filter(isMonFilled).length;
+  const note=filled===0?'（尚無資料）':filled<12?`（${filled}/12月有資料）`:'（全年完整）';
+  document.getElementById('yr-sub').textContent=`天晟醫院教研中心 · 民國${yr}年 ${note}`;
+  bKPI();
+  const pid=document.querySelector('.page.on')?.id?.replace('page-','');
+  if(pid&&PB[pid])PB[pid]();
+}
+
+// ════════════════════════════════════════════════════════════
 //  KPI
-// ═══════════════════════════════
+// ════════════════════════════════════════════════════════════
 function bKPI(){
-  const rows=getMonData();
-  const te=sa(rows.map(r=>r.e)),tv=Object.values(D.vm).reduce((s,a)=>s+sa(selMonths.map(i=>a[i])),0);
-  const tje=sa(rows.map(r=>r.ej)),tdb=sa(rows.map(r=>r.edb));
+  const mon=getMon(CYR);
+  const te=sa(mon.map(m=>m.e)),tej=sa(mon.map(m=>m.ej)),tedb=sa(mon.map(m=>m.edb));
+  const filled=mon.filter(isMonFilled).length;
+  const sfx=filled<12&&filled>0?`（${filled}月）`:'';
   document.getElementById('kpi').innerHTML=[
-    {l:'現有館藏總量',v:D.col.total.toLocaleString(),s:`中文${D.col.chinese}/西文${D.col.english}`},
-    {l:'進館人次',v:te.toLocaleString(),s:rows.length>1?'月均 '+Math.round(te/rows.length):'單月'},
-    {l:'電子期刊使用',v:tje,s:'院內登入'},
-    {l:'電子資料庫',v:tdb,s:'院內登入'},
-    {l:'廠商提供量',v:Math.round(tv/1000)+'k',s:'含院外存取'},
+    {l:'現有館藏總量',v:SD.col.total.toLocaleString(),s:`中文${SD.col.chinese}/西文${SD.col.english}`},
+    {l:'單位工具書',v:SD.col.unit_books.toLocaleString(),s:`已註銷 ${SD.col.canceled.toLocaleString()} 冊`},
+    {l:`${CYR}年進館人次`,v:te>0?te.toLocaleString():'—',s:te>0?(filled===12?`月均${Math.round(te/12)}人`:`${sfx}累計`)+'':`尚無資料`},
+    {l:'電子期刊'+sfx,v:tej>0?tej:'—',s:'院內登入次數'},
+    {l:'電子資料庫'+sfx,v:tedb>0?tedb:'—',s:'院內登入次數'},
+  ].map((x,i)=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+//  總覽
+// ════════════════════════════════════════════════════════════
+function bOv(){
+  mkPie('c-lang',['中文','西文'],[SD.col.chinese,SD.col.english],['#4f8ef7','#6ee7b7']);
+  mkPie('c-type',['圖書','單位工具書','醫師工具書','光碟'],[SD.col.books,SD.col.unit_books,SD.col.doctor_books,SD.col.cd],['#4f8ef7','#6ee7b7','#fbbf24','#888']);
+  const mon=getMon(CYR);
+  mkPie('c-eres',['電子期刊','電子書','電子資料庫'],[sa(mon.map(m=>m.ej)),sa(mon.map(m=>m.eb)),sa(mon.map(m=>m.edb))],['#c084fc','#f87171','#fbbf24']);
+  const td=SD.domains.slice(0,12);
+  document.getElementById('dleg').innerHTML=legH([{c:'#4f8ef7',l:'中文'},{c:'#6ee7b7',l:'西文'}]);
+  mkBar('c-dom',td.map(x=>x.n.length>6?x.n.slice(0,6)+'…':x.n),[{l:'中文',d:td.map(x=>x.zh),c:'#4f8ef7'},{l:'西文',d:td.map(x=>x.en),c:'#6ee7b7'}],true);
+  const ra=getRole(CYR);
+  mkPie('c-role-pie',['醫師','藥劑','放射','檢驗','護理','物治','其他'],[ra.dr,ra.ph,ra.ra,ra.la,ra.nu,ra.pt,ra.ot],['#4f8ef7','#fbbf24','#f87171','#6ee7b7','#c084fc','#34d399','#fb923c']);
+}
+function getRole(yr){const mon=getMon(yr);return{dr:sa(mon.map(m=>m.dr)),ph:sa(mon.map(m=>m.ph)),ra:sa(mon.map(m=>m.ra)),la:sa(mon.map(m=>m.la)),nu:sa(mon.map(m=>m.nu)),pt:sa(mon.map(m=>m.pt)),ot:sa(mon.map(m=>m.ot)),total:sa(mon.map(m=>m.e))};}
+
+// ════════════════════════════════════════════════════════════
+//  月報管理（Key In 核心）
+// ════════════════════════════════════════════════════════════
+let kiYr=CYR,kiMi=0;
+const KI_FIELDS=[
+  {section:'一、進館人次（依職類）'},
+  {id:'e', label:'進館總人次',  hint:'所有職類合計'},
+  {id:'dr',label:'　醫師'},
+  {id:'ph',label:'　藥劑'},
+  {id:'ra',label:'　放射'},
+  {id:'la',label:'　檢驗'},
+  {id:'nu',label:'　護理'},
+  {id:'pt',label:'　物治'},
+  {id:'ot',label:'　其他'},
+  {section:'二、圖書借閱'},
+  {id:'bk',label:'圖書借閱（本）'},
+  {section:'三、電子資源（院內登入）'},
+  {id:'ej', label:'電子期刊'},
+  {id:'eb', label:'電子書'},
+  {id:'edb',label:'電子資料庫'},
+];
+
+function bMon(){
+  const mon=getMon(CYR);
+  const filled=mon.filter(isMonFilled).length;
+  document.getElementById('mon-yr-badge').textContent=`${CYR}年`;
+
+  // 完成度
+  const pct=Math.round(filled/12*100);
+  const barColor=filled===12?'#6ee7b7':filled>0?'#fbbf24':'#f87171';
+  document.getElementById('completeness-bar').innerHTML=`
+    <span class="cb-label">${CYR}年完成度</span>
+    <div class="cb-track"><div class="cb-fill" style="width:${pct}%;background:${barColor}"></div></div>
+    <span class="cb-count">${filled}/12 月</span>
+    <span style="color:${barColor};font-weight:700;font-size:.7rem">${pct}%</span>`;
+
+  // 管理者工具列
+  const aa=document.getElementById('mon-aa');
+  if(isAdm()){
+    aa.innerHTML=`
+      <button class="badd" onclick="openKeyIn(-1)">✏ 選月填入</button>
+      <button class="badd" onclick="toggleUpload()">📤 上傳Excel</button>
+      <button class="badd" onclick="resetYrData()" style="border-color:rgba(248,113,113,.3);color:var(--r)">⚠ 清除${CYR}年</button>`;
+  } else {
+    aa.innerHTML='<span style="font-size:.72rem;color:#565f77">瀏覽模式，管理者可編輯</span>';
+  }
+
+  // 月份卡片
+  const maxE=Math.max(...mon.map(m=>m.e),1);
+  document.getElementById('mon-cards').innerHTML=mon.map((m,i)=>{
+    const filled=isMonFilled(m);
+    const pct=Math.round(m.e/maxE*100);
+    const _oc = isAdm() ? 'onclick="openKeyIn('+i+')"' : '';
+    const _dot = filled ? '<div class="mc-full"></div>' : '<div class="mc-empty"></div>';
+    const _sub = filled ? '電子:'+(m.ej+m.eb+m.edb)+' 借:'+m.bk : '';
+    return '<div class="mon-card'+(filled?' has-data':'')+'" '+_oc+'>'+
+      _dot+
+      '<div class="mc-mo">'+m.m+'</div>'+
+      '<div class="mc-e">'+(m.e>0?m.e+' 人':'尚無資料')+'</div>'+
+      '<div class="mc-sub">'+_sub+'</div>'+
+      '<div class="mc-bar"><div class="mc-fill" style="width:'+pct+'%"></div></div>'+
+      '</div>';
+  }).join('');
+
+  document.getElementById('excel-upload-area').style.display='none';
+}
+
+function openKeyIn(mi){
+  if(!isAdm()){toast('需要管理者權限','err');return;}
+  kiYr=CYR; kiMi=mi<0?0:mi;
+  buildKiSelectors();
+  renderKiGrid();
+  document.getElementById('keyin-panel').classList.add('show');
+  document.getElementById('keyin-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function kiClose(){document.getElementById('keyin-panel').classList.remove('show');}
+
+function buildKiSelectors(){
+  const ysel=document.getElementById('ki-yr-sel');
+  ysel.innerHTML=YEARS.map(y=>`<option value="${y}"${y===kiYr?' selected':''}>${y}年</option>`).join('');
+  ysel.onchange=e=>{kiYr=+e.target.value;renderKiGrid();};
+  const msel=document.getElementById('ki-mo-sel');
+  msel.innerHTML=MO.map((m,i)=>`<option value="${i}"${i===kiMi?' selected':''}>${m}</option>`).join('');
+  msel.onchange=e=>{kiMi=+e.target.value;renderKiGrid();};
+}
+function kiSyncYrMo(){kiYr=+document.getElementById('ki-yr-sel').value;kiMi=+document.getElementById('ki-mo-sel').value;renderKiGrid();}
+
+function renderKiGrid(){
+  document.getElementById('ki-title').textContent=`📝 ${kiYr}年 ${MO[kiMi]} 月報資料`;
+  const mon=getMon(kiYr)[kiMi];
+  const grid=document.getElementById('ki-grid');
+  grid.innerHTML=KI_FIELDS.map(f=>{
+    if(f.section) return `<div class="ki-section">${f.section}</div>`;
+    const val=mon[f.id]||0;
+    const hasData=val>0;
+    return `<div class="ki-field">
+      <label>${f.label}${f.hint?`<span style="color:var(--text3);font-size:.6rem"> ${f.hint}</span>`:''}
+      </label>
+      <input type="number" id="ki-${f.id}" value="${val}" min="0" class="${hasData?'has-data':''}" oninput="this.classList.toggle('has-data',this.value>0)">
+    </div>`;
+  }).join('');
+}
+
+function kiSave(){
+  const obj={m:MO[kiMi]};
+  let hasAny=false;
+  for(const f of KI_FIELDS){
+    if(f.section)continue;
+    const v=parseInt(document.getElementById(`ki-${f.id}`)?.value)||0;
+    obj[f.id]=v;
+    if(v>0)hasAny=true;
+  }
+  setMon(kiYr,kiMi,obj);
+  ALLMON=loadAllMon();
+  bMon();bKPI();buildYrSw();
+  toast(`${kiYr}年 ${MO[kiMi]} 已儲存 ✓`,'ok');
+  // 自動跳下一月
+  if(kiMi<11){kiMi++;document.getElementById('ki-mo-sel').value=kiMi;renderKiGrid();}
+}
+
+function kiClear(){
+  if(!confirm(`確定清除 ${kiYr}年 ${MO[kiMi]} 的資料？`))return;
+  setMon(kiYr,kiMi,BLANK_MON(MO[kiMi]));
+  ALLMON=loadAllMon();
+  renderKiGrid();bMon();bKPI();
+  toast('已清除','info');
+}
+
+function resetYrData(){
+  if(!confirm(`確定清除 ${CYR}年 全部12個月的資料？\n此操作無法復原。`))return;
+  ALLMON[CYR]=MO.map(BLANK_MON);
+  saveAllMon();
+  bMon();bKPI();buildYrSw();
+  toast(`${CYR}年資料已清除`,'info');
+}
+
+function toggleUpload(){
+  const el=document.getElementById('excel-upload-area');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+function uzDrag(e,on){e.preventDefault();document.getElementById('upload-zone').classList.toggle('drag',on);}
+function uzDrop(e){e.preventDefault();uzDrag(e,false);const f=e.dataTransfer.files[0];if(f)processExcel(f);}
+function handleExcelUpload(e){const f=e.target.files[0];if(f)processExcel(f);}
+
+async function processExcel(file){
+  document.getElementById('upload-status').textContent='⏳ 載入 Excel 引擎…';
+  if(!window.XLSX){
+    await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+  }
+  try{
+    const buf=await file.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    let imported=0;
+    // 嘗試解析「各職類進出借閱統計」sheet
+    const sn1='各職類進出借閱統計';
+    if(wb.SheetNames.includes(sn1)){
+      const ws=wb.Sheets[sn1];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      let curYr=null,curMo=null;
+      const moMap=Object.fromEntries(MO.map((m,i)=>[m,i]));
+      for(const row of rows){
+        if(typeof row[0]==='number'&&row[0]>100)curYr=row[0]-1911; // 西元轉民國
+        if(typeof row[1]==='string'&&MO.includes(row[1]))curMo=moMap[row[1]];
+        if(curYr&&curMo!==null&&row[2]==='進舘人次統計'&&YEARS.includes(curYr)){
+          const mon=getMon(curYr)[curMo]||BLANK_MON(MO[curMo]);
+          mon.e=+row[10]||0;mon.dr=+row[3]||0;mon.ph=+row[4]||0;mon.ra=+row[5]||0;
+          mon.la=+row[6]||0;mon.nu=+row[7]||0;mon.pt=+row[8]||0;mon.ot=+row[9]||0;
+          setMon(curYr,curMo,mon);imported++;
+        }
+        if(curYr&&curMo!==null&&row[2]==='圖書借閱(本)'&&YEARS.includes(curYr)){
+          const mon=getMon(curYr)[curMo];if(mon){mon.bk=+row[10]||0;setMon(curYr,curMo,mon);}
+        }
+      }
+    }
+    // 嘗試解析「各職類登入電子資源統計」sheet
+    const sn2='各職類登入電子資源統計';
+    if(wb.SheetNames.includes(sn2)){
+      const ws=wb.Sheets[sn2];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      let curYr=null,curMo=null;
+      const moMap=Object.fromEntries(MO.map((m,i)=>[m,i]));
+      for(const row of rows){
+        if(typeof row[0]==='number'&&row[0]>100)curYr=row[0]-1911;
+        if(typeof row[1]==='string'&&MO.includes(row[1]))curMo=moMap[row[1]];
+        if(curYr&&curMo!==null&&YEARS.includes(curYr)){
+          const mon=getMon(curYr)[curMo];if(!mon)continue;
+          if(row[2]==='電子期刊'){mon.ej=+row[10]||0;setMon(curYr,curMo,mon);}
+          else if(row[2]==='電子書'){mon.eb=+row[10]||0;setMon(curYr,curMo,mon);}
+          else if(row[2]==='電子資料庫'){mon.edb=+row[10]||0;setMon(curYr,curMo,mon);}
+        }
+      }
+    }
+    ALLMON=loadAllMon();
+    bMon();bKPI();buildYrSw();
+    document.getElementById('upload-status').textContent=`✅ 匯入完成，共更新 ${imported} 個月份進館人次`;
+    toast(`Excel 匯入成功`,'ok');
+  }catch(err){
+    document.getElementById('upload-status').textContent='❌ 匯入失敗：'+err.message;
+    toast('匯入失敗','err');
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+//  資源使用
+// ════════════════════════════════════════════════════════════
+let ufm='year',ufq='Q1',ufmi=0,cuc='entry';
+const QS={Q1:[0,1,2],Q2:[3,4,5],Q3:[6,7,8],Q4:[9,10,11]};
+function gi(){if(ufm==='year')return MO.map((_,i)=>i);if(ufm==='quarter')return QS[ufq];return[ufmi];}
+function buildUFC(){
+  const fc=document.getElementById('ufc');fc.innerHTML='';
+  if(ufm==='year'){fc.innerHTML='<span style="font-size:.68rem;color:#565f77">全部12個月</span>';return;}
+  if(ufm==='quarter'){const s=document.createElement('select');s.innerHTML=['Q1','Q2','Q3','Q4'].map(q=>`<option${q===ufq?' selected':''}>${q}</option>`).join('');s.onchange=e=>{ufq=e.target.value;bUKPI();bUC(cuc);};fc.appendChild(s);return;}
+  const s=document.createElement('select');s.innerHTML=MO.map((m,i)=>`<option value="${i}"${i===ufmi?' selected':''}>${m}</option>`).join('');s.onchange=e=>{ufmi=+e.target.value;bUKPI();bUC(cuc);};fc.appendChild(s);
+}
+function setUM(m,el){ufm=m;document.querySelectorAll('#ufb .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');buildUFC();bUKPI();bUC(cuc);}
+function bUsage(){buildUFC();bUKPI();bUC(cuc);}
+function bUKPI(){
+  const mon=getMon(CYR);const rows=gi().map(i=>mon[i]);const n=rows.length;
+  const te=sa(rows.map(r=>r.e)),tj=sa(rows.map(r=>r.ej)),tdb=sa(rows.map(r=>r.edb));
+  document.getElementById('ukpi').innerHTML=[
+    {l:'進館人次',v:te||'—',s:n>1&&te?'月均'+Math.round(te/n):'單月'},
+    {l:'電子期刊',v:tj||'—',s:'院內登入'},
+    {l:'電子書',v:sa(rows.map(r=>r.eb))||'—',s:'院內登入'},
+    {l:'電子資料庫',v:tdb||'—',s:'院內登入'},
   ].map(x=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
 }
-
-// ═══════════════════════════════
-//  PAGE: 總覽
-// ═══════════════════════════════
-function bOv(){
-  mkPie('c-lang',['中文','西文'],[D.col.chinese,D.col.english],['#4f8ef7','#6ee7b7']);
-  mkPie('c-type',['圖書','單位工具書','醫師工具書','光碟'],[1565,D.col.unit_books,D.col.doctor_books,D.col.cd],['#4f8ef7','#6ee7b7','#fbbf24','#888780']);
-  const rows=getMonData();
-  const lbs=rows.map(r=>r.m);
-  const tje=sa(rows.map(r=>r.ej)),teb=sa(rows.map(r=>r.eb)),tdb=sa(rows.map(r=>r.edb));
-  mkPie('c-eres',['電子期刊','電子書','電子資料庫'],[tje,teb,tdb],['#c084fc','#f87171','#fbbf24']);
-  document.getElementById('ov-leg').innerHTML=legH([{c:'#4f8ef7',l:'進館人次'}]);
-  mkLine('c-entry',lbs,[{l:'進館人次',d:rows.map(r=>r.e),c:'#4f8ef7'}],true);
-  document.getElementById('ov-eres-leg').innerHTML=legH([{c:'#c084fc',l:'電子期刊'},{c:'#fbbf24',l:'電子資料庫'}]);
-  mkBar('c-ov-eres',lbs,[{l:'電子期刊',d:rows.map(r=>r.ej),c:'#c084fc'},{l:'電子資料庫',d:rows.map(r=>r.edb),c:'#fbbf24'}],true);
-}
-
-// ═══════════════════════════════
-//  PAGE: 資源使用
-// ═══════════════════════════════
-let cuc='entry',utbl='mon';
-function bUsage(){
-  bUC(cuc); bUTbl(utbl);
-  const rows=getMonData();
-  const tje=sa(rows.map(r=>r.ej)),teb=sa(rows.map(r=>r.eb)),tdb=sa(rows.map(r=>r.edb));
-  mkPie('c-u-pie',['電子期刊','電子書','電子資料庫'],[tje,teb,tdb],['#c084fc','#f87171','#fbbf24']);
-}
-function suc(m,el){cuc=m;document.querySelectorAll('#uct .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');bUC(m);}
 function bUC(m){
-  const rows=getMonData();const lbs=rows.map(r=>r.m);
-  if(m==='entry'){document.getElementById('u-leg').innerHTML=legH([{c:'#4f8ef7',l:'進館人次'}]);mkLine('c-usage',lbs,[{l:'進館人次',d:rows.map(r=>r.e),c:'#4f8ef7'}],true);}
-  else if(m==='eres'){document.getElementById('u-leg').innerHTML=legH([{c:'#c084fc',l:'電子期刊'},{c:'#f87171',l:'電子書'},{c:'#fbbf24',l:'電子資料庫'}]);mkBar('c-usage',lbs,[{l:'電子期刊',d:rows.map(r=>r.ej),c:'#c084fc'},{l:'電子書',d:rows.map(r=>r.eb),c:'#f87171'},{l:'電子資料庫',d:rows.map(r=>r.edb),c:'#fbbf24'}],true);}
-  else if(m==='db'){const ks=Object.keys(D.dbm);document.getElementById('u-leg').innerHTML=legH(ks.map((k,i)=>({c:P[i],l:k})));mkBar('c-usage',lbs,ks.map((k,i)=>({l:k,d:selMonths.map(idx=>D.dbm[k][idx]),c:P[i]})),true);}
-  else if(m==='vend'){const ks=Object.keys(D.vm);document.getElementById('u-leg').innerHTML=legH(ks.map((k,i)=>({c:P[i],l:k})));mkLine('c-usage',lbs,ks.map((k,i)=>({l:k,d:selMonths.map(idx=>D.vm[k][idx]),c:P[i]})));}
-  else if(m==='staff'){const ROLES=['醫師','藥劑','放射','檢驗','護理','物治','其他'];const RKEYS=['dr','ph','ra','la','nu','pt','ot'];document.getElementById('u-leg').innerHTML=legH(ROLES.map((r,i)=>({c:P[i],l:r})));mkBar('c-usage',lbs,RKEYS.map((k,i)=>({l:ROLES[i],d:rows.map(r=>r[k]||0),c:P[i]})),true);}
-}
-function setUTbl(t,el){utbl=t;document.querySelectorAll('#utbl-tabs .ft').forEach(x=>x.classList.remove('on'));el.classList.add('on');bUTbl(t);}
-function bUTbl(t){
-  const rows=getMonData();
-  let h='';
-  if(t==='mon'){
-    h=tblH(['月份','進館','電子期刊','電子書','資料庫','借閱'],rows.map(r=>({d:[r.m,r.e,r.ej,r.eb,r.edb,r.bk]})).concat([{d:['合計',sa(rows.map(r=>r.e)),sa(rows.map(r=>r.ej)),sa(rows.map(r=>r.eb)),sa(rows.map(r=>r.edb)),sa(rows.map(r=>r.bk))],_t:true}]));
-  } else if(t==='db'){
-    const ks=Object.keys(D.dbm);
-    h=tblH(['資料庫',...rows.map(r=>r.m),'合計'],ks.map(k=>({d:[k,...selMonths.map(i=>D.dbm[k][i]),sa(selMonths.map(i=>D.dbm[k][i]))]})));
-  } else {
-    const ks=Object.keys(D.vm);
-    h=tblH(['廠商',...rows.map(r=>r.m),'合計'],ks.map(k=>({d:[k,...selMonths.map(i=>D.vm[k][i]),sa(selMonths.map(i=>D.vm[k][i]))]})));
+  cuc=m;const mon=getMon(CYR);const lbs=gi().map(i=>MO[i]);const rows=gi().map(i=>mon[i]);
+  if(m==='entry'){document.getElementById('uleg').innerHTML=legH([{c:'#4f8ef7',l:'進館人次'}]);mkLine('c-usage',lbs,[{l:'進館人次',d:rows.map(r=>r.e||null),c:'#4f8ef7'}],true);}
+  else if(m==='eres'){document.getElementById('uleg').innerHTML=legH([{c:'#c084fc',l:'電子期刊'},{c:'#f87171',l:'電子書'},{c:'#fbbf24',l:'電子資料庫'}]);mkBar('c-usage',lbs,[{l:'電子期刊',d:rows.map(r=>r.ej),c:'#c084fc'},{l:'電子書',d:rows.map(r=>r.eb),c:'#f87171'},{l:'電子資料庫',d:rows.map(r=>r.edb),c:'#fbbf24'}],true);}
+  else{
+    const dbSrc=CYR===115?SD.dbm115q1:SD.dbm114;
+    const dkeys=Object.keys(dbSrc);
+    const validIdx=gi().filter(i=>i<(CYR===115?3:12));
+    const validLbs=validIdx.map(i=>MO[i]);
+    document.getElementById('uleg').innerHTML=legH(dkeys.map((k,i)=>({c:P[i],l:k})));
+    mkBar('c-usage',validLbs.length?validLbs:lbs,dkeys.map((k,i)=>({l:k,d:validIdx.map(mi=>(dbSrc[k]||[])[mi]||0),c:P[i]})),true);
   }
-  document.getElementById('u-table').innerHTML=h;
+}
+function suc(m,el){document.querySelectorAll('#uct .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');bUC(m);}
+
+// ════════════════════════════════════════════════════════════
+//  職類分析
+// ════════════════════════════════════════════════════════════
+const ROLES=[{k:'dr',l:'醫師',c:'#4f8ef7'},{k:'ph',l:'藥劑',c:'#fbbf24'},{k:'ra',l:'放射',c:'#f87171'},{k:'la',l:'檢驗',c:'#6ee7b7'},{k:'nu',l:'護理',c:'#c084fc'},{k:'pt',l:'物治',c:'#34d399'},{k:'ot',l:'其他',c:'#fb923c'}];
+function bRole(){
+  const mon=getMon(CYR);const ra=getRole(CYR);
+  const hasDr=ra.total>0;
+  document.getElementById('role-note').textContent=hasDr?`${CYR}年進館人次職類統計（總計 ${ra.total.toLocaleString()} 人次）`:`${CYR}年尚無進館人次資料，請先至「月報管理」填入資料`;
+  document.getElementById('role-cards').innerHTML=ROLES.map(r=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:.65rem .8rem;text-align:center"><div style="font-size:.65rem;color:var(--text2);margin-bottom:.2rem">${r.l}</div><div style="font-size:1.05rem;font-weight:700;color:${r.c};font-family:'DM Mono',monospace">${(ra[r.k]||0).toLocaleString()}</div><div style="font-size:.6rem;color:var(--text3);margin-top:.1rem">${ra.total>0?((ra[r.k]||0)/ra.total*100).toFixed(1)+'%':'—'}</div></div>`).join('');
+  mkBar('c-role-stack',MO,ROLES.map(r=>({l:r.l,d:mon.map(m=>m[r.k]||0),c:r.c})),true);
+  mkBar('c-role-eres',ROLES.map(r=>r.l),[{l:'電子期刊',d:ROLES.map(r=>sa(mon.map(m=>0))),c:'#c084fc'}]);
+  // 電子資源職類（114年有詳細資料）
+  if(CYR===114){
+    const ej={dr:104,ph:8,ra:44,la:154,nu:76,pt:60,ot:41};
+    const eb={dr:8,ph:0,ra:4,la:2,nu:6,pt:3,ot:2};
+    mkBar('c-role-eres',ROLES.map(r=>r.l),[{l:'電子期刊',d:ROLES.map(r=>ej[r.k]||0),c:'#c084fc'},{l:'電子書',d:ROLES.map(r=>eb[r.k]||0),c:'#f87171'}],true);
+  }
 }
 
-// ═══════════════════════════════
-//  PAGE: 館藏統計
-// ═══════════════════════════════
-function bColl(){
-  if(isAdm())document.getElementById('ab-coll').classList.add('show');
-  mkLine('c-coll',D.yl,[{l:'館藏量',d:D.yt,c:'#4f8ef7'}],true);
-  document.getElementById('dl').innerHTML=legH([{c:'#6ee7b7',l:'購入中文'},{c:'#4f8ef7',l:'購入西文'},{c:'#f87171',l:'註銷'}]);
-  mkBar('c-delta',D.yl,[{l:'購入中文',d:D.ybz,c:'#6ee7b7'},{l:'購入西文',d:D.ybe,c:'#4f8ef7'},{l:'註銷',d:D.yd,c:'#f87171'}]);
-  const cols=['類型',...D.py];
-  document.getElementById('t-purch').innerHTML=tblH(cols,D.pr.map(r=>({d:[r.n,...r.d],_t:r.n==='合計'})));
-}
-
-// ═══════════════════════════════
-//  PAGE: 期刊訂閱
-// ═══════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  期刊訂閱
+// ════════════════════════════════════════════════════════════
 function bJrnl(){
   if(isAdm())document.getElementById('ab-jrnl').classList.add('show');
-  const jy=D.jy;
-  let jh=`<table><thead><tr><th style="min-width:140px">期刊</th><th>型態</th>${jy.map(y=>`<th>${y}</th>`).join('')}${isAdm()?'<th>操作</th>':''}</tr></thead><tbody>`;
-  D.jl.forEach((j,i)=>{jh+=`<tr><td>${j.n}</td><td>${j.t}</td>${j.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}${isAdm()?`<td><button class="beditsm" onclick="openM('journal',${i})">編輯</button> <button class="bdelsm" onclick="delJ(${i})">刪除</button></td>`:''}</tr>`;});
-  jh+=`<tr class="tr-tot"><td>訂購數量</td><td></td>${D.jc.map(v=>`<td>${v}</td>`).join('')}${isAdm()?'<td></td>':''}</tr></tbody></table>`;
+  const jy=SD.jy;
+  let jh=`<table><thead><tr><th style="min-width:130px">期刊</th><th>型態</th>${jy.map(y=>`<th>${y}</th>`).join('')}${isAdm()?'<th>操作</th>':''}</tr></thead><tbody>`;
+  SD.jl.forEach((j,i)=>{jh+=`<tr><td>${j.n}</td><td>${j.t}</td>${j.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}${isAdm()?`<td><button class="beditsm" onclick="openM('journal',${i})">編輯</button></td>`:''}</tr>`;});
+  jh+=`<tr class="tr-tot"><td>訂購數量</td><td></td>${SD.jc.map(v=>`<td>${v}</td>`).join('')}${isAdm()?'<td></td>':''}</tr></tbody></table>`;
   document.getElementById('tjrnl').innerHTML=jh;
-  let dbh=`<table><thead><tr><th style="min-width:110px">資料庫</th>${jy.map(y=>`<th>${y}</th>`).join('')}${isAdm()?'<th>操作</th>':''}</tr></thead><tbody>`;
-  D.dbs.forEach((db,i)=>{dbh+=`<tr><td>${db.n}</td>${db.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}${isAdm()?`<td><button class="beditsm" onclick="openM('database',${i})">編輯</button> <button class="bdelsm" onclick="delDB(${i})">刪除</button></td>`:''}</tr>`;});
-  dbh+='</tbody></table>';
-  document.getElementById('tdb').innerHTML=dbh;
-  mkLine('c-jt',jy,[{l:'訂購數量',d:D.jc,c:'#4f8ef7'}],true);
+  let dbh=`<table><thead><tr><th style="min-width:100px">資料庫</th>${jy.map(y=>`<th>${y}</th>`).join('')}</tr></thead><tbody>`;
+  SD.dbs.forEach(db=>{dbh+=`<tr><td>${db.n}</td>${db.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}</tr>`;});
+  dbh+='</tbody></table>';document.getElementById('tdb').innerHTML=dbh;
+  mkLine('c-jt',jy,[{l:'訂購數量',d:SD.jc,c:'#4f8ef7'}],true);
+  const yrRankData=SD.jrnl_rank[CYR]||SD.jrnl_rank[114];
+  document.getElementById('jrnl-yr-label').textContent=`${CYR}年${CYR===115?' Q1':''}`;
+  document.getElementById('jrnl-rank').innerHTML=rankH([...yrRankData].sort((a,b)=>b.v-a.v).map(x=>[x.n,x.v]),'#c084fc');
 }
-function delJ(i){if(!confirm('確定刪除？'))return;D.jl.splice(i,1);D.jc=D.jy.map((_,yi)=>D.jl.filter(j=>j.d[yi]==='V').length);sd(D);D=ld();bJrnl();toast('已刪除');}
-function delDB(i){if(!confirm('確定刪除？'))return;D.dbs.splice(i,1);sd(D);D=ld();bJrnl();toast('已刪除');}
 
-// ═══════════════════════════════
-//  PAGE: 單位分布
-// ═══════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  單位分布
+// ════════════════════════════════════════════════════════════
 function bUnit(){
   if(isAdm())document.getElementById('ab-unit').classList.add('show');
-  const s=[...D.units].sort((a,b)=>b.v-a.v);
+  const s=[...SD.units].sort((a,b)=>b.v-a.v);
   mkBar('c-unit',s.slice(0,15).map(x=>x.n),[{l:'冊數',d:s.slice(0,15).map(x=>x.v),c:'#c084fc'}],false,true);
   document.getElementById('urf').innerHTML=rankH(s.map(x=>[x.n,x.v]),'#c084fc');
 }
 
-// ═══════════════════════════════
-//  PAGE: 月報輸入
-// ═══════════════════════════════
-let iedIdx=-1;
-function bMon(){
-  document.getElementById('mon-year-label').textContent=`民國${selYear}年`;
-  const aa=document.getElementById('mon-aa');
-  aa.innerHTML=isAdm()?`<button class="badd" onclick="openIED(-1)">＋ 新增月份</button><button class="badd" onclick="openM('addyear')">＋ 新增年份</button>`:'<span style="font-size:.73rem;color:#565f77">瀏覽模式</span>';
-  const allMon=(D.monthly||{})[selYear]||[];
-  const maxE=Math.max(1,...allMon.map(m=>m.e||0));
-  document.getElementById('mcards').innerHTML=allMon.map((m,i)=>`
-    <div class="mcard${iedIdx===i?' editing':''}" onclick="${isAdm()?`openIED(${i})`:''}">
-      <div class="mcard-h">
-        <span class="mcard-m">${m.m}</span>
-        <span class="mcard-e">${(m.e||0).toLocaleString()} 人</span>
-      </div>
-      <div class="mcard-d">電子：${(m.ej||0)+(m.eb||0)+(m.edb||0)} ｜ 借閱：${m.bk||0}</div>
-      <div class="mbar-bg"><div class="mbar-f" style="width:${Math.round((m.e||0)/maxE*100)}%"></div></div>
-    </div>`).join('');
-  if(iedIdx<0) closeIED();
+// ════════════════════════════════════════════════════════════
+//  跨年趨勢
+// ════════════════════════════════════════════════════════════
+let trendMetric='e';
+function setTrendMetric(m,el){trendMetric=m;document.querySelectorAll('#trend-metric .yr-range-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderTrend();}
+function bTrend(){renderTrend();bCollCharts();}
+function renderTrend(){
+  const labels=YEARS.map(y=>y+'年');
+  const metricLabel={e:'進館人次',ej:'電子期刊',edb:'電子資料庫',bk:'圖書借閱'}[trendMetric];
+  const ds=YEARS.map(yr=>{const mon=getMon(yr);return sa(mon.map(m=>m[trendMetric]));});
+  mkLine('c-trend-yr',labels,[{l:metricLabel,d:ds,c:'#4f8ef7'}],true);
+  document.getElementById('trend-max-yr').textContent=Math.max(...YEARS);
 }
-function openIED(idx){
-  if(!isAdm()){toast('需要管理者權限','err');return;}
-  iedIdx=idx;
-  const allMon=(D.monthly||{})[selYear]||[];
-  const m=idx>=0?{...allMon[idx]}:{m:'',e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0};
-  document.getElementById('ied-title').textContent=idx>=0?`編輯 ${selYear}年 ${m.m} 資料`:`新增 ${selYear}年 月份資料`;
-  ['dr','ph','ra','la','nu','pt','ot','bk','jo','ej','eb','edb'].forEach(k=>{
-    const el=document.getElementById('f-'+k);if(el) el.value=m[k]||0;
-  });
-  updateTotal();
-  const delBtn=document.getElementById('ied-del');
-  if(delBtn){delBtn.style.display=idx>=0?'':'none';delBtn.onclick=()=>delMon(idx);}
-  const saveBtn=document.getElementById('ied-save');
-  if(saveBtn) saveBtn.onclick=()=>saveMon(idx);
-  document.getElementById('ied').style.display='block';
-  bMon();
-}
-function updateTotal(){
-  const sum=['dr','ph','ra','la','nu','pt','ot'].reduce((s,k)=>{const el=document.getElementById('f-'+k);return s+(parseInt(el?.value)||0);},0);
-  const el=document.getElementById('f-e');if(el) el.value=sum;
-}
-['dr','ph','ra','la','nu','pt','ot'].forEach(k=>{
-  document.getElementById('f-'+k)?.addEventListener('input',updateTotal);
-});
-function saveMon(idx){
-  if(!isAdm()) return;
-  const g=id=>{const el=document.getElementById(id);return parseInt(el?.value)||0;};
-  if(!D.monthly) D.monthly={};
-  if(!D.monthly[selYear]) D.monthly[selYear]=[];
-  const allMon=D.monthly[selYear];
-  const obj={
-    m:idx>=0?allMon[idx].m:(document.getElementById('f-new-m')?.value||`${allMon.length+1}月`),
-    dr:g('f-dr'),ph:g('f-ph'),ra:g('f-ra'),la:g('f-la'),nu:g('f-nu'),pt:g('f-pt'),ot:g('f-ot'),
-    bk:g('f-bk'),jo:g('f-jo'),ej:g('f-ej'),eb:g('f-eb'),edb:g('f-edb'),
-  };
-  obj.e=['dr','ph','ra','la','nu','pt','ot'].reduce((s,k)=>s+obj[k],0);
-  if(idx>=0) allMon[idx]=obj; else allMon.push(obj);
-  sd(D);D=ld();iedIdx=-1;closeIED();bMon();bKPI();toast(idx>=0?`${obj.m} 已更新`:'新月份已新增');
-}
-function delMon(idx){
-  if(!confirm('確定刪除此月份資料？')) return;
-  (D.monthly[selYear]||[]).splice(idx,1);
-  sd(D);D=ld();iedIdx=-1;closeIED();bMon();bKPI();toast('已刪除');
-}
-function closeIED(){iedIdx=-1;document.getElementById('ied').style.display='none';}
-
-// ═══════════════════════════════
-//  PAGE: 進出館
-// ═══════════════════════════════
-let acGroup='全部';
-const ACCESS_DATA={total:1737,total_people:126,dates:["2026/01/13","2026/01/14","2026/01/15","2026/01/16","2026/01/19","2026/01/20","2026/01/21","2026/01/22","2026/01/23","2026/01/26","2026/01/27","2026/01/28","2026/01/29","2026/01/30","2026/01/31","2026/02/02","2026/02/03","2026/02/04","2026/02/05","2026/02/06","2026/02/07","2026/02/08","2026/02/09","2026/02/10","2026/02/11","2026/02/12","2026/02/13","2026/02/21","2026/02/23","2026/02/24","2026/02/25","2026/02/26","2026/03/02","2026/03/03","2026/03/04","2026/03/05","2026/03/06","2026/03/07","2026/03/08","2026/03/09","2026/03/10","2026/03/11","2026/03/12","2026/03/13","2026/03/16","2026/03/17","2026/03/18","2026/03/19","2026/03/20","2026/03/23","2026/03/24","2026/03/25","2026/03/26","2026/03/27","2026/03/30","2026/03/31"],groups:["PGY","其他醫事人員","實習生","復健","放射","檢驗","藥劑","行政人員","護理","醫師"],monthly:{"2026/01":{"行政人員":357,"醫師":29,"護理":88,"檢驗":14,"藥劑":11,"PGY":12,"放射":1,"其他醫事人員":1},"2026/02":{"行政人員":382,"護理":57,"醫師":40,"檢驗":6,"PGY":2,"放射":4,"復健":5,"藥劑":2,"實習生":1},"2026/03":{"行政人員":555,"醫師":59,"護理":82,"檢驗":8,"復健":6,"放射":13,"藥劑":2}},daily:{"2026/01/13":{"行政人員":5},"2026/01/14":{"行政人員":37,"醫師":3,"護理":3,"檢驗":1,"藥劑":1},"2026/01/15":{"行政人員":10},"2026/01/16":{"行政人員":45,"護理":11,"醫師":5,"藥劑":3,"檢驗":11},"2026/01/19":{"行政人員":25,"護理":2},"2026/01/20":{"行政人員":28,"醫師":5,"護理":20,"檢驗":1,"藥劑":2},"2026/01/21":{"行政人員":34,"護理":17,"藥劑":1},"2026/01/22":{"護理":4,"行政人員":16},"2026/01/23":{"行政人員":17,"護理":4,"PGY":1,"放射":1},"2026/01/26":{"行政人員":19,"藥劑":1,"護理":1},"2026/01/27":{"行政人員":30,"醫師":7,"護理":7,"藥劑":1},"2026/01/28":{"行政人員":39,"醫師":4,"護理":6,"檢驗":1,"藥劑":1},"2026/01/29":{"護理":9,"行政人員":13,"醫師":2,"藥劑":1},"2026/01/30":{"行政人員":38,"護理":4,"醫師":3,"PGY":11,"其他醫事人員":1},"2026/01/31":{"行政人員":1},"2026/02/02":{"行政人員":19,"護理":1},"2026/02/03":{"行政人員":29,"護理":10,"醫師":7,"檢驗":1},"2026/02/04":{"行政人員":35,"醫師":2,"護理":10,"檢驗":2},"2026/02/05":{"行政人員":20,"護理":5},"2026/02/06":{"行政人員":24,"醫師":5,"護理":1},"2026/02/07":{"醫師":2},"2026/02/08":{"醫師":4},"2026/02/09":{"醫師":2,"行政人員":23,"護理":1},"2026/02/10":{"行政人員":40,"護理":7,"醫師":7,"PGY":2},"2026/02/11":{"行政人員":34,"護理":3,"放射":1,"醫師":1,"檢驗":1},"2026/02/12":{"行政人員":19,"復健":5,"護理":1},"2026/02/13":{"行政人員":31,"護理":2,"醫師":2},"2026/02/21":{"行政人員":5},"2026/02/23":{"行政人員":34,"藥劑":2,"放射":1},"2026/02/24":{"行政人員":13,"醫師":4,"護理":8},"2026/02/25":{"行政人員":35,"醫師":4,"護理":8,"檢驗":2,"放射":1},"2026/02/26":{"行政人員":21,"放射":1,"實習生":1},"2026/03/02":{"行政人員":15,"醫師":1},"2026/03/03":{"行政人員":19,"醫師":4,"護理":11},"2026/03/04":{"行政人員":20},"2026/03/05":{"行政人員":17,"護理":1},"2026/03/06":{"行政人員":19,"護理":4,"醫師":2},"2026/03/07":{"行政人員":4},"2026/03/08":{"行政人員":1},"2026/03/09":{"行政人員":17},"2026/03/10":{"行政人員":26,"醫師":5,"護理":6},"2026/03/11":{"行政人員":39,"護理":2,"醫師":1,"檢驗":1},"2026/03/12":{"行政人員":12,"復健":4,"醫師":1},"2026/03/13":{"行政人員":36,"護理":4,"醫師":2,"檢驗":5},"2026/03/16":{"行政人員":25,"放射":1,"醫師":1},"2026/03/17":{"行政人員":33,"醫師":6,"護理":6},"2026/03/18":{"行政人員":23,"護理":16,"檢驗":2},"2026/03/19":{"行政人員":16,"醫師":1},"2026/03/20":{"行政人員":25,"醫師":5,"護理":5,"放射":12,"復健":2},"2026/03/23":{"行政人員":15,"護理":1,"醫師":1},"2026/03/24":{"行政人員":41,"醫師":11,"護理":5},"2026/03/25":{"行政人員":42,"護理":2,"醫師":1},"2026/03/26":{"行政人員":23,"醫師":4},"2026/03/27":{"行政人員":20,"醫師":4,"護理":4,"藥劑":2},"2026/03/30":{"行政人員":36},"2026/03/31":{"行政人員":31,"醫師":9,"護理":15}},gate:{"前門":1347,"後門":390},people:[{card:"8442837",name:"鍾蕙琦",group:"行政人員",visits:545,days:52},{card:"8401660",name:"戴珮如",group:"行政人員",visits:157,days:41},{card:"4541122",name:"王琇瑩",group:"行政人員",visits:146,days:40},{card:"5850699",name:"張家綺",group:"行政人員",visits:134,days:44},{card:"11758222",name:"黃祐珍",group:"行政人員",visits:102,days:38},{card:"48010",name:"鄭夙淇",group:"行政人員",visits:67,days:41},{card:"8461068",name:"李佳燕",group:"行政人員",visits:29,days:13},{card:"5850804",name:"游惠怡",group:"護理",visits:26,days:9},{card:"38418279",name:"王佳貞",group:"護理",visits:22,days:11},{card:"8461058",name:"翁國益",group:"醫師",visits:19,days:12},{card:"5100473",name:"鄭貴麟",group:"醫師",visits:17,days:12},{card:"5100404",name:"沈淑美",group:"護理",visits:17,days:8},{card:"5850768",name:"邱讚旺",group:"醫師",visits:16,days:10},{card:"47825",name:"廖珮玟",group:"護理",visits:16,days:9},{card:"8442816",name:"柳緒英",group:"護理",visits:15,days:9},{card:"8442896",name:"林美延",group:"護理",visits:14,days:12},{card:"48390",name:"李翊寧",group:"護理",visits:14,days:9},{card:"12219396",name:"周燕伺",group:"護理",visits:13,days:13},{card:"8461043",name:"葉如芳",group:"行政人員",visits:12,days:10},{card:"70356854",name:"利佳蓉",group:"檢驗",visits:11,days:3},{card:"11758204",name:"陳政元",group:"行政人員",visits:10,days:9},{card:"5850723",name:"林慶元",group:"檢驗",visits:9,days:7},{card:"5100464",name:"陳榮貴",group:"醫師",visits:9,days:8},{card:"12219475",name:"胡詔凱",group:"醫師",visits:9,days:9},{card:"8412101",name:"邱誌冠",group:"復健",visits:9,days:2},{card:"70356787",name:"黃盈焜",group:"藥劑",visits:8,days:7},{card:"48009",name:"李佩樺",group:"行政人員",visits:8,days:3},{card:"5100422",name:"蔡於民",group:"行政人員",visits:8,days:6},{card:"1226877",name:"吳昭頤",group:"行政人員",visits:7,days:6},{card:"13439",name:"徐慧美",group:"護理",visits:7,days:7}]};
-const ACCESS_ENTRIES=[["2026/01/13","15:37","戴珮如","行政人員","前門"],["2026/01/13","16:26","張家綺","行政人員","後門"],["2026/01/13","16:47","鍾蕙琦","行政人員","後門"],["2026/01/13","17:48","鍾蕙琦","行政人員","前門"],["2026/01/13","19:04","鍾蕙琦","行政人員","前門"],["2026/01/14","07:16","王琇瑩","行政人員","前門"],["2026/01/14","07:25","王琇瑩","行政人員","前門"],["2026/01/14","08:04","李易儒","醫師","前門"],["2026/01/14","08:04","高時貽","醫師","前門"],["2026/01/14","08:19","柳緒英","護理","前門"],["2026/01/14","09:12","鍾蕙琦","行政人員","前門"],["2026/01/14","10:56","鍾蕙琦","行政人員","前門"],["2026/01/14","11:26","黃祐珍","行政人員","前門"],["2026/01/14","11:58","張家綺","行政人員","後門"],["2026/01/14","12:04","王琇瑩","行政人員","前門"],["2026/01/14","12:04","鄭夙淇","行政人員","後門"],["2026/01/14","13:52","林慶元","檢驗","前門"],["2026/01/14","13:56","戴珮如","行政人員","前門"],["2026/01/14","13:59","鄭貴麟","醫師","前門"],["2026/01/14","13:59","林美延","護理","前門"],["2026/01/14","14:32","黃盈焜","藥劑","前門"],["2026/01/16","08:01","柳緒英","護理","前門"],["2026/01/16","08:05","周燕伺","護理","前門"],["2026/01/16","08:13","陳榮貴","醫師","前門"],["2026/01/16","10:28","利佳蓉","檢驗","前門"],["2026/01/20","07:40","游惠怡","護理","前門"],["2026/01/20","07:40","邱讚旺","醫師","前門"],["2026/01/20","07:43","沈淑美","護理","前門"],["2026/01/20","07:50","王佳貞","護理","前門"],["2026/01/20","08:37","王佳貞","護理","前門"],["2026/01/27","07:39","胡詔凱","醫師","前門"],["2026/01/27","07:41","游惠怡","護理","前門"],["2026/01/27","07:42","邱讚旺","醫師","前門"],["2026/01/27","07:46","王佳貞","護理","前門"],["2026/01/30","10:24","黃祐珍","行政人員","前門"],["2026/01/30","10:29","翁國益","醫師","前門"],["2026/02/03","07:43","沈淑美","護理","前門"],["2026/02/03","07:44","翁國益","醫師","前門"],["2026/02/03","07:44","游惠怡","護理","前門"],["2026/02/03","07:44","邱讚旺","醫師","前門"],["2026/02/03","13:30","翁國益","醫師","前門"],["2026/02/10","07:45","邱讚旺","醫師","前門"],["2026/02/10","07:47","胡詔凱","醫師","前門"],["2026/02/10","07:55","王佳貞","護理","前門"],["2026/02/25","08:01","陳榮貴","醫師","前門"],["2026/02/25","08:09","柳緒英","護理","前門"],["2026/03/03","07:34","翁國益","醫師","前門"],["2026/03/03","07:42","邱讚旺","醫師","前門"],["2026/03/03","07:42","游惠怡","護理","前門"],["2026/03/03","07:50","廖珮玟","護理","前門"],["2026/03/10","07:38","邱讚旺","醫師","前門"],["2026/03/17","07:40","邱讚旺","醫師","前門"],["2026/03/18","08:00","王佳貞","護理","前門"],["2026/03/18","08:02","游惠怡","護理","前門"],["2026/03/20","10:29","郭琬琪","放射","前門"],["2026/03/20","10:30","李孟穎","放射","前門"],["2026/03/20","10:40","翁國益","醫師","前門"],["2026/03/24","07:39","胡詔凱","醫師","前門"],["2026/03/24","07:41","邱讚旺","醫師","前門"],["2026/03/24","07:47","沈淑美","護理","前門"],["2026/03/31","07:23","翁國益","醫師","前門"],["2026/03/31","07:31","沈淑美","護理","前門"],["2026/03/31","07:38","邱讚旺","醫師","前門"],["2026/03/31","07:41","游惠怡","護理","前門"],["2026/03/31","07:44","廖珮玟","護理","前門"]];
-
-function bAccess(){
-  const d=ACCESS_DATA;
-  document.getElementById('ac-kpi').innerHTML=[
-    {l:'進館總人次',v:d.total.toLocaleString(),s:'僅計「進入」記錄'},
-    {l:'不重複人員',v:d.total_people,s:'不同卡號'},
-    {l:'前門使用',v:(d.gate['前門']||0),s:`佔${Math.round((d.gate['前門']||0)/d.total*100)}%`},
-    {l:'記錄天數',v:d.dates.length,s:`${d.dates[0].slice(5)}～${d.dates[d.dates.length-1].slice(5)}`},
-  ].map(x=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
-  const grps=d.groups;const dates=d.dates;
-  document.getElementById('ac-leg').innerHTML=legH(grps.map((g,i)=>({c:P[i],l:g})));
-  mkBar('ac-daily',dates.map(dt=>dt.slice(5)),grps.map((g,i)=>({l:g,d:dates.map(dt=>(d.daily[dt]||{})[g]||0),c:P[i]})),true);
-  const grpTot=grps.map(g=>Object.values(d.monthly).reduce((s,mv)=>s+(mv[g]||0),0));
-  mkPie('ac-pie',grps,grpTot,grps.map((_,i)=>P[i]));
-  const months=Object.keys(d.monthly).sort();
-  mkBar('ac-month',months,grps.map((g,i)=>({l:g,d:months.map(m=>(d.monthly[m]||{})[g]||0),c:P[i]})),true);
-  mkPie('ac-gate',['前門','後門'],[d.gate['前門']||0,d.gate['後門']||0],['#4f8ef7','#c084fc']);
-  document.getElementById('ac-gtabs').innerHTML=`<button class="ft${acGroup==='全部'?' on':''}" onclick="setACGroup('全部',this)">全部</button>`+grps.map(g=>`<button class="ft${acGroup===g?' on':''}" onclick="setACGroup('${g}',this)">${g}</button>`).join('');
-  document.getElementById('ac-fg').innerHTML='<option value="">全部職類</option>'+grps.map(g=>`<option>${g}</option>`).join('');
-  buildACPeople();filterAC();
-}
-function setACGroup(g,el){acGroup=g;document.querySelectorAll('#ac-gtabs .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');buildACPeople();}
-function buildACPeople(){
-  const d=ACCESS_DATA;
-  const fl=acGroup==='全部'?d.people:d.people.filter(p=>p.group===acGroup);
-  document.getElementById('ac-pcount').textContent=`（${fl.length}人）`;
-  let h=`<table><thead><tr><th style="width:28px">#</th><th style="text-align:left">姓名</th><th>職類</th><th>進館次數</th><th>出現天數</th></tr></thead><tbody>`;
-  fl.slice(0,30).forEach((p,i)=>{h+=`<tr><td>${i+1}</td><td>${p.name}</td><td>${p.group}</td><td>${p.visits}</td><td>${p.days}</td></tr>`;});
-  h+='</tbody></table>';
-  document.getElementById('ac-ptable').innerHTML=h;
-}
-function filterAC(){
-  const g=document.getElementById('ac-fg').value;
-  const gate=document.getElementById('ac-fgate').value;
-  const q=document.getElementById('ac-sch').value.trim();
-  let rows=ACCESS_ENTRIES;
-  if(g) rows=rows.filter(r=>r[3]===g);
-  if(gate) rows=rows.filter(r=>r[4]===gate);
-  if(q) rows=rows.filter(r=>r[2].includes(q));
-  document.getElementById('ac-cnt').textContent=`${rows.length} 筆`;
-  let h=`<table><thead><tr><th style="text-align:left">日期</th><th style="text-align:left">時間</th><th style="text-align:left">姓名</th><th>職類</th><th>門</th></tr></thead><tbody>`;
-  rows.slice(0,200).forEach(r=>{h+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`;});
-  if(rows.length>200) h+=`<tr><td colspan="5" style="text-align:center;color:var(--tx3);font-size:.7rem">顯示前200筆，共${rows.length}筆</td></tr>`;
-  h+='</tbody></table>';
-  document.getElementById('ac-table').innerHTML=h;
+function bCollCharts(){
+  mkLine('c-trend-coll',SD.yl,[{l:'館藏量',d:SD.yt,c:'#4f8ef7'}],true);
+  const tot=SD.pr.find(r=>r.n==='合計');
+  if(tot)mkBar('c-trend-buy',SD.py,[{l:'購入合計',d:tot.d,c:'#6ee7b7'}]);
 }
 
-// ═══════════════════════════════
-//  MODAL (期刊、資料庫、館藏)
-// ═══════════════════════════════
+// ════════════════════════════════════════════════════════════
+//  館藏統計
+// ════════════════════════════════════════════════════════════
+function bColl(){
+  if(isAdm())document.getElementById('ab-coll').classList.add('show');
+  mkLine('c-coll',SD.yl,[{l:'館藏量',d:SD.yt,c:'#4f8ef7'}],true);
+  document.getElementById('dl').innerHTML=legH([{c:'#6ee7b7',l:'購入中文'},{c:'#4f8ef7',l:'購入西文'},{c:'#f87171',l:'註銷'}]);
+  mkBar('c-delta',SD.yl,[{l:'購入中文',d:SD.ybz,c:'#6ee7b7'},{l:'購入西文',d:SD.ybe,c:'#4f8ef7'},{l:'註銷',d:SD.yd,c:'#f87171'}]);
+  document.getElementById('t-purch').innerHTML=tblH(['類型',...SD.py],SD.pr.map(r=>({d:[r.n,...r.d],_tot:r.n==='合計'})));
+}
+
+// ════════════════════════════════════════════════════════════
+//  Modal（期刊編輯 / 單位 / 館藏）
+// ════════════════════════════════════════════════════════════
 let mm='',mi=-1;
 function openM(mode,idx=-1){
   if(!isAdm()){toast('需要管理者權限','err');return;}
-  mm=mode;mi=idx;const jy=D.jy;
+  mm=mode;mi=idx;const jy=SD.jy;
   let title='',body='';
   if(mode==='journal'){
-    const j=idx>=0?D.jl[idx]:{n:'',t:'電子',d:jy.map(()=>'V')};
+    const j=idx>=0?SD.jl[idx]:{n:'',t:'電子',d:jy.map(()=>'V')};
     title=idx>=0?`編輯期刊：${j.n}`:'新增期刊';
-    body=`<div class="mf"><label>期刊名稱</label><input id="mj-n" value="${j.n}"></div>
-    <div class="mf"><label>型態</label><select id="mj-t"><option${j.t==='電子'?' selected':''}>電子</option><option${j.t==='紙本'?' selected':''}>紙本</option></select></div>
-    <div style="font-size:.7rem;color:var(--tx2);margin:.65rem 0 .45rem;font-weight:600">各年度訂閱狀況</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem">${jy.map((y,i)=>`<div class="mf"><label>${y}</label><select id="mj-d-${i}"><option${(j.d[i]||'V')==='V'?' selected':''}>V</option><option${(j.d[i]||'V')==='X'?' selected':''}>X</option></select></div>`).join('')}</div>`;
-  } else if(mode==='database'){
-    const db=idx>=0?D.dbs[idx]:{n:'',d:jy.map(()=>'V')};
-    title=idx>=0?`編輯資料庫：${db.n}`:'新增資料庫';
-    body=`<div class="mf"><label>資料庫名稱</label><input id="mdb-n" value="${db.n}"></div>
-    <div style="font-size:.7rem;color:var(--tx2);margin:.65rem 0 .45rem;font-weight:600">各年度訂閱狀況</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem">${jy.map((y,i)=>`<div class="mf"><label>${y}</label><select id="mdb-d-${i}"><option${(db.d[i]||'V')==='V'?' selected':''}>V</option><option${(db.d[i]||'V')==='X'?' selected':''}>X</option></select></div>`).join('')}</div>`;
-  } else if(mode==='unit'){
+    body=`<div class="mf" style="margin-bottom:.6rem"><label>期刊名稱</label><input id="mj-n" value="${j.n}"></div>
+    <div class="mf" style="margin-bottom:.6rem"><label>型態</label><select id="mj-t"><option${j.t==='電子'?' selected':''}>電子</option><option${j.t==='紙本'?' selected':''}>紙本</option></select></div>
+    <div style="font-size:.68rem;color:#8b92a8;margin-bottom:.4rem;font-weight:600">各年度訂閱</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem">${jy.map((y,i)=>`<div class="mf"><label>${y}</label><select id="mj-d-${i}"><option${(j.d[i]||'V')==='V'?' selected':''}>V</option><option${(j.d[i]||'V')==='X'?' selected':''}>X</option></select></div>`).join('')}</div>`;
+  }else if(mode==='unit'){
     title='新增單位';
-    body=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem"><div class="mf"><label>單位名稱</label><input id="mu-n"></div><div class="mf"><label>工具書冊數</label><input type="number" id="mu-v" value="0" min="0"></div></div>`;
-  } else if(mode==='coll_stat'){
-    title='更新館藏統計數字';
-    body=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
-      <div class="mf"><label>現有館藏總量</label><input type="number" id="mc-tot" value="${D.col.total}" min="0"></div>
-      <div class="mf"><label>中文館藏</label><input type="number" id="mc-zh" value="${D.col.chinese}" min="0"></div>
-      <div class="mf"><label>西文館藏</label><input type="number" id="mc-en" value="${D.col.english}" min="0"></div>
-      <div class="mf"><label>單位工具書</label><input type="number" id="mc-ub" value="${D.col.unit_books}" min="0"></div>
-      <div class="mf"><label>醫師工具書</label><input type="number" id="mc-db" value="${D.col.doctor_books}" min="0"></div>
-      <div class="mf"><label>已註銷冊數</label><input type="number" id="mc-can" value="${D.col.canceled}" min="0"></div>
+    body=`<div class="mg"><div class="mf"><label>單位名稱</label><input id="mu-n" value=""></div><div class="mf"><label>工具書冊數</label><input type="number" id="mu-v" value="0" min="0"></div></div>`;
+  }else if(mode==='coll_stat'){
+    title='更新館藏數字';
+    body=`<div class="mg">
+      <div class="mf"><label>現有館藏總量</label><input type="number" id="mc-tot" value="${SD.col.total}"></div>
+      <div class="mf"><label>中文館藏</label><input type="number" id="mc-zh" value="${SD.col.chinese}"></div>
+      <div class="mf"><label>西文館藏</label><input type="number" id="mc-en" value="${SD.col.english}"></div>
+      <div class="mf"><label>單位工具書</label><input type="number" id="mc-ub" value="${SD.col.unit_books}"></div>
+      <div class="mf"><label>醫師工具書</label><input type="number" id="mc-db" value="${SD.col.doctor_books}"></div>
+      <div class="mf"><label>已註銷冊數</label><input type="number" id="mc-can" value="${SD.col.canceled}"></div>
     </div>`;
-  } else if(mode==='yr_stat'){
-    title='更新歷年館藏量';
-    body=`<div style="font-size:.7rem;color:var(--tx2);margin-bottom:.5rem">各年度館藏現有量（冊）</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem">${D.yl.map((y,i)=>`<div class="mf"><label>${y}</label><input type="number" id="yr-${i}" value="${D.yt[i]}" min="0"></div>`).join('')}</div>`;
-  } else if(mode==='addyear'){
-    title='新增年份';
-    body=`<div class="mf"><label>年份（民國）</label><input id="new-year" placeholder="如：115" maxlength="3"></div>`;
   }
-  document.getElementById('mt').textContent=title;
-  document.getElementById('mb').innerHTML=body;
+  document.getElementById('mt').textContent=title;document.getElementById('mb').innerHTML=body;
   document.getElementById('mo').classList.add('show');
 }
 function closeM(){document.getElementById('mo').classList.remove('show');}
 function saveM(){
-  const jy=D.jy;
+  const jy=SD.jy;
   if(mm==='journal'){
     const n=document.getElementById('mj-n').value.trim();if(!n){toast('名稱不可空白','err');return;}
     const obj={n,t:document.getElementById('mj-t').value,d:jy.map((_,i)=>document.getElementById(`mj-d-${i}`).value)};
-    if(mi>=0)D.jl[mi]=obj;else D.jl.push(obj);
-    D.jc=jy.map((_,yi)=>D.jl.filter(j=>j.d[yi]==='V').length);
-  } else if(mm==='database'){
-    const n=document.getElementById('mdb-n').value.trim();if(!n){toast('名稱不可空白','err');return;}
-    const obj={n,d:jy.map((_,i)=>document.getElementById(`mdb-d-${i}`).value)};
-    if(mi>=0)D.dbs[mi]=obj;else D.dbs.push(obj);
-  } else if(mm==='unit'){
+    if(mi>=0)SD.jl[mi]=obj;else SD.jl.push(obj);
+    SD.jc=jy.map((_,yi)=>SD.jl.filter(j=>j.d[yi]==='V').length);
+    bJrnl();
+  }else if(mm==='unit'){
     const n=document.getElementById('mu-n').value.trim();if(!n){toast('名稱不可空白','err');return;}
-    D.units.push({n,v:parseInt(document.getElementById('mu-v').value)||0});
-  } else if(mm==='coll_stat'){
-    D.col.total=parseInt(document.getElementById('mc-tot').value)||0;
-    D.col.chinese=parseInt(document.getElementById('mc-zh').value)||0;
-    D.col.english=parseInt(document.getElementById('mc-en').value)||0;
-    D.col.unit_books=parseInt(document.getElementById('mc-ub').value)||0;
-    D.col.doctor_books=parseInt(document.getElementById('mc-db').value)||0;
-    D.col.canceled=parseInt(document.getElementById('mc-can').value)||0;
-  } else if(mm==='yr_stat'){
-    D.yt=D.yl.map((_,i)=>parseInt(document.getElementById(`yr-${i}`).value)||0);
-  } else if(mm==='addyear'){
-    const y=document.getElementById('new-year').value.trim();
-    if(!y||isNaN(y)){toast('請輸入有效年份','err');return;}
-    if(!D.years)D.years=[];
-    if(D.years.includes(y)){toast('此年份已存在','err');return;}
-    D.years.push(y.toString());
-    if(!D.monthly)D.monthly={};
-    D.monthly[y]=ALL_MONTHS.map(m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0}));
-    sd(D);D=ld();closeM();selYear=y;buildYearTabs();bMon();toast(`${y}年已新增`);return;
+    SD.units.push({n,v:parseInt(document.getElementById('mu-v').value)||0});
+    bUnit();
+  }else if(mm==='coll_stat'){
+    SD.col.total=+document.getElementById('mc-tot').value||0;
+    SD.col.chinese=+document.getElementById('mc-zh').value||0;
+    SD.col.english=+document.getElementById('mc-en').value||0;
+    SD.col.unit_books=+document.getElementById('mc-ub').value||0;
+    SD.col.doctor_books=+document.getElementById('mc-db').value||0;
+    SD.col.canceled=+document.getElementById('mc-can').value||0;
+    bKPI();bOv();bColl();
   }
-  sd(D);D=ld();closeM();bKPI();
-  if(mm==='journal'||mm==='database')bJrnl();
-  else if(mm==='unit')bUnit();
-  else bColl();
-  toast('資料已儲存');
+  closeM();toast('已儲存');
 }
 
-// ═══════════════════════════════
-//  NAV + INIT
-// ═══════════════════════════════
-const PB={ov:bOv,usage:bUsage,coll:bColl,jrnl:bJrnl,unit:bUnit,mon:bMon,access:bAccess};
-let curP='ov';
+// ════════════════════════════════════════════════════════════
+//  匯出功能
+// ════════════════════════════════════════════════════════════
+function exportCSV(){
+  showProg('⏳ 準備 CSV…');
+  const sheets=[
+    {name:`${CYR}年月報`,rows:[['月份','進館人次','醫師','藥劑','放射','檢驗','護理','物治','其他','圖書借閱','電子期刊','電子書','電子資料庫'],...getMon(CYR).map(m=>[m.m,m.e,m.dr,m.ph,m.ra,m.la,m.nu,m.pt,m.ot,m.bk,m.ej,m.eb,m.edb])]},
+    {name:'館藏統計',rows:[['項目','數值'],['現有館藏總量',SD.col.total],['中文館藏',SD.col.chinese],['西文館藏',SD.col.english],['單位工具書',SD.col.unit_books],['醫師工具書',SD.col.doctor_books],['已註銷',SD.col.canceled]]},
+    {name:'單位分布',rows:[['單位','冊數'],...[...SD.units].sort((a,b)=>b.v-a.v).map(u=>[u.n,u.v])]},
+  ];
+  sheets.forEach((s,i)=>setTimeout(()=>{
+    const bom='\uFEFF';
+    const csv=s.rows.map(r=>r.map(v=>{const str=String(v??'');return str.includes(',')||str.includes('"')?`"${str.replace(/"/g,'""')}"`  :str;}).join(',')).join('\r\n');
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([bom+csv],{type:'text/csv;charset=utf-8'}));a.download=`圖書館_${s.name}.csv`;a.click();URL.revokeObjectURL(a.href);
+    if(i===sheets.length-1){showProg('✅ CSV 匯出完成');hideProg();}
+  },i*600));
+}
+function exportExcel(){
+  showProg('⏳ 載入 Excel 引擎…');
+  if(window.XLSX){doXlsx();return;}
+  const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=doXlsx;s.onerror=()=>{showProg('❌ 無法載入引擎');hideProg();};document.head.appendChild(s);
+}
+function doXlsx(){
+  showProg('⏳ 產生 Excel…');
+  try{
+    const wb=XLSX.utils.book_new();
+    // 所有年度月報
+    for(const yr of YEARS){
+      const mon=getMon(yr);
+      const ws=XLSX.utils.aoa_to_sheet([
+        [`天晟醫院圖書館 ${yr}年月報統計`],[],
+        ['月份','進館人次','醫師','藥劑','放射','檢驗','護理','物治','其他','圖書借閱','電子期刊','電子書','電子資料庫'],
+        ...mon.map(m=>[m.m,m.e||'',m.dr||'',m.ph||'',m.ra||'',m.la||'',m.nu||'',m.pt||'',m.ot||'',m.bk||'',m.ej||'',m.eb||'',m.edb||'']),
+        ['合計',sa(mon.map(m=>m.e)),sa(mon.map(m=>m.dr)),sa(mon.map(m=>m.ph)),sa(mon.map(m=>m.ra)),sa(mon.map(m=>m.la)),sa(mon.map(m=>m.nu)),sa(mon.map(m=>m.pt)),sa(mon.map(m=>m.ot)),sa(mon.map(m=>m.bk)),sa(mon.map(m=>m.ej)),sa(mon.map(m=>m.eb)),sa(mon.map(m=>m.edb))],
+      ]);
+      XLSX.utils.book_append_sheet(wb,ws,`${yr}年月報`);
+    }
+    // 館藏統計
+    const ws2=XLSX.utils.aoa_to_sheet([['天晟醫院圖書館館藏統計'],[],['項目','數值'],['現有館藏總量',SD.col.total],['中文館藏',SD.col.chinese],['西文館藏',SD.col.english],['單位工具書',SD.col.unit_books],['醫師工具書',SD.col.doctor_books],['已註銷',SD.col.canceled]]);
+    XLSX.utils.book_append_sheet(wb,ws2,'館藏統計');
+    // 年度購入
+    const ws3=XLSX.utils.aoa_to_sheet([['天晟醫院圖書館年度購入'],[],['類型',...SD.py],...SD.pr.map(r=>[r.n,...r.d])]);
+    XLSX.utils.book_append_sheet(wb,ws3,'年度購入');
+    XLSX.writeFile(wb,`天晟醫院圖書館_統計報表_${CYR}年.xlsx`);
+    showProg('✅ Excel 匯出完成');hideProg();
+  }catch(err){showProg('❌ 匯出失敗：'+err.message);hideProg();}
+}
+function exportPDF(){
+  let ps=document.getElementById('print-style');
+  if(!ps){ps=document.createElement('style');ps.id='print-style';
+  ps.textContent=`@media print{@page{size:A4 landscape;margin:10mm}#ls,#kiosk-overlay,#exp-progress,.bexp,.bsm,.ab,#mon-aa,.mo,.toast,.nw,button.nb{display:none!important}body{background:#fff!important;color:#111!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}.topbar{position:relative;background:#1a2236!important;padding:6px 12px}.main{padding:6px!important;max-width:100%!important}.card{background:#f8f9fb!important;border:1px solid #dee2e8!important;page-break-inside:avoid;margin-bottom:6px}.page{display:block!important}.page+.page{page-break-before:always}canvas{max-height:180px!important}table{font-size:9px}thead th{background:#e8eef8!important;color:#333!important}}`;
+  document.head.appendChild(ps);}
+  setTimeout(()=>window.print(),300);
+}
+
+// ════════════════════════════════════════════════════════════
+//  大屏模式（Kiosk）
+// ════════════════════════════════════════════════════════════
+const KIOSK_INTERVAL=12000;
+let kioskTimer=null,kioskIdx=0,kioskPaused=false,kioskProgTimer=null,kioskProgStart=0;
+const KSLIDES=[
+  {id:'ks-kpi',title:'📊 年度總覽'},
+  {id:'ks-entry',title:'🚶 進館人次趨勢'},
+  {id:'ks-role',title:'👥 職類分析'},
+  {id:'ks-unit',title:'🏥 單位分布'},
+  {id:'ks-jrnl',title:'📰 電子資源'},
+];
+function enterKiosk(){
+  document.getElementById('kh-yr-sub').textContent=`民國${CYR}年`;
+  buildKioskSlides();startKioskClock();kioskIdx=0;kioskPaused=false;
+  document.getElementById('kpause-btn').textContent='⏸';
+  showKSlide(0);startKioskTimer();
+  document.body.classList.add('kiosk-mode');
+  const el=document.getElementById('kiosk-overlay');
+  if(el.requestFullscreen)el.requestFullscreen().catch(()=>{});
+}
+function exitKiosk(){document.body.classList.remove('kiosk-mode');clearInterval(kioskTimer);clearInterval(kioskProgTimer);if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});}
+
+function buildKioskSlides(){
+  const mon=getMon(CYR);const ra=getRole(CYR);
+  const te=sa(mon.map(m=>m.e)),tej=sa(mon.map(m=>m.ej)),tedb=sa(mon.map(m=>m.edb));
+  const body=document.getElementById('kiosk-body');
+  body.innerHTML=`
+  <div class="kslide" id="ks-kpi">
+    <div class="kslide-title">📊 ${CYR}年 總覽</div>
+    <div class="kg-k">${[{l:'現有館藏總量',v:SD.col.total.toLocaleString(),s:`中文${SD.col.chinese}/西文${SD.col.english}`,c:'#4f8ef7'},{l:'單位工具書',v:SD.col.unit_books.toLocaleString(),s:`已註銷 ${SD.col.canceled.toLocaleString()} 冊`,c:'#6ee7b7'},{l:`${CYR}年進館人次`,v:te>0?te.toLocaleString():'—',s:'',c:'#fbbf24'},{l:'電子期刊',v:tej>0?tej:'—',s:'院內登入',c:'#c084fc'},{l:'電子資料庫',v:tedb>0?tedb:'—',s:'院內登入',c:'#f87171'}].map(x=>`<div class="kc-k"><div class="kl">${x.l}</div><div class="kv" style="color:${x.c}">${x.v}</div><div class="ks">${x.s}</div></div>`).join('')}</div>
+    <div class="kslide-grid g3">
+      <div class="kcard"><div class="kcard-label">館藏語文比例</div><div class="kcard-chart"><canvas id="kc-lang"></canvas></div></div>
+      <div class="kcard"><div class="kcard-label">電子資源使用比例</div><div class="kcard-chart"><canvas id="kc-eres"></canvas></div></div>
+      <div class="kcard"><div class="kcard-label">職類進館比例</div><div class="kcard-chart"><canvas id="kc-role-pie"></canvas></div></div>
+    </div>
+  </div>
+  <div class="kslide" id="ks-entry">
+    <div class="kslide-title">🚶 ${CYR}年 進館人次月份趨勢</div>
+    <div class="kslide-grid g2">
+      <div class="kcard"><div class="kcard-label">各月進館人次</div><div class="kcard-chart"><canvas id="kc-entry"></canvas></div></div>
+      <div class="kcard"><div class="kcard-label">電子資源使用（月份）</div><div class="kcard-chart"><canvas id="kc-eres2"></canvas></div></div>
+    </div>
+  </div>
+  <div class="kslide" id="ks-role">
+    <div class="kslide-title">👥 ${CYR}年 職類使用分析</div>
+    <div class="kslide-grid g2">
+      <div class="kcard"><div class="kcard-label">職類進館堆疊</div><div class="kcard-chart"><canvas id="kc-role-stack"></canvas></div></div>
+      <div class="kcard" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;align-content:start">${[...ROLES,{k:'total',l:'合計',c:'#e8eaf0'}].map(r=>`<div style="text-align:center;padding:.5rem;background:rgba(255,255,255,.04);border-radius:6px"><div style="font-size:.58rem;color:#8b92a8;margin-bottom:.15rem">${r.l}</div><div style="font-size:1.3rem;font-weight:700;color:${r.c};font-family:'DM Mono',monospace">${(ra[r.k]||0).toLocaleString()}</div></div>`).join('')}</div>
+    </div>
+  </div>
+  <div class="kslide" id="ks-unit">
+    <div class="kslide-title">🏥 各單位工具書分布</div>
+    <div class="kslide-grid g2">
+      <div class="kcard"><div class="kcard-label">Top 15 單位</div><div class="kcard-chart"><canvas id="kc-unitbar"></canvas></div></div>
+      <div class="kcard"><div class="kcard-label">排行榜</div><div class="kcard-rank" id="kc-unit-rank"></div></div>
+    </div>
+  </div>
+  <div class="kslide" id="ks-jrnl">
+    <div class="kslide-title">📰 ${CYR}年 電子資源使用排行</div>
+    <div class="kslide-grid g2">
+      <div class="kcard"><div class="kcard-label">電子期刊使用排行</div><div class="kcard-rank" id="kc-jrnl-rank"></div></div>
+      <div class="kcard"><div class="kcard-label">期刊訂購趨勢</div><div class="kcard-chart"><canvas id="kc-jt"></canvas></div></div>
+    </div>
+  </div>`;
+  const rH=(pairs,col)=>pairs.map(([n,v],i)=>`<div style="display:flex;align-items:center;gap:.4rem;padding:.28rem 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:.58rem;color:#565f77;min-width:12px">${i+1}</span><span style="font-size:.67rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n}</span><div style="width:55px;height:3px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round(v/(pairs[0][1]||1)*100)}%;background:${col};border-radius:2px"></div></div><span style="font-size:.65rem;font-weight:700;color:#8b92a8;min-width:22px;text-align:right">${v}</span></div>`).join('');
+  const su=[...SD.units].sort((a,b)=>b.v-a.v);
+  document.getElementById('kc-unit-rank').innerHTML=rH(su.slice(0,10).map(u=>[u.n,u.v]),'#c084fc');
+  const jr=(SD.jrnl_rank[CYR]||SD.jrnl_rank[114]);
+  document.getElementById('kc-jrnl-rank').innerHTML=rH([...jr].sort((a,b)=>b.v-a.v).map(x=>[x.n,x.v]),'#c084fc');
+  document.getElementById('kprog-dots').innerHTML=KSLIDES.map((_,i)=>`<div class="kprog-dot" id="kd-${i}"></div>`).join('');
+}
+const KC={};
+function mkKC(id,type,lbs,ds,opts={}){
+  const c=document.getElementById(id);if(!c)return;if(KC[id])KC[id].destroy();
+  KC[id]=new Chart(c,{type,data:{labels:lbs,datasets:type==='doughnut'?[{data:ds,backgroundColor:opts.colors||P,borderWidth:2,borderColor:'#0a0c12'}]:ds.map((d,i)=>({label:d.l,data:d.d,borderColor:d.c||P[i],backgroundColor:type==='line'?(d.c||P[i])+'22':'transparent',fill:type==='line',borderWidth:2,tension:.35,pointRadius:2,borderRadius:3,...(type==='bar'?{backgroundColor:(d.c||P[i])+'cc'}:{})}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type==='doughnut',position:'bottom',labels:{color:'#8b92a8',font:{size:9},boxWidth:8,padding:5}}},scales:type==='doughnut'?{}:{x:{ticks:{color:'#6b7494',font:{size:9},autoSkip:true,maxRotation:45},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#6b7494',font:{size:9}},grid:{color:'rgba(255,255,255,.04)'}}}}});
+}
+function renderKioskCharts(idx){
+  const mon=getMon(CYR);
+  if(idx===0){
+    mkKC('kc-lang','doughnut',['中文','西文'],[SD.col.chinese,SD.col.english],{colors:['#4f8ef7','#6ee7b7']});
+    mkKC('kc-eres','doughnut',['電子期刊','電子書','電子資料庫'],[sa(mon.map(m=>m.ej)),sa(mon.map(m=>m.eb)),sa(mon.map(m=>m.edb))],{colors:['#c084fc','#f87171','#fbbf24']});
+    const ra=getRole(CYR);mkKC('kc-role-pie','doughnut',ROLES.map(r=>r.l),ROLES.map(r=>ra[r.k]||0),{colors:ROLES.map(r=>r.c)});
+  }else if(idx===1){
+    mkKC('kc-entry','line',MO,[{l:'進館',d:mon.map(m=>m.e||null),c:'#c084fc'}]);
+    mkKC('kc-eres2','bar',MO,[{l:'電子期刊',d:mon.map(m=>m.ej),c:'#c084fc'},{l:'電子書',d:mon.map(m=>m.eb),c:'#f87171'},{l:'電子資料庫',d:mon.map(m=>m.edb),c:'#fbbf24'}]);
+  }else if(idx===2){
+    mkKC('kc-role-stack','bar',MO,ROLES.map(r=>({l:r.l,d:mon.map(m=>m[r.k]||0),c:r.c})));
+  }else if(idx===3){
+    const s=[...SD.units].sort((a,b)=>b.v-a.v);
+    mkKC('kc-unitbar','bar',s.slice(0,15).map(x=>x.n),[{l:'冊數',d:s.slice(0,15).map(x=>x.v),c:'#c084fc'}]);
+  }else if(idx===4){
+    mkKC('kc-jt','line',SD.jy,[{l:'訂購數量',d:SD.jc,c:'#4f8ef7'}]);
+  }
+}
+function showKSlide(idx){
+  document.querySelectorAll('.kslide').forEach(s=>s.classList.remove('active'));
+  const s=document.getElementById(KSLIDES[idx]?.id);
+  if(s){s.classList.add('active');renderKioskCharts(idx);}
+  document.querySelectorAll('.kprog-dot').forEach((d,i)=>{d.className='kprog-dot'+(i===idx?' active':i<idx?' done':'');});
+  document.getElementById('kiosk-slide-label').textContent=`${idx+1}/${KSLIDES.length} · ${KSLIDES[idx]?.title}`;
+  resetKioskProgress();
+}
+function resetKioskProgress(){
+  clearInterval(kioskProgTimer);const bar=document.getElementById('kprog-bar');bar.style.width='0%';
+  if(kioskPaused)return;
+  kioskProgStart=Date.now();kioskProgTimer=setInterval(()=>{bar.style.width=Math.min(100,(Date.now()-kioskProgStart)/KIOSK_INTERVAL*100)+'%';},80);
+}
+function startKioskTimer(){clearInterval(kioskTimer);if(kioskPaused)return;kioskTimer=setInterval(()=>{kioskIdx=(kioskIdx+1)%KSLIDES.length;showKSlide(kioskIdx);},KIOSK_INTERVAL);}
+function kioskNext(){kioskIdx=(kioskIdx+1)%KSLIDES.length;showKSlide(kioskIdx);if(!kioskPaused){clearInterval(kioskTimer);startKioskTimer();}}
+function kioskPrev(){kioskIdx=(kioskIdx-1+KSLIDES.length)%KSLIDES.length;showKSlide(kioskIdx);if(!kioskPaused){clearInterval(kioskTimer);startKioskTimer();}}
+function kioskToggle(){kioskPaused=!kioskPaused;document.getElementById('kpause-btn').textContent=kioskPaused?'▶':'⏸';if(kioskPaused){clearInterval(kioskTimer);clearInterval(kioskProgTimer);}else{startKioskTimer();resetKioskProgress();}}
+function startKioskClock(){const days=['日','一','二','三','四','五','六'];setInterval(()=>{const n=new Date();document.getElementById('kiosk-clock').textContent=n.toTimeString().slice(0,8);document.getElementById('kiosk-date').textContent=`民國${n.getFullYear()-1911}年 ${n.getMonth()+1}月${n.getDate()}日（週${days[n.getDay()]}）`;},1000);}
+document.addEventListener('keydown',e=>{if(!document.body.classList.contains('kiosk-mode'))return;if(e.key==='ArrowRight')kioskNext();else if(e.key==='ArrowLeft')kioskPrev();else if(e.key===' '){e.preventDefault();kioskToggle();}else if(e.key==='Escape')exitKiosk();});
+
+// ════════════════════════════════════════════════════════════
+//  Nav & Init
+// ════════════════════════════════════════════════════════════
+const PB={ov:bOv,mon:bMon,usage:bUsage,role:bRole,jrnl:bJrnl,unit:bUnit,trend:bTrend,coll:bColl};
 function sp(p,el){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));
   document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
   document.getElementById('page-'+p).classList.add('on');el.classList.add('on');
-  curP=p;if(PB[p])PB[p]();
-}
-function refreshAll(){
-  bKPI();if(PB[curP])PB[curP]();
+  if(PB[p])PB[p]();
 }
 function initApp(){
-  if(!D.years||!D.years.length) D.years=['113','114'];
-  if(!D.monthly) D.monthly={};
-  if(!D.monthly['113']) D.monthly['113']=DD.monthly['113'];
-  if(!D.monthly['114']) D.monthly['114']=DD.monthly['114'];
-  selYear=D.years[D.years.length-1]||'114';
-  buildYearTabs();buildMonthTabs();
+  buildYrSw();bKPI();bOv();
   document.querySelectorAll('.ab').forEach(ab=>{if(ab.id!=='ab-mon')ab.style.display='none';});
-  bKPI();bOv();
 }
 </script>
 </body>
