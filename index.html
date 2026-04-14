@@ -662,23 +662,18 @@ const EJ_LIST=[
   '台灣實證醫學學會會刊','社區發展季刊',
 ];
 // 電子書清單(依11401，動態)
-const EB_LIST=[
-  "Comprehensive Atlas High-Res Endoscopy","Radiographic Image Analysis",
-  "Clinical Orthopaedic Rehabilitation","OSullivan Physical Rehabilitation",
-  "Vaginal Surgery for the Urologist","Hinmans Atlas Urologic Surgery",
-  "Sperling Pediatric Endocrinology","Washington Manual Critical Care",
-  "Pocket Guide Cardiac Catheterization",
-  "Washington Manual Medical Therapeutics","Pediatric Dermatology",
-  "The Mulligan Concept Manual Therapy","Wall Melzack Textbook of Pain",
-  "Diagnostic Imaging","Textbook of Critical Care",
-];
+const EB_LIST=["The Washington Manual of Critical Care","O'Sullivan & Schmitz's Physical Rehabilitation","Comprehensive Atlas High-Res Endoscopy","Pocket Guide Cardiac Catheterization","Zitelli and Davis' Atlas of Pediatric Physical Diagnosis","Wall & Melzack's Textbook of Pain","Vaginal Surgery for the Urologist","Urogynecology and Reconstructive Pelvic Surgery","Textbook of Critical Care","Surgical Techniques Shoulder Elbow Knee Sports Medicine","Clinical Scenarios in Surgery","Radiographic Image Analysis","Sperling Pediatric Endocrinology","Sabiston Textbook of Surgery","Principles and Practice of Pediatric Infectious Diseases","Stoelting's Anesthesia and Co-Existing Disease","Practice of Clinical Echocardiography","Pfenninger and Fowler's Procedures for Primary Care","Pediatric Dermatology","Pediatric Allergy","Oh's Intensive Care Manual","Netter's Clinical Anatomy","National Kidney Foundation Primer on Kidney Diseases","Musculoskeletal Imaging: Case Review Series","Medical Management Thoracic Surgery Patient","Mandell Douglas Bennett's Infectious Diseases","Imaging in Pediatrics","Hurwitz Clinical Pediatric Dermatology","Hinman's Atlas of Urologic Surgery","Ham's Primary Care Geriatrics","Goldman-Cecil Medicine E-Book","Fundamentals of Body CT","Evidence-Based Practice of Critical Care","Essential Orthopaedics","Electromyography and Neuromuscular Disorders","Diagnostic Ultrasound: Abdomen and Pelvis","Diagnostic Pathology: Nonneoplastic Dermatopathology","Critical Care Ultrasound","Complications of Urologic Surgery","Digital Health Care in Taiwan","Clinical Respiratory Medicine","Clinical Orthopaedic Rehabilitation: A Team Approach","Clinical Cases in Anesthesia","Orthopedic Physical Assessment 7/e","Chest Radiology","Campbell Walsh Wein Urology","Braddom's Physical Medicine and Rehabilitation","Benzel's Spine Surgery","Atlas of Pain Injection Techniques","Atlas of Human Anatomy","Anesthesia and Uncommon Diseases","Anatomy Trains E-Book","Aesthetic Plastic Surgery","250 Cases in Clinical Medicine","Guccione's Geriatric Physical Therapy","The Washington Manual of Critical Care (2nd)","Uterine Fibroids","The Mulligan Concept of Manual Therapy","Diagnostic Imaging","Atlas of Human Infectious Diseases","Non-invasive Ventilation and Weaning","The Washington Manual of Medical Therapeutics","Harwood-Nuss' Clinical Practice of Emergency Medicine","Kucers' The Use of Antibiotics","心血管疾病預防照護指引 (國健署109.04出版)","Neurologic Localization and Diagnosis","Neinstein's Adolescent and Young Adult Health Care","CT and MR in Cardiology"];
 // 資料庫清單(9筆)
 const DB_LIST=[
   'Clinicalkey','DynaMed','UpTodate','Lexicomp','CEPS(華藝)',
   'PubMed','Symskan','Sanford Guide','Cochrane Library',
 ];
 // 廠商提供量(6筆)
-const VM_LIST=['Clinical key','DynaMed','UpTodate','Lexicomp','CEPS','Kono雜誌庫'];
+// 廠商提供量依年度有不同項目
+const VM_LIST_109_110=['Clinical key','Micromedex','DynaMed','UpTodate','Lexicomp','CEPS','Kono雜誌庫'];
+const VM_LIST_111PLUS=['Clinical key','DynaMed','UpTodate','Lexicomp','CEPS','Kono雜誌庫'];
+function getVmList(yr){ return (yr<=110)?VM_LIST_109_110:VM_LIST_111PLUS; }
+const VM_LIST=VM_LIST_111PLUS; // 預設（向後相容）
 
 const BLANK_MON=m=>({
   m,
@@ -694,13 +689,13 @@ const BLANK_MON=m=>({
   // 三-1、期刊明細(17筆)
   ej_d:EJ_LIST.map(()=>0),
   // 三-1、電子書明細(15筆)
-  eb_d:EB_LIST.map(()=>0),
+  eb_d:EB_LIST.map(()=>0), // 68本
   // 三-2、電子資料庫職類
   edb_dr:0,edb_ph:0,edb_ra:0,edb_la:0,edb_nu:0,edb_pt:0,edb_ot:0,edb:0,
   // 三-2、資料庫明細(9筆)
   db_d:DB_LIST.map(()=>0),
   // 四、廠商提供量(6筆)
-  vm_d:VM_LIST.map(()=>0),
+  vm_d:getVmList(115).map(()=>0), // 長度依年度，存入時重設
 });
 
 // 內建已知資料(114年完整、115年Q1)
@@ -867,10 +862,11 @@ function bMon(){
   // 管理者工具列
   const aa=document.getElementById('mon-aa');
   if(isAdm()){
-    aa.innerHTML=`
-      <button class="badd" onclick="openKeyIn(-1)">✏ 選月填入</button>
-      <button class="badd" onclick="toggleUpload()">📤 上傳Excel</button>
-      <button class="badd" onclick="resetYrData()" style="border-color:rgba(248,113,113,.3);color:var(--r)">⚠ 清除${CYR}年</button>`;
+    aa.innerHTML=
+      '<button class="badd" onclick="openKeyIn(-1)">✏ 選月填入</button>'+
+      '<button class="badd" onclick="toggleUpload()">📤 上傳Excel</button>'+
+      '<button class="badd" onclick="openListMgr()">⚙ 管理品項清單</button>'+
+      '<button class="badd" style="border-color:rgba(248,113,113,.3);color:var(--r)" onclick="resetYrData()">⚠ 清除'+CYR+'年</button>';
   } else {
     aa.innerHTML='<span style="font-size:.72rem;color:#565f77">瀏覽模式，管理者可編輯</span>';
   }
@@ -979,8 +975,9 @@ function renderKiGrid(){
 
   // ── 四、廠商提供量 ──
   html+=sec('四、資料庫使用量【廠商提供】','#6ee7b7');
-  const vmd=mon.vm_d||VM_LIST.map(()=>0);
-  VM_LIST.forEach((name,i)=>{ html+=inp('vmd_'+i, vmd[i]||0, name); });
+  const vmList=getVmList(kiYr);
+  const vmd=mon.vm_d||(vmList.map(()=>0));
+  vmList.forEach((name,i)=>{ html+=inp('vmd_'+i, vmd[i]||0, name); });
 
   grid.innerHTML=html;
 
@@ -1028,7 +1025,7 @@ function kiSave(){
   obj.edb=roles.reduce((s,r)=>s+obj['edb_'+r],0)||g('edb-total');
   obj.db_d=DB_LIST.map((_,i)=>g('dbd_'+i));
   // 四、廠商提供量
-  obj.vm_d=VM_LIST.map((_,i)=>g('vmd_'+i));
+  obj.vm_d=getVmList(kiYr).map((_,i)=>g('vmd_'+i));
   setMon(kiYr,kiMi,obj);
   ALLMON=loadAllMon();
   bMon();bKPI();buildYrSw();
@@ -2620,6 +2617,734 @@ function _renderRoleTrend(roleKey) {
     [{ l: roleLabel + ' 進館人次', d: data, c: colors[roleKey] || '#4f8ef7' }],
     true
   );
+}
+
+// ════════════════════════════════════════════════════════════
+//  品項清單管理（新增電子期刊/電子書/資料庫/廠商）
+// ════════════════════════════════════════════════════════════
+
+function openListMgr() {
+  if (!isAdm()) { toast('需要管理者權限','err'); return; }
+
+  const tabs = [
+    { id:'ej',  label:'電子期刊',   list: EJ_LIST,      maxLabel:'共 '+EJ_LIST.length+' 種' },
+    { id:'eb',  label:'電子書',     list: EB_LIST,      maxLabel:'共 '+EB_LIST.length+' 種' },
+    { id:'db',  label:'資料庫',     list: DB_LIST,      maxLabel:'共 '+DB_LIST.length+' 個' },
+    { id:'vm',  label:'廠商提供量', list: VM_LIST,      maxLabel:'（依年度不同）' },
+  ];
+
+  let activeTab = 'ej';
+
+  const renderTab = (tabId) => {
+    activeTab = tabId;
+    const t = tabs.find(x => x.id === tabId);
+    const list = t.id === 'vm' ? getVmList(CYR) : t.list;
+    return (
+      '<div style="font-size:.72rem;color:var(--text2);margin-bottom:.55rem">' +
+      t.maxLabel + '　<span style="color:var(--text3)">點擊品項可刪除，拖曳可排序（開發中）</span>' +
+      '</div>' +
+      // 新增輸入欄
+      '<div style="display:flex;gap:.45rem;margin-bottom:.65rem">' +
+      '<input id="lm-new-name" placeholder="輸入新品項名稱..." style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:.42rem .7rem;color:var(--text);font-size:.82rem;font-family:inherit">' +
+      (t.id === 'vm' ?
+        '<select id="lm-vm-yr" style="font-size:.75rem;padding:.28rem .5rem;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg4);color:var(--text);font-family:inherit">' +
+        '<option value="all">所有年度</option>' +
+        '<option value="old">109–110年</option>' +
+        '<option value="new">111年起</option>' +
+        '</select>' : '') +
+      '<button class="badd" data-tab="'+tabId+'" onclick="lmAdd(this.dataset.tab)">＋ 新增</button>' +
+      '</div>' +
+      // 現有清單
+      '<div style="max-height:340px;overflow-y:auto;background:var(--bg3);border-radius:var(--r2);padding:.5rem">' +
+      list.map((name, i) =>
+        '<div style="display:flex;align-items:center;gap:.4rem;padding:.3rem .4rem;border-bottom:1px solid var(--border)">' +
+        '<span style="font-size:.65rem;color:var(--text3);min-width:22px;font-family:DM Mono,monospace">' + (i+1) + '</span>' +
+        '<span style="font-size:.75rem;flex:1">' + name + '</span>' +
+        '<button data-tab="'+tabId+'" data-idx="'+i+'" onclick="lmDel(this.dataset.tab,+this.dataset.idx)" style="font-size:.65rem;padding:.18rem .45rem;border-radius:3px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.07);color:var(--r);cursor:pointer">✕</button>' +
+        '</div>'
+      ).join('') +
+      '</div>'
+    );
+  };
+
+  const tabBar = tabs.map(t =>
+    '<button onclick="lmSwitchTab(this.dataset.tab)" data-tab="'+(t.id)+')" id="lm-tab-'+t.id+'" style="font-size:.76rem;padding:.3rem .7rem;border-radius:var(--r2);border:1px solid var(--border2);background:'+(t.id===activeTab?'var(--accent)':'transparent')+';color:'+(t.id===activeTab?'#fff':'var(--text2)')+';cursor:pointer;font-family:inherit">'+t.label+'</button>'
+  ).join('');
+
+  document.getElementById('mt').textContent = '⚙ 品項清單管理';
+  document.getElementById('mb').innerHTML =
+    '<div style="display:flex;gap:.4rem;margin-bottom:.75rem;flex-wrap:wrap" id="lm-tabs">' + tabBar + '</div>' +
+    '<div id="lm-body">' + renderTab('ej') + '</div>';
+  window._lmRender = renderTab;
+  document.getElementById('mo').classList.add('show');
+}
+
+function lmSwitchTab(tabId) {
+  // 更新 tab bar 樣式
+  ['ej','eb','db','vm'].forEach(t => {
+    const btn = document.getElementById('lm-tab-'+t);
+    if (btn) {
+      btn.style.background = t === tabId ? 'var(--accent)' : 'transparent';
+      btn.style.color      = t === tabId ? '#fff' : 'var(--text2)';
+    }
+  });
+  document.getElementById('lm-body').innerHTML = window._lmRender(tabId);
+}
+
+function lmAdd(tabId) {
+  const nameEl = document.getElementById('lm-new-name');
+  const name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { toast('請輸入品項名稱', 'err'); return; }
+
+  const listMap = { ej: EJ_LIST, eb: EB_LIST, db: DB_LIST };
+
+  if (tabId === 'vm') {
+    const scope = document.getElementById('lm-vm-yr')?.value || 'all';
+    if (scope === 'old' || scope === 'all') {
+      if (!VM_LIST_109_110.includes(name)) VM_LIST_109_110.push(name);
+    }
+    if (scope === 'new' || scope === 'all') {
+      if (!VM_LIST_111PLUS.includes(name)) VM_LIST_111PLUS.push(name);
+    }
+    toast('廠商「'+name+'」已新增 ✓');
+  } else {
+    const list = listMap[tabId];
+    if (!list) return;
+    if (list.includes(name)) { toast('「'+name+'」已存在', 'err'); return; }
+    list.push(name);
+    // 同步更新 BLANK_MON（現有月份資料需要補 0）
+    YEARS.forEach(yr => {
+      getMon(yr).forEach(m => {
+        if (tabId === 'ej' && m.ej_d) m.ej_d.push(0);
+        if (tabId === 'eb' && m.eb_d) m.eb_d.push(0);
+        if (tabId === 'db' && m.db_d) m.db_d.push(0);
+      });
+    });
+    saveAllMon();
+    toast('「'+name+'」已新增 ✓（'+list.length+'種）');
+  }
+
+  nameEl.value = '';
+  // 重新渲染清單
+  document.getElementById('lm-body').innerHTML = window._lmRender(tabId);
+}
+
+function lmDel(tabId, idx) {
+  const listMap = { ej: EJ_LIST, eb: EB_LIST, db: DB_LIST };
+  const list = listMap[tabId];
+
+  if (tabId === 'vm') {
+    const name109 = VM_LIST_109_110[idx];
+    const name111 = VM_LIST_111PLUS[idx];
+    if (!confirm('確定從廠商清單刪除？')) return;
+    VM_LIST_109_110.splice(idx, 1);
+    if (idx < VM_LIST_111PLUS.length) VM_LIST_111PLUS.splice(idx, 1);
+  } else {
+    if (!list) return;
+    const name = list[idx];
+    if (!confirm('確定刪除「'+name+'」？\n注意：現有月報資料中此品項的使用次數將一併移除。')) return;
+    list.splice(idx, 1);
+    // 同步移除各月份對應欄位
+    YEARS.forEach(yr => {
+      getMon(yr).forEach(m => {
+        if (tabId === 'ej' && m.ej_d && m.ej_d.length > idx) m.ej_d.splice(idx, 1);
+        if (tabId === 'eb' && m.eb_d && m.eb_d.length > idx) m.eb_d.splice(idx, 1);
+        if (tabId === 'db' && m.db_d && m.db_d.length > idx) m.db_d.splice(idx, 1);
+      });
+    });
+    saveAllMon();
+  }
+
+  toast('已刪除 ✓');
+  document.getElementById('lm-body').innerHTML = window._lmRender(tabId);
+}
+
+// ════════════════════════════════════════════════════════════
+//  預決算管理模組（Budget Management Module）
+//  天晟醫院教研中心圖書館
+//  資料來源：111-115圖書館預決算.xlsx + 102-112年度預決算分析表.xlsx
+// ════════════════════════════════════════════════════════════
+
+// ── 預決算靜態資料（102–115年，from Excel）──────────────────
+const BUDGET_DATA = {
+  // 格式：年度 → { budget:預算, actual:實際支出, items:[{name,budget,actual}] }
+  102: { budget:2420017, actual:2824991,
+    items:[{n:'圖書',b:110297,a:251414},{n:'醫師自購',b:354000,a:330838},{n:'多媒體',b:25300,a:17340},{n:'期刊類',b:1390000,a:1673123},{n:'電子資料庫',b:540420,a:552276}]},
+  103: { budget:3411092, actual:3381223,
+    items:[{n:'圖書',b:69659,a:47252},{n:'醫師自購',b:407000,a:339019},{n:'多媒體',b:35530,a:47770},{n:'期刊類',b:2358483,a:2200000},{n:'電子資料庫',b:540420,a:747182}]},
+  104: { budget:3220610, actual:2865620,
+    items:[{n:'圖書',b:215000,a:136889},{n:'醫師自購',b:96000,a:133445},{n:'NP自購',b:40000,a:8550},{n:'多媒體',b:131500,a:105210},{n:'期刊類',b:1678425,a:1476000},{n:'電子資料庫',b:1059685,a:1005526}]},
+  105: { budget:2856710, actual:2928515,
+    items:[{n:'圖書',b:674000,a:406415},{n:'多媒體',b:6000,a:4250},{n:'期刊類',b:1476000,a:1840000},{n:'電子資料庫',b:660710,a:672550},{n:'其他',b:40000,a:5300}]},
+  106: { budget:3099517, actual:2565877,
+    items:[{n:'圖書',b:600000,a:421030},{n:'期刊類',b:1840000,a:1450000},{n:'電子資料庫',b:620000,a:680647},{n:'其他',b:39517,a:14200}]},
+  107: { budget:2860000, actual:2463910,
+    items:[{n:'圖書',b:600000,a:401536},{n:'期刊類',b:1634000,a:1398000},{n:'電子資料庫',b:586000,a:650374},{n:'其他',b:40000,a:14000}]},
+  108: { budget:2899000, actual:2655929,
+    items:[{n:'圖書',b:195000,a:148068},{n:'期刊類',b:1086000,a:987000},{n:'電子資料庫',b:1578000,a:1505061},{n:'其他',b:40000,a:15800}]},
+  109: { budget:2910000, actual:2637105,
+    items:[{n:'圖書',b:195000,a:136492},{n:'期刊類',b:1077000,a:945000},{n:'電子資料庫',b:1598000,a:1540613},{n:'其他',b:40000,a:15000}]},
+  110: { budget:2934000, actual:2614826,
+    items:[{n:'圖書',b:195000,a:148068},{n:'期刊類',b:1079000,a:964000},{n:'電子資料庫',b:1620000,a:1487158},{n:'其他',b:40000,a:15600}]},
+  111: { budget:2821924, actual:2520744,
+    items:[{n:'圖書',b:195000,a:150811},{n:'期刊類',b:960298,a:901000},{n:'電子資料庫',b:1586626,a:1437947},{n:'其他',b:80000,a:30986}]},
+  112: { budget:2915372, actual:2653441,
+    items:[{n:'圖書',b:195000,a:158648},{n:'期刊類',b:921996,a:853000},{n:'電子資料庫',b:1738376,a:1625190},{n:'其他',b:60000,a:16603}]},
+  113: { budget:4260407, actual:3951158,
+    items:[{n:'圖書',b:195000,a:153611},{n:'期刊類',b:1207363,a:1102000},{n:'電子資料庫',b:2808044,a:2672040},{n:'其他',b:50000,a:23507}]},
+  114: { budget:4335294, actual:4116281,
+    items:[{n:'圖書',b:195000,a:115481},{n:'期刊類',b:1186365,a:1158450},{n:'電子資料庫',b:2903929,a:2815678},{n:'其他',b:50000,a:26672}]},
+  115: { budget:4501908, actual:4171576,
+    items:[{n:'圖書',b:195000,a:0},{n:'期刊類',b:1211707,a:1130560},{n:'電子資料庫',b:3035201,a:3034816},{n:'其他',b:60000,a:6200}]},
+};
+
+// 114年圖書各職類詳細
+const BUDGET_UNIT_114 = {
+  budget: { dr:80000, ph:25000, ra:10000, la:10000, nu:25000, pt:10000, ot:35000 },
+  actual: { dr:24485, ph:15498, ra:10180, la:8240,  nu:17667, pt:9507,  ot:29904 },
+};
+
+// 114年期刊廠商
+const BUDGET_JOURNAL_114 = [
+  { vendor:'飛資得', count:8, amount:892450 },
+  { vendor:'鳳聲',  count:4, amount:138000 },
+  { vendor:'Kono雜誌庫', count:1, amount:128000 },
+];
+
+// 114年電子資料庫細項
+const BUDGET_DB_114 = [
+  { name:'CK (Clinicalkey)', usd:50039, rate:31.64, twd:1641780, contract:'5年約(112-116)' },
+  { name:'UpTodate',         usd:19446, rate:32.81, twd:638023,  contract:'3年約(114-116)' },
+  { name:'Lexicomp',         usd:6139,  rate:32.81, twd:201421,  contract:'3年約(114-116)' },
+  { name:'DynaMed',          usd:0,     rate:1,     twd:211000,  contract:'1年約' },
+  { name:'CEPS',             usd:0,     rate:1,     twd:182000,  contract:'3年約(113-115)' },
+];
+
+// 115年預算（期刊廠商估算）
+const BUDGET_JOURNAL_115 = [
+  { vendor:'飛資得', count:8, amount:865000 },
+  { vendor:'鳳聲',  count:4, amount:130560 },
+  { vendor:'Kono雜誌庫', count:1, amount:135000 },
+];
+
+// ── localStorage 存放使用者更新的預決算 ─────────────────────
+function loadBudget() {
+  try {
+    const s = localStorage.getItem('lib_budget_v1');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(BUDGET_DATA));
+}
+function saveBudget(d) {
+  try { localStorage.setItem('lib_budget_v1', JSON.stringify(d)); }
+  catch(e) { toast('儲存失敗', 'err'); }
+}
+let BUDGET = null;
+function ensureBudget() {
+  if (!BUDGET) BUDGET = loadBudget();
+}
+
+// ── 格式化工具 ───────────────────────────────────────────────
+const _fmtNT  = v => v != null ? '$' + Math.round(v).toLocaleString() : '—';
+const _fmtPct = v => v != null ? (v * 100).toFixed(1) + '%' : '—';
+const _execColor = r => {
+  if (r == null) return 'var(--text3)';
+  if (r >= 0.95) return '#6ee7b7';
+  if (r >= 0.80) return '#fbbf24';
+  return '#f87171';
+};
+
+// ════════════════════════════════════════════════════════════
+//  預決算頁面主函式（page-budget）
+// ════════════════════════════════════════════════════════════
+let _budgetTab = 'overview'; // overview | trend | detail | edit
+
+function bBudget() {
+  if (isAdm()) document.getElementById('ab-budget').classList.add('show');
+  ensureBudget();
+  _renderBudgetTabs();
+  _renderBudgetContent(_budgetTab);
+}
+
+function _renderBudgetTabs() {
+  const tabDefs = [
+    { id:'overview', label:'📊 年度總覽' },
+    { id:'trend',    label:'📈 歷年趨勢' },
+    { id:'detail',   label:'🔍 支出細項' },
+    { id:'edit',     label:'✏ 資料編輯',  adminOnly:true },
+  ];
+  const bar = document.getElementById('budget-tab-bar');
+  if (!bar) return;
+  bar.innerHTML = tabDefs
+    .filter(t => !t.adminOnly || isAdm())
+    .map(t =>
+      '<button onclick="switchBudgetTab(\'' + t.id + '\')" id="btab-' + t.id + '" ' +
+      'style="font-size:.78rem;padding:.32rem .75rem;border-radius:var(--r2);border:1px solid var(--border2);' +
+      'background:' + (t.id === _budgetTab ? 'var(--accent)' : 'transparent') + ';' +
+      'color:' + (t.id === _budgetTab ? '#fff' : 'var(--text2)') + ';cursor:pointer;font-family:inherit">' +
+      t.label + '</button>'
+    ).join('');
+}
+
+function switchBudgetTab(tab) {
+  _budgetTab = tab;
+  _renderBudgetTabs();
+  _renderBudgetContent(tab);
+}
+
+function _renderBudgetContent(tab) {
+  const el = document.getElementById('budget-content');
+  if (!el) return;
+  if (tab === 'overview') _renderBudgetOverview(el);
+  else if (tab === 'trend') _renderBudgetTrend(el);
+  else if (tab === 'detail') _renderBudgetDetail(el);
+  else if (tab === 'edit') _renderBudgetEdit(el);
+}
+
+// ── 年度總覽 ─────────────────────────────────────────────────
+function _renderBudgetOverview(el) {
+  ensureBudget();
+  const years = Object.keys(BUDGET).map(Number).sort((a,b) => b - a);
+  const CUR = CYR; // 跟隨年度切換
+  const cur = BUDGET[CUR];
+
+  // KPI 卡片：本年度
+  let kpiHtml = '';
+  if (cur) {
+    const rate = cur.actual / cur.budget;
+    const diff = cur.actual - cur.budget;
+    kpiHtml =
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-bottom:1rem">' +
+      _kpiCard('預算總額（' + CUR + '年）', _fmtNT(cur.budget), '', 'var(--accent)') +
+      _kpiCard('實際支出', _fmtNT(cur.actual), cur.actual > 0 ? '已確認' : '待更新', 'var(--g)') +
+      _kpiCard('差異（結餘）', _fmtNT(Math.abs(diff)), diff >= 0 ? '▽ 結餘' : '▲ 超支', diff >= 0 ? 'var(--g)' : 'var(--r)') +
+      _kpiCard('預算執行率', _fmtPct(cur.actual / cur.budget), cur.actual > 0 ? '完整決算' : '預算中', _execColor(cur.actual / cur.budget)) +
+      '</div>';
+  }
+
+  // 各項目明細表
+  let tableHtml = '';
+  if (cur && cur.items) {
+    const rows = cur.items.map(it => {
+      const rate = it.a > 0 ? it.a / it.b : null;
+      const diff = it.b - it.a;
+      return (
+        '<tr>' +
+        '<td style="font-weight:500">' + it.n + '</td>' +
+        '<td>' + _fmtNT(it.b) + '</td>' +
+        '<td>' + (it.a > 0 ? _fmtNT(it.a) : '—') + '</td>' +
+        '<td style="color:' + (diff >= 0 ? 'var(--g)' : 'var(--r)') + '">' + (it.a > 0 ? _fmtNT(diff) : '—') + '</td>' +
+        '<td style="color:' + _execColor(rate) + ';font-weight:600">' + (rate ? _fmtPct(rate) : '—') + '</td>' +
+        '</tr>'
+      );
+    }).join('');
+    const total = cur.items.reduce((s,it) => s+it.b, 0);
+    const totalA = cur.items.reduce((s,it) => s+it.a, 0);
+    tableHtml =
+      '<div class="card" style="margin-bottom:1rem">' +
+      '<div class="ct">' + CUR + '年 各項目預算 vs 實際支出</div>' +
+      '<div class="tw">' +
+      '<table><thead><tr>' +
+      '<th style="text-align:left">項目</th>' +
+      '<th>預算金額</th><th>實際支出</th><th>差異（結餘）</th><th>執行率</th>' +
+      '</tr></thead><tbody>' + rows +
+      '<tr class="tr-tot">' +
+      '<td>合計</td>' +
+      '<td>' + _fmtNT(total) + '</td>' +
+      '<td>' + (totalA > 0 ? _fmtNT(totalA) : '—') + '</td>' +
+      '<td>' + (totalA > 0 ? _fmtNT(total - totalA) : '—') + '</td>' +
+      '<td style="color:' + _execColor(totalA > 0 ? totalA/total : null) + '">' + (totalA > 0 ? _fmtPct(totalA/total) : '—') + '</td>' +
+      '</tr>' +
+      '</tbody></table>' +
+      '</div></div>';
+  }
+
+  // 全年列表（歷年快速比較）
+  const yearRows = years.slice(0, 8).map(yr => {
+    const d = BUDGET[yr];
+    if (!d) return '';
+    const rate = d.actual > 0 ? d.actual / d.budget : null;
+    return (
+      '<tr' + (yr === CUR ? ' style="background:rgba(79,142,247,.08)"' : '') + '>' +
+      '<td style="font-weight:' + (yr===CUR?'700':'400') + '">' + yr + '年</td>' +
+      '<td>' + _fmtNT(d.budget) + '</td>' +
+      '<td>' + (d.actual > 0 ? _fmtNT(d.actual) : '—') + '</td>' +
+      '<td style="color:' + _execColor(rate) + ';font-weight:600">' + (rate ? _fmtPct(rate) : '—') + '</td>' +
+      '<td><div style="height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;width:80px">' +
+      '<div style="height:100%;width:' + Math.min(100, Math.round((rate||0)*100)) + '%;background:' + _execColor(rate) + ';border-radius:3px"></div>' +
+      '</div></td>' +
+      '</tr>'
+    );
+  }).join('');
+
+  el.innerHTML =
+    kpiHtml + tableHtml +
+    '<div class="card">' +
+    '<div class="ct">近年預算執行率概覽</div>' +
+    '<div class="tw">' +
+    '<table><thead><tr>' +
+    '<th style="text-align:left">年度</th><th>預算</th><th>實際支出</th><th>執行率</th><th>執行進度</th>' +
+    '</tr></thead><tbody>' + yearRows + '</tbody></table>' +
+    '</div></div>';
+}
+
+function _kpiCard(label, value, sub, color) {
+  return (
+    '<div class="kc">' +
+    '<div class="kl">' + label + '</div>' +
+    '<div class="kv" style="color:' + color + ';font-size:1.3rem">' + value + '</div>' +
+    '<div class="ks">' + sub + '</div>' +
+    '</div>'
+  );
+}
+
+// ── 歷年趨勢 ─────────────────────────────────────────────────
+function _renderBudgetTrend(el) {
+  ensureBudget();
+  el.innerHTML =
+    '<div class="g2">' +
+    '<div class="card"><div class="ct">歷年預算 vs 實際支出（102–' + Math.max(...Object.keys(BUDGET).map(Number)) + '年）</div>' +
+    '<div class="cw" style="height:240px"><canvas id="c-budget-trend"></canvas></div></div>' +
+    '<div class="card"><div class="ct">歷年預算執行率（%）</div>' +
+    '<div class="cw" style="height:240px"><canvas id="c-budget-rate"></canvas></div></div>' +
+    '</div>' +
+    '<div class="card" style="margin-top:1rem">' +
+    '<div class="ct">各項目歷年支出趨勢</div>' +
+    '<div class="leg" id="budget-item-leg"></div>' +
+    '<div class="cw" style="height:220px"><canvas id="c-budget-items"></canvas></div>' +
+    '</div>';
+
+  requestAnimationFrame(() => {
+    const years = Object.keys(BUDGET).map(Number).sort((a,b) => a-b);
+    const labels = years.map(y => y + '年');
+    const budgets = years.map(y => BUDGET[y]?.budget || 0);
+    const actuals = years.map(y => BUDGET[y]?.actual || null);
+    const rates   = years.map(y => {
+      const d = BUDGET[y];
+      return d?.actual > 0 ? parseFloat((d.actual/d.budget*100).toFixed(1)) : null;
+    });
+
+    // 趨勢圖
+    const c1 = document.getElementById('c-budget-trend');
+    if (c1) {
+      if (window._CH_bt) window._CH_bt.destroy();
+      window._CH_bt = new Chart(c1, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            { label:'預算', data:budgets, backgroundColor:'rgba(79,142,247,.5)', borderWidth:0, borderRadius:3 },
+            { label:'實際支出', data:actuals, backgroundColor:'rgba(110,231,183,.7)', borderWidth:0, borderRadius:3 },
+          ]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ display:true, position:'top', labels:{ color:'#8b92a8', font:{size:10}, boxWidth:10 } } },
+          scales:{
+            x:{ ticks:{ color:'#8b92a8', font:{size:9}, autoSkip:true, maxRotation:45 }, grid:{ color:'rgba(255,255,255,.05)' } },
+            y:{ ticks:{ color:'#8b92a8', font:{size:10}, callback: v => '$'+v.toLocaleString() }, grid:{ color:'rgba(255,255,255,.05)' } }
+          }
+        }
+      });
+    }
+
+    // 執行率折線
+    const c2 = document.getElementById('c-budget-rate');
+    if (c2) {
+      if (window._CH_br) window._CH_br.destroy();
+      window._CH_br = new Chart(c2, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label:'執行率(%)', data:rates, borderColor:'#fbbf24', backgroundColor:'rgba(251,191,36,.15)',
+              borderWidth:2, fill:true, tension:.35, pointRadius:4,
+              pointBackgroundColor: rates.map(r => r ? _execColor(r/100) : 'transparent') }
+          ]
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ ticks:{ color:'#8b92a8', font:{size:9}, autoSkip:true, maxRotation:45 }, grid:{ color:'rgba(255,255,255,.05)' } },
+            y:{ min:70, max:115, ticks:{ color:'#8b92a8', font:{size:10}, callback:v=>v+'%' }, grid:{ color:'rgba(255,255,255,.05)' } }
+          }
+        }
+      });
+    }
+
+    // 各項目堆疊
+    const itemNames = ['圖書','期刊類','電子資料庫','其他'];
+    const itemColors = ['#4f8ef7','#6ee7b7','#c084fc','#fbbf24'];
+    const c3 = document.getElementById('c-budget-items');
+    const legEl = document.getElementById('budget-item-leg');
+    if (legEl) legEl.innerHTML = itemNames.map((n,i) =>
+      '<div class="li"><span class="ld" style="background:' + itemColors[i] + '"></span>' + n + '</div>'
+    ).join('');
+    if (c3) {
+      if (window._CH_bi) window._CH_bi.destroy();
+      window._CH_bi = new Chart(c3, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: itemNames.map((name, ci) => ({
+            label: name,
+            data: years.map(y => {
+              const it = BUDGET[y]?.items?.find(x => x.n === name);
+              return it?.a || null;
+            }),
+            backgroundColor: itemColors[ci] + 'cc',
+            borderWidth:0, borderRadius:2,
+          }))
+        },
+        options: {
+          responsive:true, maintainAspectRatio:false,
+          plugins:{ legend:{ display:false } },
+          scales:{
+            x:{ stacked:true, ticks:{ color:'#8b92a8', font:{size:9}, autoSkip:true, maxRotation:45 }, grid:{ color:'rgba(255,255,255,.05)' } },
+            y:{ stacked:true, ticks:{ color:'#8b92a8', font:{size:10}, callback:v=>'$'+v.toLocaleString() }, grid:{ color:'rgba(255,255,255,.05)' } }
+          }
+        }
+      });
+    }
+  });
+}
+
+// ── 支出細項 ─────────────────────────────────────────────────
+function _renderBudgetDetail(el) {
+  // 顯示 114年完整細項（可依年切換）
+  const yr = CYR;
+  const dbRows = BUDGET_DB_114.map(d =>
+    '<tr>' +
+    '<td style="font-weight:500">' + d.name + '</td>' +
+    '<td style="font-family:DM Mono,monospace">' + (d.usd ? 'USD $' + d.usd.toLocaleString() : '—') + '</td>' +
+    '<td style="font-family:DM Mono,monospace">' + (d.rate !== 1 ? d.rate : '—') + '</td>' +
+    '<td style="font-family:DM Mono,monospace;color:var(--accent)">' + _fmtNT(d.twd) + '</td>' +
+    '<td style="font-size:.7rem;color:var(--text2)">' + d.contract + '</td>' +
+    '</tr>'
+  ).join('');
+
+  const journalRows = BUDGET_JOURNAL_114.map(j =>
+    '<tr>' +
+    '<td style="font-weight:500">' + j.vendor + '</td>' +
+    '<td style="text-align:center">' + j.count + ' 種</td>' +
+    '<td style="color:var(--accent);font-family:DM Mono,monospace">' + _fmtNT(j.amount) + '</td>' +
+    '</tr>'
+  ).join('');
+
+  const unitBudget = BUDGET_UNIT_114.budget;
+  const unitActual = BUDGET_UNIT_114.actual;
+  const roleLabels = { dr:'醫療部', ph:'藥劑', ra:'放射', la:'檢驗', nu:'護理', pt:'物治', ot:'其他' };
+  const unitRows = Object.keys(unitBudget).map(k =>
+    '<tr>' +
+    '<td style="font-weight:500">' + roleLabels[k] + '</td>' +
+    '<td>' + _fmtNT(unitBudget[k]) + '</td>' +
+    '<td>' + _fmtNT(unitActual[k]) + '</td>' +
+    '<td style="color:' + _execColor(unitActual[k]/unitBudget[k]) + ';font-weight:600">' + _fmtPct(unitActual[k]/unitBudget[k]) + '</td>' +
+    '<td><div style="height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;width:70px">' +
+    '<div style="height:100%;width:' + Math.min(100,Math.round(unitActual[k]/unitBudget[k]*100)) + '%;background:' + _execColor(unitActual[k]/unitBudget[k]) + ';border-radius:3px"></div></div></td>' +
+    '</tr>'
+  ).join('');
+
+  el.innerHTML =
+    '<div style="font-size:.72rem;color:var(--text3);background:var(--bg3);padding:.4rem .75rem;border-radius:var(--r2);margin-bottom:.85rem">' +
+    '⚠ 支出細項目前顯示 114年資料。如需查看其他年度，請切換頁面上方年度後重新進入此頁。' +
+    '</div>' +
+
+    '<div class="g2" style="margin-bottom:1rem">' +
+    // 電子資料庫細項
+    '<div class="card">' +
+    '<div class="ct">電子資料庫支出細項（114年）</div>' +
+    '<div class="tw">' +
+    '<table><thead><tr>' +
+    '<th style="text-align:left">品項</th><th>美金</th><th>匯率</th><th>台幣金額</th><th>合約</th>' +
+    '</tr></thead><tbody>' + dbRows + '</tbody></table>' +
+    '</div></div>' +
+    // 期刊廠商
+    '<div class="card">' +
+    '<div class="ct">期刊採購廠商（114年）</div>' +
+    '<div class="tw">' +
+    '<table><thead><tr><th style="text-align:left">廠商</th><th>品項數</th><th>費用</th></tr></thead>' +
+    '<tbody>' + journalRows +
+    '<tr class="tr-tot"><td>合計</td><td>' + BUDGET_JOURNAL_114.reduce((s,j)=>s+j.count,0) + ' 種</td>' +
+    '<td>' + _fmtNT(BUDGET_JOURNAL_114.reduce((s,j)=>s+j.amount,0)) + '</td></tr>' +
+    '</tbody></table>' +
+    '</div>' +
+    '<div style="margin-top:.85rem"><div class="ct">各職類圖書購書預算執行（114年）</div>' +
+    '<div class="tw">' +
+    '<table><thead><tr><th style="text-align:left">單位</th><th>預算</th><th>實支</th><th>執行率</th><th>進度</th></tr></thead>' +
+    '<tbody>' + unitRows + '</tbody></table>' +
+    '</div></div>' +
+    '</div></div>';
+}
+
+// ── 資料編輯（管理者）────────────────────────────────────────
+function _renderBudgetEdit(el) {
+  const years = Object.keys(BUDGET).map(Number).sort((a,b) => b - a);
+  const opts = years.map(y => '<option value="' + y + '"' + (y === CYR ? ' selected' : '') + '>' + y + '年</option>').join('');
+
+  el.innerHTML =
+    '<div class="card">' +
+    '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;flex-wrap:wrap">' +
+    '<div class="ct" style="margin:0">編輯年度預決算</div>' +
+    '<select id="budget-edit-yr" onchange="loadBudgetEditForm()" style="font-size:.75rem;padding:.28rem .55rem;border-radius:var(--r2);border:1px solid var(--border2);background:var(--bg4);color:var(--text);font-family:inherit">' +
+    opts + '</select>' +
+    '<button class="badd" onclick="addBudgetYear()">＋ 新增年度</button>' +
+    '</div>' +
+    '<div id="budget-edit-form"></div>' +
+    '</div>';
+
+  loadBudgetEditForm();
+}
+
+function loadBudgetEditForm() {
+  const yr = parseInt(document.getElementById('budget-edit-yr')?.value || CYR);
+  ensureBudget();
+  const d = BUDGET[yr] || { budget:0, actual:0, items:[] };
+  const items = d.items || [];
+
+  let rows = items.map((it, i) =>
+    '<tr>' +
+    '<td><input id="be-n-' + i + '" value="' + it.n + '" style="width:90px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:.28rem .4rem;color:var(--text);font-size:.75rem;font-family:inherit"></td>' +
+    '<td><input type="number" id="be-b-' + i + '" value="' + it.b + '" style="width:100px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:.28rem .4rem;color:var(--text);font-size:.75rem;font-family:DM Mono,monospace;text-align:right"></td>' +
+    '<td><input type="number" id="be-a-' + i + '" value="' + it.a + '" style="width:100px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:.28rem .4rem;color:var(--text);font-size:.75rem;font-family:DM Mono,monospace;text-align:right"></td>' +
+    '<td><button onclick="removeBudgetItem(' + i + ')" style="font-size:.65rem;padding:.18rem .4rem;border-radius:3px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.07);color:var(--r);cursor:pointer">✕</button></td>' +
+    '</tr>'
+  ).join('');
+
+  const formHtml =
+    '<table style="width:100%;border-collapse:collapse;font-size:.78rem">' +
+    '<thead><tr>' +
+    '<th style="text-align:left;padding:.4rem .5rem;background:var(--bg3);font-size:.68rem">項目名稱</th>' +
+    '<th style="padding:.4rem .5rem;background:var(--bg3);font-size:.68rem">預算金額</th>' +
+    '<th style="padding:.4rem .5rem;background:var(--bg3);font-size:.68rem">實際支出</th>' +
+    '<th style="padding:.4rem .5rem;background:var(--bg3);font-size:.68rem">刪除</th>' +
+    '</tr></thead>' +
+    '<tbody id="budget-edit-rows">' + rows + '</tbody>' +
+    '</table>' +
+    '<div style="display:flex;gap:.45rem;margin-top:.65rem;flex-wrap:wrap">' +
+    '<button class="badd" onclick="addBudgetItem()">＋ 新增項目</button>' +
+    '<button class="bsave" onclick="saveBudgetEdit(' + yr + ')">💾 儲存 ' + yr + '年</button>' +
+    '<button class="bcancel" onclick="bBudget()">取消</button>' +
+    '</div>';
+
+  const formEl = document.getElementById('budget-edit-form');
+  if (formEl) formEl.innerHTML = formHtml;
+  window._budgetEditCount = items.length;
+}
+
+function addBudgetItem() {
+  const n = window._budgetEditCount || 0;
+  const tbody = document.getElementById('budget-edit-rows');
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input id="be-n-' + n + '" placeholder="項目名稱" style="width:90px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:.28rem .4rem;color:var(--text);font-size:.75rem;font-family:inherit"></td>' +
+    '<td><input type="number" id="be-b-' + n + '" value="0" style="width:100px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:.28rem .4rem;color:var(--text);font-size:.75rem;font-family:DM Mono,monospace;text-align:right"></td>' +
+    '<td><input type="number" id="be-a-' + n + '" value="0" style="width:100px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;padding:.28rem .4rem;color:var(--text);font-size:.75rem;font-family:DM Mono,monospace;text-align:right"></td>' +
+    '<td><button onclick="this.closest(\'tr\').remove()" style="font-size:.65rem;padding:.18rem .4rem;border-radius:3px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.07);color:var(--r);cursor:pointer">✕</button></td>';
+  tbody.appendChild(tr);
+  window._budgetEditCount = n + 1;
+}
+
+function removeBudgetItem(idx) {
+  const n = document.getElementById('be-n-' + idx);
+  if (n) n.closest('tr').remove();
+}
+
+function saveBudgetEdit(yr) {
+  ensureBudget();
+  const rows = document.querySelectorAll('#budget-edit-rows tr');
+  const items = [];
+  rows.forEach((tr, i) => {
+    const nEl = tr.querySelector('[id^="be-n-"]');
+    const bEl = tr.querySelector('[id^="be-b-"]');
+    const aEl = tr.querySelector('[id^="be-a-"]');
+    const n = nEl?.value?.trim();
+    const b = parseFloat(bEl?.value) || 0;
+    const a = parseFloat(aEl?.value) || 0;
+    if (n) items.push({ n, b, a });
+  });
+  const budget = items.reduce((s,it) => s+it.b, 0);
+  const actual = items.reduce((s,it) => s+it.a, 0);
+  BUDGET[yr] = { budget, actual, items };
+  saveBudget(BUDGET);
+  toast(yr + '年預決算已儲存 ✓');
+  switchBudgetTab('overview');
+}
+
+function addBudgetYear() {
+  const yr = parseInt(prompt('請輸入新年度（民國年，如 116）:'));
+  if (!yr || yr < 100 || yr > 130) { toast('年度格式不正確', 'err'); return; }
+  ensureBudget();
+  if (BUDGET[yr]) { toast(yr + '年已存在', 'err'); return; }
+  BUDGET[yr] = { budget:0, actual:0, items:[{n:'圖書',b:0,a:0},{n:'期刊類',b:0,a:0},{n:'電子資料庫',b:0,a:0},{n:'其他',b:0,a:0}] };
+  saveBudget(BUDGET);
+  toast(yr + '年新增成功，請填入資料');
+  const sel = document.getElementById('budget-edit-yr');
+  if (sel) {
+    const opt = new Option(yr + '年', yr, true, true);
+    sel.insertBefore(opt, sel.firstChild);
+  }
+  loadBudgetEditForm();
+}
+
+// ── 初始化：注入 Nav 和頁面 ──────────────────────────────────
+(function initBudgetPage() {
+  window.addEventListener('DOMContentLoaded', () => {
+    // Nav 按鈕
+    const nav = document.querySelector('.nav');
+    if (nav && !document.getElementById('nav-budget')) {
+      const btn = document.createElement('button');
+      btn.className = 'nb';
+      btn.id = 'nav-budget';
+      btn.textContent = '💰 預決算';
+      btn.onclick = function() { sp('budget', this); };
+      // 插在關聯分析前
+      const refBtn = document.getElementById('nav-analysis');
+      if (refBtn) nav.insertBefore(btn, refBtn);
+      else nav.appendChild(btn);
+    }
+
+    // 頁面 HTML
+    const main = document.querySelector('.main');
+    if (main && !document.getElementById('page-budget')) {
+      const div = document.createElement('div');
+      div.className = 'page';
+      div.id = 'page-budget';
+      div.innerHTML =
+        '<div class="ab" id="ab-budget" style="display:none">' +
+        '<div class="aa">⚙ 管理者模式</div>' +
+        '<div class="aas"><button class="badd" onclick="switchBudgetTab(\'edit\')">✏ 編輯預決算</button>' +
+        '<button class="badd" onclick="exportBudgetCSV()">⬇ 匯出CSV</button></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:.4rem;margin-bottom:.75rem;flex-wrap:wrap" id="budget-tab-bar"></div>' +
+        '<div id="budget-content"></div>';
+      main.appendChild(div);
+    }
+
+    PB['budget'] = bBudget;
+  });
+})();
+
+// ── 匯出預決算 CSV ───────────────────────────────────────────
+function exportBudgetCSV() {
+  ensureBudget();
+  const bom = '\uFEFF';
+  const header = '年度,預算金額,實際支出,差異,執行率';
+  const years = Object.keys(BUDGET).map(Number).sort((a,b) => a-b);
+  const rows = years.map(yr => {
+    const d = BUDGET[yr];
+    const rate = d.actual > 0 ? (d.actual/d.budget*100).toFixed(1)+'%' : '—';
+    return yr + ',' + d.budget + ',' + d.actual + ',' + (d.budget-d.actual) + ',' + rate;
+  });
+  const csv = bom + header + '\r\n' + rows.join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+  a.download = '天晟醫院圖書館預決算_102-' + Math.max(...years) + '年.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('預決算 CSV 匯出完成');
 }
 
 </script>
