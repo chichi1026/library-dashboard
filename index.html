@@ -295,6 +295,8 @@ body.kiosk-mode #kiosk-overlay{display:flex}
 
     <!-- ── 總覽 ── -->
     <div class="page on" id="page-ov">
+      <!-- 預決算執行率卡片（動態注入）-->
+      <div id="ov-budget-kpi" style="background:var(--bg2);border:1px solid rgba(251,191,36,.2);border-radius:var(--rr);padding:.85rem 1.1rem;margin-bottom:1rem"></div>
       <div class="g3">
         <div class="card"><div class="ct">館藏語文比例</div><div class="cw" style="height:145px"><canvas id="c-lang"></canvas></div></div>
         <div class="card"><div class="ct">館藏類型比例</div><div class="cw" style="height:145px"><canvas id="c-type"></canvas></div></div>
@@ -835,6 +837,29 @@ function bOv(){
   mkBar('c-dom',td.map(x=>x.n.length>6?x.n.slice(0,6)+'…':x.n),[{l:'中文',d:td.map(x=>x.zh),c:'#4f8ef7'},{l:'西文',d:td.map(x=>x.en),c:'#6ee7b7'}],true);
   const ra=getRole(CYR);
   mkPie('c-role-pie',['醫師','藥劑','放射','檢驗','護理','物治','其他'],[ra.dr,ra.ph,ra.ra,ra.la,ra.nu,ra.pt,ra.ot],['#4f8ef7','#fbbf24','#f87171','#6ee7b7','#c084fc','#34d399','#fb923c']);
+  // 預決算執行率卡片
+  _renderBudgetKpiCard();
+}
+function _renderBudgetKpiCard(){
+  const el=document.getElementById('ov-budget-kpi');
+  if(!el||typeof BUDGET_DATA==='undefined')return;
+  ensureBudget();
+  const d=BUDGET[CYR];
+  if(!d){el.innerHTML='<div style="font-size:.72rem;color:var(--text3)">'+CYR+'年預決算資料待補</div>';return;}
+  const rate=d.actual>0?d.actual/d.budget:null;
+  const color=rate?_execColor(rate):'var(--text3)';
+  const diff=d.budget-d.actual;
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem">'+
+    '<span style="font-size:.7rem;font-weight:600;color:var(--text2)">'+CYR+'年預算執行率</span>'+
+    '<span style="font-size:1.1rem;font-weight:700;font-family:DM Mono,monospace;color:'+color+'">'+
+    (rate?Math.round(rate*100)+'%':'—')+'</span></div>'+
+    '<div style="height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:.3rem">'+
+    '<div style="height:100%;width:'+Math.min(100,Math.round((rate||0)*100))+'%;background:'+color+';border-radius:3px;transition:width .5s"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;font-size:.65rem;color:var(--text3)">'+
+    '<span>預算 '+_fmtNT(d.budget)+'</span>'+
+    '<span style="color:'+(diff>=0?'var(--g)':'var(--r)')+'">'+
+    (d.actual>0?(diff>=0?'結餘 ':'超支 ')+_fmtNT(Math.abs(diff)):'尚無決算')+'</span></div>';
 }
 function getRole(yr){const mon=getMon(yr);return{dr:sa(mon.map(m=>m.dr)),ph:sa(mon.map(m=>m.ph)),ra:sa(mon.map(m=>m.ra)),la:sa(mon.map(m=>m.la)),nu:sa(mon.map(m=>m.nu)),pt:sa(mon.map(m=>m.pt)),ot:sa(mon.map(m=>m.ot)),total:sa(mon.map(m=>m.e))};}
 
@@ -1059,7 +1084,8 @@ function uzDrop(e){e.preventDefault();uzDrag(e,false);const f=e.dataTransfer.fil
 function handleExcelUpload(e){const f=e.target.files[0];if(f)processExcel(f);}
 
 async function processExcel(file){
-  document.getElementById('upload-status').textContent='⏳ 載入 Excel 引擎…';
+  const statusEl=document.getElementById('upload-status');
+  statusEl.textContent='⏳ 載入 Excel 引擎…';
   if(!window.XLSX){
     await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
   }
@@ -1067,20 +1093,22 @@ async function processExcel(file){
     const buf=await file.arrayBuffer();
     const wb=XLSX.read(buf,{type:'array'});
     let imported=0;
-    // 嘗試解析「各職類進出借閱統計」sheet
+    const moMap=Object.fromEntries(MO.map((m,i)=>[m,i]));
+
+    // ── 格式A：有「各職類進出借閱統計」sheet（114年/115年格式）──
     const sn1='各職類進出借閱統計';
     if(wb.SheetNames.includes(sn1)){
-      const ws=wb.Sheets[sn1];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn1],{header:1,defval:null});
       let curYr=null,curMo=null;
-      const moMap=Object.fromEntries(MO.map((m,i)=>[m,i]));
       for(const row of rows){
-        if(typeof row[0]==='number'&&row[0]>100)curYr=row[0]-1911; // 西元轉民國
+        if(typeof row[0]==='number'&&row[0]>100)curYr=row[0]-1911;
         if(typeof row[1]==='string'&&MO.includes(row[1]))curMo=moMap[row[1]];
         if(curYr&&curMo!==null&&row[2]==='進舘人次統計'&&YEARS.includes(curYr)){
           const mon=getMon(curYr)[curMo]||BLANK_MON(MO[curMo]);
-          mon.e=+row[10]||0;mon.dr=+row[3]||0;mon.ph=+row[4]||0;mon.ra=+row[5]||0;
+          // 114+年格式：[年度,月份,內容,醫師,藥劑,放射,檢驗,護理,物治,其他,總計]
+          mon.dr=+row[3]||0;mon.ph=+row[4]||0;mon.ra=+row[5]||0;
           mon.la=+row[6]||0;mon.nu=+row[7]||0;mon.pt=+row[8]||0;mon.ot=+row[9]||0;
+          mon.e=+row[10]||0;
           setMon(curYr,curMo,mon);imported++;
         }
         if(curYr&&curMo!==null&&row[2]==='圖書借閱(本)'&&YEARS.includes(curYr)){
@@ -1088,13 +1116,10 @@ async function processExcel(file){
         }
       }
     }
-    // 嘗試解析「各職類登入電子資源統計」sheet
     const sn2='各職類登入電子資源統計';
     if(wb.SheetNames.includes(sn2)){
-      const ws=wb.Sheets[sn2];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn2],{header:1,defval:null});
       let curYr=null,curMo=null;
-      const moMap=Object.fromEntries(MO.map((m,i)=>[m,i]));
       for(const row of rows){
         if(typeof row[0]==='number'&&row[0]>100)curYr=row[0]-1911;
         if(typeof row[1]==='string'&&MO.includes(row[1]))curMo=moMap[row[1]];
@@ -1106,12 +1131,56 @@ async function processExcel(file){
         }
       }
     }
+
+    // ── 格式B：逐月 sheet（109年等舊格式，sheet名如10901,10902...）──
+    // 偵測：sheet名稱為5位數字，如10901
+    const monthSheets=wb.SheetNames.filter(s=>/^\d{5}$/.test(s));
+    if(monthSheets.length>0&&imported===0){
+      for(const sn of monthSheets){
+        const yrRaw=parseInt(sn.slice(0,3)); // 109
+        const moRaw=parseInt(sn.slice(3,5))-1; // 0-indexed
+        if(!YEARS.includes(yrRaw)||moRaw<0||moRaw>11)continue;
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:null});
+        const mon=getMon(yrRaw)[moRaw]||BLANK_MON(MO[moRaw]);
+        for(const row of rows){
+          if(!row[1])continue;
+          const label=String(row[1]);
+          // 進館人次：[_,職類,醫師,藥劑,放射,檢驗,護理,物治,其他,總計]
+          if(label==='次數'&&row[2]!==null){
+            mon.dr=+row[2]||0;mon.ph=+row[3]||0;mon.ra=+row[4]||0;
+            mon.la=+row[5]||0;mon.nu=+row[6]||0;mon.pt=+row[7]||0;mon.ot=+row[8]||0;
+            mon.e=+row[9]||0||[mon.dr,mon.ph,mon.ra,mon.la,mon.nu,mon.pt,mon.ot].reduce((s,v)=>s+v,0);
+          }
+          // 借閱
+          if(label==='圖書')mon.bk=+row[9]||[+row[2],+row[3],+row[4],+row[5],+row[6],+row[7],+row[8]].reduce((s,v)=>s+v,0);
+          // 電子期刊
+          if(label==='電子期刊'){
+            mon.ej_dr=+row[2]||0;mon.ej_ph=+row[3]||0;mon.ej_ra=+row[4]||0;
+            mon.ej_la=+row[5]||0;mon.ej_nu=+row[6]||0;mon.ej_pt=+row[7]||0;mon.ej_ot=+row[8]||0;
+            mon.ej=+row[9]||[mon.ej_dr,mon.ej_ph,mon.ej_ra,mon.ej_la,mon.ej_nu,mon.ej_pt,mon.ej_ot].reduce((s,v)=>s+v,0);
+          }
+          // 電子書
+          if(label==='電子書'){
+            mon.eb=[+row[2],+row[3],+row[4],+row[5],+row[6],+row[7],+row[8]].reduce((s,v)=>s+v,0);
+          }
+          // 電子資料庫
+          if(label==='電子資料庫'){
+            mon.edb_dr=+row[2]||0;mon.edb_ph=+row[3]||0;mon.edb_ra=+row[4]||0;
+            mon.edb_la=+row[5]||0;mon.edb_nu=+row[6]||0;mon.edb_pt=+row[7]||0;mon.edb_ot=+row[8]||0;
+            mon.edb=+row[9]||[mon.edb_dr,mon.edb_ph,mon.edb_ra,mon.edb_la,mon.edb_nu,mon.edb_pt,mon.edb_ot].reduce((s,v)=>s+v,0);
+          }
+        }
+        setMon(yrRaw,moRaw,mon);imported++;
+      }
+    }
+
     ALLMON=loadAllMon();
     bMon();bKPI();buildYrSw();
-    document.getElementById('upload-status').textContent=`✅ 匯入完成，共更新 ${imported} 個月份進館人次`;
-    toast(`Excel 匯入成功`,'ok');
+    const msg='✅ 匯入完成，共更新 '+imported+' 個月份進館人次';
+    statusEl.textContent=msg;
+    toast('Excel 匯入成功（'+imported+'個月）','ok');
   }catch(err){
-    document.getElementById('upload-status').textContent='❌ 匯入失敗：'+err.message;
+    statusEl.textContent='❌ 匯入失敗：'+err.message;
     toast('匯入失敗','err');
   }
 }
@@ -1265,7 +1334,14 @@ function openM(mode,idx=-1){
   document.getElementById('mt').textContent=title;document.getElementById('mb').innerHTML=body;
   document.getElementById('mo').classList.add('show');
 }
-function closeM(){document.getElementById('mo').classList.remove('show');}
+function closeM(){
+  document.getElementById('mo').classList.remove('show');
+  window._lmMode=false;
+  window._bookEditIdx=undefined;
+  window._ebookEditIdx=undefined;
+  const bsave=document.querySelector('.mfoot .bsave');
+  if(bsave)bsave.style.display='';
+}
 function saveM(){
   const jy=SD.jy;
   if(mm==='journal'){
@@ -2676,6 +2752,9 @@ function openListMgr() {
     '<div style="display:flex;gap:.4rem;margin-bottom:.75rem;flex-wrap:wrap" id="lm-tabs">' + tabBar + '</div>' +
     '<div id="lm-body">' + renderTab('ej') + '</div>';
   window._lmRender = renderTab;
+  window._lmMode = true; // 標記為品項管理模式
+  // 隱藏 modal 的儲存按鈕，只留關閉
+  document.querySelector('.mfoot .bsave').style.display='none';
   document.getElementById('mo').classList.add('show');
 }
 
