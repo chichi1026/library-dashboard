@@ -220,11 +220,21 @@ tbody tr.tr-tot td{background:rgba(16,185,129,.06);font-weight:700;color:var(--g
       <h1>圖書館資源統計儀表板</h1>
       <p>Library Resource Statistics Dashboard</p>
     </div>
-    <div class="fg"><label>帳號</label><input type="text" id="iu" placeholder="請輸入帳號" autocomplete="username"></div>
-    <div class="fg"><label>密碼</label><input type="password" id="ip" placeholder="請輸入密碼" autocomplete="current-password"></div>
-    <button class="bl" onclick="doLogin()">登入系統</button>
-    <div class="le" id="lerr">帳號或密碼錯誤，請重試</div>
-    <div class="lh">管理者：admin / lib2024 &nbsp;｜&nbsp; 瀏覽：lib / view123</div>
+    <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:.5rem">
+      <button class="bl" onclick="enterAsViewer()" style="background:linear-gradient(135deg,#1a2236,#212d45);border:1px solid rgba(255,255,255,.13)">
+        👁 閱覽者進入
+      </button>
+      <button class="bl" onclick="showAdminLogin()">
+        🔐 管理者登入
+      </button>
+    </div>
+    <!-- Admin password panel (hidden by default) -->
+    <div id="admin-panel" style="display:none;margin-top:.75rem">
+      <div class="fg"><label>管理者密碼</label><input type="password" id="ip" placeholder="請輸入密碼" autocomplete="current-password"></div>
+      <button class="bl" onclick="doAdminLogin()">確認登入</button>
+      <div class="le" id="lerr">密碼錯誤，請重試</div>
+      <button style="background:none;border:none;color:var(--tx3);font-size:.75rem;cursor:pointer;margin-top:.6rem;font-family:inherit;width:100%;" onclick="hideAdminLogin()">取消</button>
+    </div>
   </div>
 </div>
 
@@ -236,9 +246,9 @@ tbody tr.tr-tot td{background:rgba(16,185,129,.06);font-weight:700;color:var(--g
       <div><div class="tt">圖書館資源統計儀表板</div><div class="ts" id="topbar-sub">民國114年</div></div>
     </div>
     <div class="tr">
-      <span class="brole" id="rb">瀏覽者</span>
-      <span id="un" style="font-size:.73rem;color:var(--tx2)"></span>
-      <button class="bsm" onclick="doLogout()">登出</button>
+      <span class="brole" id="rb">閱覽者</span>
+      <button class="bsm" id="btn-switch-admin" onclick="promptAdminSwitch()" style="display:none">切換管理者</button>
+      <button class="bsm" onclick="doLogout()">離開</button>
     </div>
   </div>
 
@@ -524,24 +534,63 @@ tbody tr.tr-tot td{background:rgba(16,185,129,.06);font-weight:700;color:var(--g
 // ═══════════════════════════════════════════════
 //  AUTH
 // ═══════════════════════════════════════════════
-const ACCS={'admin':{pass:'lib2024',role:'admin',name:'管理員'},'lib':{pass:'view123',role:'viewer',name:'圖書館員'}};
+const ADMIN_PASS='lib2024';
 let CU=null;
-function doLogin(){
-  const u=document.getElementById('iu').value.trim(),p=document.getElementById('ip').value;
-  const e=document.getElementById('lerr');
-  if(ACCS[u]&&ACCS[u].pass===p){
-    CU={id:u,...ACCS[u]};e.style.display='none';
-    document.getElementById('ls').style.display='none';
-    document.getElementById('app').style.display='block';
-    document.getElementById('rb').textContent=CU.role==='admin'?'管理者':'瀏覽者';
-    document.getElementById('rb').className='brole'+(CU.role==='admin'?' adm':'');
-    document.getElementById('un').textContent=CU.name;
-    initApp();
-  } else { e.style.display='block'; }
+
+function enterAsViewer(){
+  CU={role:'viewer',name:'閱覽者'};
+  launchApp();
 }
-document.getElementById('ip').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-function doLogout(){CU=null;document.getElementById('app').style.display='none';document.getElementById('ls').style.display='flex';}
+function showAdminLogin(){
+  document.getElementById('admin-panel').style.display='block';
+  document.getElementById('ip').focus();
+}
+function hideAdminLogin(){
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('lerr').style.display='none';
+  document.getElementById('ip').value='';
+}
+function doAdminLogin(){
+  const p=document.getElementById('ip').value;
+  const e=document.getElementById('lerr');
+  if(p===ADMIN_PASS){
+    CU={role:'admin',name:'管理者'};
+    e.style.display='none';
+    launchApp();
+  } else {
+    e.style.display='block';
+  }
+}
+function launchApp(){
+  document.getElementById('ls').style.display='none';
+  document.getElementById('app').style.display='block';
+  const isAdmin=CU.role==='admin';
+  document.getElementById('rb').textContent=isAdmin?'管理者':'閱覽者';
+  document.getElementById('rb').className='brole'+(isAdmin?' adm':'');
+  // Show "切換管理者" only for viewer
+  document.getElementById('btn-switch-admin').style.display=isAdmin?'none':'';
+  initApp();
+}
+function promptAdminSwitch(){
+  const p=prompt('請輸入管理者密碼');
+  if(p===ADMIN_PASS){
+    CU={role:'admin',name:'管理者'};
+    document.getElementById('rb').textContent='管理者';
+    document.getElementById('rb').className='brole adm';
+    document.getElementById('btn-switch-admin').style.display='none';
+    refreshAll();
+    toast('已切換為管理者模式');
+  } else if(p!==null){
+    toast('密碼錯誤','err');
+  }
+}
+function doLogout(){CU=null;document.getElementById('app').style.display='none';document.getElementById('ls').style.display='flex';hideAdminLogin();}
 const isAdm=()=>CU&&CU.role==='admin';
+// Allow Enter key in admin password field
+document.addEventListener('DOMContentLoaded',()=>{
+  const ip=document.getElementById('ip');
+  if(ip) ip.addEventListener('keydown',e=>{if(e.key==='Enter')doAdminLogin();});
+});
 
 // ═══════════════════════════════════════════════
 //  DEFAULT DATA
