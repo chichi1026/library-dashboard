@@ -649,7 +649,20 @@ async function pullGist(){
     const fname=gistCfg.fname||'library-data.json';
     const file=data.files[fname];
     if(!file)throw new Error(`Gist 中找不到檔案 ${fname}`);
-    const parsed=JSON.parse(file.content);
+    const content=file.content.trim();
+    // 若 Gist 只有空物件或空資料，略過不覆寫本地資料
+    if(content==='{}'||content===''||content==='null'){
+      updateSyncStatus('ok');
+      toast('Gist 尚無資料，保留本地資料','info');
+      return;
+    }
+    const parsed=JSON.parse(content);
+    // 確認有實際月報資料才覆寫
+    if(!parsed||!parsed.monthly||Object.keys(parsed.monthly).length===0){
+      updateSyncStatus('ok');
+      toast('Gist 資料為空，保留本地資料','info');
+      return;
+    }
     localStorage.setItem('lib_v5',JSON.stringify(parsed));
     D=ld();updateSyncStatus('ok');refreshAll();toast('已從 Gist 讀取最新資料','info');
   }catch(e){updateSyncStatus('err');toast('讀取失敗：'+e.message,'err');}
@@ -765,11 +778,21 @@ const DD={
 // ═══════════════════════════════════════════════
 //  STORAGE
 // ═══════════════════════════════════════════════
-function ld(){try{const s=localStorage.getItem('lib_v5');if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(DD));}
+function ld(){
+  try{
+    // 優先讀 v5
+    let s=localStorage.getItem('lib_v5');
+    if(s){const d=JSON.parse(s);if(d&&Object.keys(d).length>2)return d;}
+    // 遷移 v4 舊資料
+    s=localStorage.getItem('lib_v4');
+    if(s){const d=JSON.parse(s);if(d&&Object.keys(d).length>2){localStorage.setItem('lib_v5',s);return d;}}
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DD));
+}
 function sd(d){try{localStorage.setItem('lib_v5',JSON.stringify(d));}catch(e){}}
-function clearLocal(){localStorage.removeItem('lib_v5');D=ld();refreshAll();toast('本地快取已清除');}
+function clearLocal(){localStorage.removeItem('lib_v5');localStorage.removeItem('lib_v4');D=ld();refreshAll();toast('本地快取已清除');}
 let D=ld();
-// ensure new fields exist
+// 補上新欄位（舊資料沒有時）
 if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
 if(!D.VM_KEYS)D.VM_KEYS=DD.VM_KEYS;
 if(!D.AC_GROUPS)D.AC_GROUPS=DD.AC_GROUPS;
@@ -789,11 +812,23 @@ function buildYearTabs(){
 }
 function buildMonthTabs(){const mt=document.getElementById('month-tabs');mt.innerHTML=ALL_MONTHS.map((m,i)=>`<button class="ytab${selMonths.includes(i)?' on':''}" id="mtab-${i}" onclick="toggleMonth(${i})">${m}</button>`).join('');}
 function updateMonthTabStyles(){ALL_MONTHS.forEach((_,i)=>{const b=document.getElementById('mtab-'+i);if(b)b.className='ytab'+(selMonths.includes(i)?' on':'');});}
-function selectYear(y){selYear=y;selRange='all';selMonths=ALL_MONTHS.map((_,i)=>i);buildYearTabs();updateMonthTabStyles();updateRangeTabs();refreshAll();}
+function selectYear(y){selYear=y;selRange='all';selMonths=ALL_MONTHS.map((_,i)=>i);buildYearTabs();buildMonthTabs();updateRangeTabs();refreshAll();}
 function toggleMonth(i){selRange='custom';if(selMonths.includes(i))selMonths=selMonths.filter(m=>m!==i);else selMonths=[...selMonths,i].sort((a,b)=>a-b);if(!selMonths.length)selMonths=[i];updateMonthTabStyles();updateRangeTabs();refreshAll();}
 function setRange(r,el){selRange=r;if(r==='all')selMonths=ALL_MONTHS.map((_,i)=>i);else if(r==='Q1')selMonths=[0,1,2];else if(r==='Q2')selMonths=[3,4,5];else if(r==='Q3')selMonths=[6,7,8];else if(r==='Q4')selMonths=[9,10,11];updateMonthTabStyles();updateRangeTabs();refreshAll();}
 function updateRangeTabs(){['all','Q1','Q2','Q3','Q4'].forEach(r=>{const el=document.getElementById('range-'+r);if(el)el.className='ft'+(selRange===r?' on':'');});}
-function addYear(){const y=prompt('輸入新年份（民國，如：115）');if(!y||isNaN(y))return;if(!D.years)D.years=[];if(D.years.includes(y)){toast('此年份已存在','err');return;}D.years.push(y);D.monthly[y]=ALL_MONTHS.map(m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0,dbm:{},vm:{}}));sdAndPush(D);D=ld();selYear=y;buildYearTabs();bMon();toast(`${y}年已新增`);}
+function addYear(){
+  const y=prompt('輸入新年份（民國，如：115）');
+  if(!y||isNaN(y))return;
+  if(!D.years)D.years=[];
+  if(D.years.includes(y)){toast('此年份已存在','err');return;}
+  D.years.push(y);
+  D.monthly[y]=ALL_MONTHS.map(m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0,dbm:{},vm:{}}));
+  sdAndPush(D);D=ld();
+  selYear=y;selRange='all';selMonths=ALL_MONTHS.map((_,i)=>i);
+  buildYearTabs();buildMonthTabs();updateRangeTabs();
+  bMon();bKPI();
+  toast(`${y}年已新增`);
+}
 function getMonData(){const all=(D.monthly||{})[selYear]||[];return selMonths.map(i=>all[i]).filter(Boolean);}
 
 // ═══════════════════════════════════════════════
@@ -1273,15 +1308,19 @@ function refreshAll(){bKPI();if(PB[curP])PB[curP]();}
 function initApp(){
   if(!D.years||!D.years.length)D.years=['113','114'];
   if(!D.monthly)D.monthly={};
+  // 補上預設年份資料（若本地沒有）
   ['113','114'].forEach(y=>{if(!D.monthly[y])D.monthly[y]=DD.monthly[y];});
   if(!D.accessEntries)D.accessEntries=DD.accessEntries;
+  sd(D); // 確保本地有寫入
   selYear=D.years[D.years.length-1]||'114';
-  buildYearTabs();buildMonthTabs();
+  buildYearTabs();buildMonthTabs();updateRangeTabs();
   document.querySelectorAll('.ab:not(#ab-mon)').forEach(ab=>{if(!ab.classList.contains('show'))ab.style.display='none';});
-  // Gist: auto-pull on load if configured
+  // Gist 同步：先 pull，若 Gist 為空則自動 push 本地資料上去
   if(gistCfg.token&&gistCfg.gistId){
     updateSyncStatus('loading');
-    pullGist().catch(()=>{});
+    pullGist().then(()=>{
+      // pullGist 內部若判斷 Gist 為空會保留本地並 toast，這裡補一次 push
+    }).catch(()=>{updateSyncStatus('err');});
   }
   bKPI();bOv();
 }
