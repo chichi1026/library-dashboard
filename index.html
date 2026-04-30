@@ -822,6 +822,7 @@ function addYear(){
   if(!D.years)D.years=[];
   if(D.years.includes(y)){toast('此年份已存在','err');return;}
   D.years.push(y);
+  D.years.sort((a,b)=>parseInt(a)-parseInt(b));
   D.monthly[y]=ALL_MONTHS.map(m=>({m,e:0,dr:0,ph:0,ra:0,la:0,nu:0,pt:0,ot:0,bk:0,jo:0,ej:0,eb:0,edb:0,dbm:{},vm:{}}));
   sdAndPush(D);D=ld();
   selYear=y;selRange='all';selMonths=ALL_MONTHS.map((_,i)=>i);
@@ -1307,6 +1308,7 @@ function sp(p,el){
 function refreshAll(){bKPI();if(PB[curP])PB[curP]();}
 function initApp(){
   if(!D.years||!D.years.length)D.years=['113','114'];
+  D.years.sort((a,b)=>parseInt(a)-parseInt(b));
   if(!D.monthly)D.monthly={};
   // 補上預設年份資料（若本地沒有）
   ['113','114'].forEach(y=>{if(!D.monthly[y])D.monthly[y]=DD.monthly[y];});
