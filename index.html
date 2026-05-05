@@ -366,10 +366,12 @@ tbody tr.tr-tot td{background:#f0fdf4;font-weight:800;color:var(--gn);border-top
     <!-- ══ 進出館記錄 ══ -->
     <div class="page" id="page-access">
       <div class="ab" id="ab-access">
-        <div class="aa">⚙ 管理者模式</div>
+        <div class="aa">⚙ 管理者模式 — <span id="ac-year-label"></span></div>
         <div class="aas">
-          <button class="badd" onclick="openACEntry()">＋ 新增記錄</button>
-          <button class="bcsv" onclick="exportAccessCSV()">↓ CSV</button>
+          <button class="badd" onclick="openACImport()">↑ 貼上 CSV 匯入</button>
+          <button class="badd" onclick="openACEntry()">＋ 新增單筆</button>
+          <button class="bcsv" onclick="exportAccessCSV()">↓ 匯出 CSV</button>
+          <button class="bdelsm" onclick="clearACYear()" style="font-size:.72rem;padding:.28rem .72rem">🗑 清除本年度</button>
         </div>
       </div>
       <div class="kstrip" id="ac-kpi" style="grid-template-columns:repeat(4,1fr)"></div>
@@ -749,30 +751,8 @@ const DD={
     ],
   },
   // 進出館記錄 — entries: [date, time, name, group, gate]
-  accessEntries:[
-    ["2026/01/13","15:37","戴珮如","行政人員","前門"],["2026/01/13","16:26","張家綺","行政人員","後門"],
-    ["2026/01/13","16:47","鍾蕙琦","行政人員","後門"],["2026/01/13","17:48","鍾蕙琦","行政人員","前門"],
-    ["2026/01/14","07:16","王琇瑩","行政人員","前門"],["2026/01/14","08:04","李易儒","醫師","前門"],
-    ["2026/01/14","08:19","柳緒英","護理","前門"],["2026/01/14","09:12","鍾蕙琦","行政人員","前門"],
-    ["2026/01/14","11:26","黃祐珍","行政人員","前門"],["2026/01/14","13:52","林慶元","檢驗","前門"],
-    ["2026/01/14","13:59","鄭貴麟","醫師","前門"],["2026/01/14","13:59","林美延","護理","前門"],
-    ["2026/01/16","08:01","柳緒英","護理","前門"],["2026/01/16","08:13","陳榮貴","醫師","前門"],
-    ["2026/01/20","07:40","游惠怡","護理","前門"],["2026/01/20","07:40","邱讚旺","醫師","前門"],
-    ["2026/01/20","07:43","沈淑美","護理","前門"],["2026/01/20","07:50","王佳貞","護理","前門"],
-    ["2026/01/27","07:39","胡詔凱","醫師","前門"],["2026/01/27","07:42","邱讚旺","醫師","前門"],
-    ["2026/01/30","10:24","黃祐珍","行政人員","前門"],["2026/01/30","10:29","翁國益","醫師","前門"],
-    ["2026/02/03","07:43","沈淑美","護理","前門"],["2026/02/03","07:44","翁國益","醫師","前門"],
-    ["2026/02/03","07:44","邱讚旺","醫師","前門"],["2026/02/10","07:45","邱讚旺","醫師","前門"],
-    ["2026/02/10","07:55","王佳貞","護理","前門"],["2026/02/25","08:01","陳榮貴","醫師","前門"],
-    ["2026/02/25","08:09","柳緒英","護理","前門"],["2026/03/03","07:34","翁國益","醫師","前門"],
-    ["2026/03/03","07:42","邱讚旺","醫師","前門"],["2026/03/03","07:42","游惠怡","護理","前門"],
-    ["2026/03/10","07:38","邱讚旺","醫師","前門"],["2026/03/17","07:40","邱讚旺","醫師","前門"],
-    ["2026/03/18","08:00","王佳貞","護理","前門"],["2026/03/18","08:02","游惠怡","護理","前門"],
-    ["2026/03/20","10:29","郭琬琪","放射","前門"],["2026/03/20","10:40","翁國益","醫師","前門"],
-    ["2026/03/24","07:39","胡詔凱","醫師","前門"],["2026/03/24","07:41","邱讚旺","醫師","前門"],
-    ["2026/03/31","07:23","翁國益","醫師","前門"],["2026/03/31","07:31","沈淑美","護理","前門"],
-    ["2026/03/31","07:38","邱讚旺","醫師","前門"],["2026/03/31","07:44","廖珮玟","護理","前門"],
-  ],
+  // 依年份儲存：{ '114': [...], '115': [...] }
+  accessEntries:{},
 };
 
 // ═══════════════════════════════════════════════
@@ -796,7 +776,17 @@ let D=ld();
 if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
 if(!D.VM_KEYS)D.VM_KEYS=DD.VM_KEYS;
 if(!D.AC_GROUPS)D.AC_GROUPS=DD.AC_GROUPS;
-if(!D.accessEntries)D.accessEntries=DD.accessEntries;
+// 遷移舊格式 accessEntries（陣列→物件）
+if(Array.isArray(D.accessEntries)){
+  const migrated={};
+  D.accessEntries.forEach(r=>{
+    // 從日期推算民國年
+    const yr=r[0]?String(parseInt(r[0].slice(0,4))-1911):'';
+    if(yr){if(!migrated[yr])migrated[yr]=[];migrated[yr].push(r);}
+  });
+  D.accessEntries=migrated;
+}
+if(!D.accessEntries||typeof D.accessEntries!=='object')D.accessEntries={};
 
 // ═══════════════════════════════════════════════
 //  YEAR/MONTH FILTER
@@ -994,10 +984,20 @@ function delJ(i){if(!confirm('確定刪除？'))return;D.jl.splice(i,1);D.jc=D.j
 function delDB(i){if(!confirm('確定刪除？'))return;D.dbs.splice(i,1);sdAndPush(D);D=ld();bJrnl();toast('已刪除');}
 
 // ═══════════════════════════════════════════════
-//  PAGE: 進出館 (editable)
+//  PAGE: 進出館 (year-based, CSV import)
 // ═══════════════════════════════════════════════
 let acGroup='全部';
-function getAcEntries(){return D.accessEntries||[];}
+
+// 取得當前年份的記錄（民國年轉西元判斷日期前綴）
+function getAcEntries(){
+  if(!D.accessEntries)D.accessEntries={};
+  return D.accessEntries[selYear]||[];
+}
+function setAcEntries(arr){
+  if(!D.accessEntries)D.accessEntries={};
+  D.accessEntries[selYear]=arr;
+}
+
 function computeAcStats(){
   const entries=getAcEntries();
   const grps=D.AC_GROUPS||[];
@@ -1015,8 +1015,10 @@ function computeAcStats(){
   const dates=[...new Set(entries.map(r=>r[0]))].sort();
   return{total:entries.length,total_people:people.length,gate,daily,monthly,people,dates,groups:grps};
 }
+
 function bAccess(){
   if(isAdm())document.getElementById('ab-access').classList.add('show');
+  document.getElementById('ac-year-label').textContent=`民國${selYear}年`;
   const d=computeAcStats();
   document.getElementById('ac-kpi').innerHTML=[
     {l:'進館總人次',v:d.total.toLocaleString(),s:'僅計「進入」記錄'},
@@ -1024,6 +1026,19 @@ function bAccess(){
     {l:'前門使用',v:(d.gate['前門']||0),s:d.total?`佔${Math.round((d.gate['前門']||0)/d.total*100)}%`:'—'},
     {l:'記錄天數',v:d.dates.length,s:d.dates.length?`${d.dates[0].slice(5)}～${d.dates[d.dates.length-1].slice(5)}`:'—'},
   ].map(x=>`<div class="kc"><div class="kl">${x.l}</div><div class="kv">${x.v}</div><div class="ks">${x.s}</div></div>`).join('');
+
+  if(d.total===0){
+    // 空資料提示
+    ['ac-daily','ac-pie','ac-month','ac-gate'].forEach(id=>{if(CH[id])CH[id].destroy();});
+    document.getElementById('ac-leg').innerHTML='';
+    document.getElementById('ac-ptable').innerHTML='<div style="padding:1.5rem;color:var(--tx3);font-size:.8rem;text-align:center">本年度尚無進出館記錄，請使用「貼上 CSV 匯入」或「新增單筆」</div>';
+    document.getElementById('ac-table').innerHTML='';
+    document.getElementById('ac-cnt').textContent='0 筆';
+    document.getElementById('ac-gtabs').innerHTML='';
+    document.getElementById('ac-pcount').textContent='';
+    return;
+  }
+
   const grps=d.groups,dates=d.dates;
   document.getElementById('ac-leg').innerHTML=legH(grps.map((g,i)=>({c:P[i],l:g})));
   mkBar('ac-daily',dates.map(dt=>dt.slice(5)),grps.map((g,i)=>({l:g,d:dates.map(dt=>(d.daily[dt]||{})[g]||0),c:P[i]})),true);
@@ -1036,6 +1051,7 @@ function bAccess(){
   document.getElementById('ac-fg').innerHTML='<option value="">全部職類</option>'+grps.map(g=>`<option>${g}</option>`).join('');
   buildACPeople();filterAC();
 }
+
 function setACGroup(g,el){acGroup=g;document.querySelectorAll('#ac-gtabs .ft').forEach(t=>t.classList.remove('on'));el.classList.add('on');buildACPeople();}
 function buildACPeople(){
   const d=computeAcStats();const fl=acGroup==='全部'?d.people:d.people.filter(p=>p.group===acGroup);
@@ -1044,10 +1060,11 @@ function buildACPeople(){
   fl.slice(0,30).forEach((p,i)=>{h+=`<tr><td>${i+1}</td><td>${p.name}</td><td>${p.group}</td><td>${p.visits}</td><td>${p.days}</td></tr>`;});
   h+='</tbody></table>';document.getElementById('ac-ptable').innerHTML=h;
 }
+
 function filterAC(){
-  const g=document.getElementById('ac-fg').value;
-  const gate=document.getElementById('ac-fgate').value;
-  const q=document.getElementById('ac-sch').value.trim();
+  const g=document.getElementById('ac-fg')?.value||'';
+  const gate=document.getElementById('ac-fgate')?.value||'';
+  const q=document.getElementById('ac-sch')?.value.trim()||'';
   let rows=getAcEntries();
   if(g)rows=rows.filter(r=>r[3]===g);
   if(gate)rows=rows.filter(r=>r[4]===gate);
@@ -1055,22 +1072,29 @@ function filterAC(){
   document.getElementById('ac-cnt').textContent=`${rows.length} 筆`;
   const editCol=isAdm()?'<th>操作</th>':'';
   let h=`<table><thead><tr><th style="text-align:left">日期</th><th style="text-align:left">時間</th><th style="text-align:left">姓名</th><th>職類</th><th>門</th>${editCol}</tr></thead><tbody>`;
-  rows.slice(0,200).forEach((r,i)=>{
-    const realIdx=getAcEntries().indexOf(r);
+  const allEntries=getAcEntries();
+  rows.slice(0,500).forEach(r=>{
+    const realIdx=allEntries.indexOf(r);
     h+=`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td>${isAdm()?`<td><button class="beditsm" onclick="editACEntry(${realIdx})" style="margin-right:.2rem">編</button><button class="bdelsm" onclick="delACEntry(${realIdx})">刪</button></td>`:''}</tr>`;
   });
-  if(rows.length>200)h+=`<tr><td colspan="${isAdm()?6:5}" style="text-align:center;color:var(--tx3);font-size:.7rem">顯示前200筆，共${rows.length}筆</td></tr>`;
+  if(rows.length>500)h+=`<tr><td colspan="${isAdm()?6:5}" style="text-align:center;color:var(--tx3);font-size:.7rem">顯示前500筆，共${rows.length}筆</td></tr>`;
   h+='</tbody></table>';document.getElementById('ac-table').innerHTML=h;
 }
+
+// ── 單筆新增/編輯 ──
 function openACEntry(idx=-1){
   if(!isAdm()){toast('需要管理者權限','err');return;}
-  const e=idx>=0?D.accessEntries[idx]:['','','','行政人員','前門'];
+  const entries=getAcEntries();
+  const e=idx>=0?entries[idx]:['','','','行政人員','前門'];
   const grps=D.AC_GROUPS||[];
+  // 民國年轉西元預設
+  const westernYear=String(parseInt(selYear)+1911);
   document.getElementById('mt').textContent=idx>=0?'編輯進出館記錄':'新增進出館記錄';
   document.getElementById('mb').innerHTML=`
+    <div style="font-size:.72rem;color:var(--tx3);margin-bottom:.8rem">目前編輯年份：民國 ${selYear} 年（西元 ${westernYear} 年）</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
-      <div class="mf"><label>日期</label><input type="date" id="ac-d" value="${e[0]?e[0].replace(/\//g,'-'):''}"></div>
-      <div class="mf"><label>時間</label><input type="time" id="ac-t" value="${e[1]||''}"></div>
+      <div class="mf"><label>日期</label><input type="date" id="ac-d" value="${e[0]?e[0].replace(/\//g,'-'):`${westernYear}-01-01`}"></div>
+      <div class="mf"><label>時間</label><input type="time" id="ac-t" value="${e[1]||'08:00'}"></div>
       <div class="mf"><label>姓名</label><input id="ac-n" value="${e[2]||''}"></div>
       <div class="mf"><label>職類</label><select id="ac-g">${grps.map(g=>`<option${g===e[3]?' selected':''}>${g}</option>`).join('')}</select></div>
       <div class="mf"><label>門別</label><select id="ac-gat"><option${e[4]==='前門'?' selected':''}>前門</option><option${e[4]==='後門'?' selected':''}>後門</option></select></div>
@@ -1086,21 +1110,108 @@ function saveACEntry(idx){
   const name=document.getElementById('ac-n').value.trim();
   if(!date||!name){toast('日期和姓名不可空白','err');return;}
   const entry=[date,time,name,document.getElementById('ac-g').value,document.getElementById('ac-gat').value];
-  if(!D.accessEntries)D.accessEntries=[];
-  if(idx>=0)D.accessEntries[idx]=entry;
-  else D.accessEntries.push(entry);
-  D.accessEntries.sort((a,b)=>a[0].localeCompare(b[0])||a[1].localeCompare(b[1]));
+  const arr=getAcEntries();
+  if(idx>=0)arr[idx]=entry;else arr.push(entry);
+  arr.sort((a,b)=>a[0].localeCompare(b[0])||a[1].localeCompare(b[1]));
+  setAcEntries(arr);
   sdAndPush(D);D=ld();closeM();bAccess();toast(idx>=0?'記錄已更新':'已新增');
 }
 function delACEntry(idx){
   if(!confirm('確定刪除此筆記錄？'))return;
-  D.accessEntries.splice(idx,1);sdAndPush(D);D=ld();bAccess();toast('已刪除');
+  const arr=getAcEntries();arr.splice(idx,1);setAcEntries(arr);
+  sdAndPush(D);D=ld();bAccess();toast('已刪除');
 }
+function clearACYear(){
+  if(!confirm(`確定清除民國${selYear}年所有進出館記錄？`))return;
+  setAcEntries([]);sdAndPush(D);D=ld();bAccess();toast('已清除');
+}
+
+// ── CSV 貼上匯入 ──
+function openACImport(){
+  if(!isAdm()){toast('需要管理者權限','err');return;}
+  const westernYear=String(parseInt(selYear)+1911);
+  document.getElementById('mt').textContent=`貼上 CSV 匯入 — 民國${selYear}年`;
+  document.getElementById('mb').innerHTML=`
+    <div style="font-size:.75rem;color:var(--tx2);margin-bottom:.75rem;line-height:1.8;background:var(--bg3);padding:.75rem;border-radius:var(--r2);border:1px solid var(--bd)">
+      <b>格式說明</b>（每行一筆，Tab 或逗號分隔）：<br>
+      <code style="font-size:.72rem;font-family:'DM Mono',monospace">日期　時間　姓名　職類　門別</code><br>
+      例：<code style="font-size:.72rem;font-family:'DM Mono',monospace">${westernYear}/01/14　08:04　王小明　醫師　前門</code><br>
+      <span style="color:var(--tx3);font-size:.7rem">• 日期格式：YYYY/MM/DD 或 YYYY-MM-DD<br>• 門別：前門 或 後門<br>• 可從 Excel 直接複製貼上（Tab 分隔）</span>
+    </div>
+    <div class="mf">
+      <label>貼上資料（可多行）</label>
+      <textarea id="ac-csv" rows="12" placeholder="${westernYear}/01/14\t08:04\t王小明\t醫師\t前門&#10;${westernYear}/01/14\t08:19\t李小華\t護理\t前門" style="font-family:'DM Mono',monospace;font-size:.78rem;resize:vertical"></textarea>
+    </div>
+    <div id="ac-import-preview" style="font-size:.72rem;color:var(--tx3);margin-top:.4rem"></div>
+    <div style="display:flex;gap:.5rem;margin-top:.6rem;align-items:center">
+      <label style="font-size:.73rem;font-weight:600;color:var(--tx2)">匯入方式：</label>
+      <select id="ac-import-mode" style="font-size:.73rem;padding:.28rem .5rem;border-radius:var(--r2);border:1.5px solid var(--bd2);background:var(--bg3);color:var(--tx);font-family:inherit">
+        <option value="append">追加到現有資料</option>
+        <option value="replace">取代本年度所有資料</option>
+      </select>
+    </div>`;
+  document.getElementById('mfoot').innerHTML=`
+    <button class="bcancel" onclick="closeM()">取消</button>
+    <button class="bsave" onclick="doACImport()">匯入</button>`;
+  document.getElementById('mo').classList.add('show');
+  // 即時預覽
+  setTimeout(()=>{
+    document.getElementById('ac-csv')?.addEventListener('input',previewACImport);
+  },100);
+}
+
+function parseCSVLine(line){
+  // 支援 Tab 或逗號分隔
+  const sep=line.includes('\t')?'\t':',';
+  const parts=line.split(sep).map(s=>s.trim().replace(/^["']|["']$/g,''));
+  return parts;
+}
+
+function previewACImport(){
+  const raw=document.getElementById('ac-csv')?.value||'';
+  const lines=raw.split('\n').filter(l=>l.trim());
+  let ok=0,err=0;
+  lines.forEach(line=>{
+    const p=parseCSVLine(line);
+    if(p.length>=4&&p[0].match(/\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/))ok++;
+    else if(line.trim())err++;
+  });
+  const el=document.getElementById('ac-import-preview');
+  if(el)el.innerHTML=`解析結果：<b style="color:var(--gn)">${ok} 筆有效</b>${err?`，<b style="color:var(--rd)">${err} 筆格式錯誤（略過）</b>`:''}`;
+}
+
+function doACImport(){
+  const raw=document.getElementById('ac-csv')?.value||'';
+  const mode=document.getElementById('ac-import-mode')?.value||'append';
+  const lines=raw.split('\n').filter(l=>l.trim());
+  const parsed=[];
+  lines.forEach(line=>{
+    const p=parseCSVLine(line);
+    if(p.length<3)return;
+    const date=p[0].replace(/-/g,'/');
+    if(!date.match(/\d{4}\/\d{1,2}\/\d{1,2}/))return;
+    const time=p[1]||'';
+    const name=p[2]||'';
+    const group=p[3]||'其他醫事人員';
+    const gate=p[4]||'前門';
+    if(!name)return;
+    parsed.push([date,time,name,group,gate]);
+  });
+  if(!parsed.length){toast('沒有可匯入的有效資料','err');return;}
+  let arr=mode==='replace'?[]:getAcEntries();
+  arr=[...arr,...parsed];
+  arr.sort((a,b)=>a[0].localeCompare(b[0])||a[1].localeCompare(b[1]));
+  setAcEntries(arr);
+  sdAndPush(D);D=ld();closeM();bAccess();
+  toast(`已匯入 ${parsed.length} 筆記錄${mode==='replace'?'（已取代舊資料）':'（已追加）'}`);
+}
+
+// ── CSV 匯出 ──
 function exportAccessCSV(){
   const rows=getAcEntries();
   let csv='日期,時間,姓名,職類,門別\n';
   rows.forEach(r=>csv+=r.map(v=>`"${v}"`).join(',')+'\n');
-  dlCSV(csv,'進出館記錄.csv');
+  dlCSV(csv,`進出館記錄_${selYear}年.csv`);
 }
 
 // ═══════════════════════════════════════════════
