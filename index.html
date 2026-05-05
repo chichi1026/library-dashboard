@@ -1131,21 +1131,14 @@ IED_BASE.forEach(k=>{document.getElementById('f-'+k)?.addEventListener('input',u
 
 function bMon(){
   document.getElementById('mon-year-label').textContent=`民國${selYear}年`;
-  buildDBMGrid();buildVMGrid();
-  IED_BASE.forEach(k=>{document.getElementById('f-'+k)?.addEventListener('input',updateTotal);});
+  // 只有在編輯器關閉時才重建 grid（避免清空正在編輯的欄位）
+  if(document.getElementById('ied').style.display==='none'||document.getElementById('ied').style.display===''){
+    buildDBMGrid();buildVMGrid();
+    IED_BASE.forEach(k=>{document.getElementById('f-'+k)?.addEventListener('input',updateTotal);});
+  }
   const aa=document.getElementById('mon-aa');
   aa.innerHTML=isAdm()?`<button class="badd" onclick="openIED(-1)">＋ 新增月份</button><button class="badd" onclick="addYear()">＋ 年份</button>`:'<span style="font-size:.72rem;color:var(--tx3)">瀏覽模式</span>';
-  const allMon=(D.monthly||{})[selYear]||[];
-  const maxE=Math.max(1,...allMon.filter(m=>m).map(m=>m.e||0));
-  document.getElementById('mcards').innerHTML=ALL_MONTHS.map((mn,i)=>{
-    const m=allMon[i];const hasData=m&&(m.e||m.bk||m.ej||m.eb||m.edb);
-    if(!m)return `<div class="mcard" onclick="${isAdm()?`openIEDNew(${i})`:''}"><div class="mcard-h"><span class="mcard-m" style="color:var(--tx3)">${mn}</span></div><div class="mcard-empty">${isAdm()?'點擊新增':'—'}</div></div>`;
-    return `<div class="mcard${iedIdx===i?' editing':''}${hasData?' has-data':''}" onclick="${isAdm()?`openIED(${i})`:''}">
-      <div class="mcard-h"><span class="mcard-m">${m.m}</span><span class="mcard-e">${(m.e||0).toLocaleString()} 人</span></div>
-      <div class="mcard-d">電子 ${(m.ej||0)+(m.eb||0)+(m.edb||0)} ｜ 借閱 ${m.bk||0}</div>
-      <div class="mbar-bg"><div class="mbar-f" style="width:${Math.round((m.e||0)/maxE*100)}%"></div></div>
-    </div>`;
-  }).join('');
+  updateCardHighlights();
   buildMonYearSummary();
 }
 
@@ -1178,7 +1171,7 @@ function openIEDNew(monthIdx){
   document.getElementById('ied-save').onclick=()=>saveMon(-1);
   document.getElementById('ied').style.display='block';
   IED_BASE.forEach(k=>{document.getElementById('f-'+k)?.addEventListener('input',updateTotal);});
-  bMon();
+  updateCardHighlights();
 }
 function openIED(idx){
   if(!isAdm()){toast('需要管理者權限','err');return;}
@@ -1194,8 +1187,22 @@ function openIED(idx){
   document.getElementById('ied-save').onclick=()=>saveMon(idx);
   document.getElementById('ied').style.display='block';
   IED_BASE.forEach(k=>{document.getElementById('f-'+k)?.addEventListener('input',updateTotal);});
-  bMon();
+  updateCardHighlights();
   setTimeout(()=>document.getElementById('ied').scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+// 只更新卡片樣式，不重建 DOM（避免清空已填欄位）
+function updateCardHighlights(){
+  const allMon=(D.monthly||{})[selYear]||[];
+  const maxE=Math.max(1,...allMon.filter(m=>m).map(m=>m.e||0));
+  document.getElementById('mcards').innerHTML=ALL_MONTHS.map((mn,i)=>{
+    const m=allMon[i];const hasData=m&&(m.e||m.bk||m.ej||m.eb||m.edb);
+    if(!m)return `<div class="mcard" onclick="${isAdm()?`openIEDNew(${i})`:''}"><div class="mcard-h"><span class="mcard-m" style="color:var(--tx3)">${mn}</span></div><div class="mcard-empty">${isAdm()?'點擊新增':'—'}</div></div>`;
+    return `<div class="mcard${iedIdx===i?' editing':''}${hasData?' has-data':''}" onclick="${isAdm()?`openIED(${i})`:''}">
+      <div class="mcard-h"><span class="mcard-m">${m.m}</span><span class="mcard-e">${(m.e||0).toLocaleString()} 人</span></div>
+      <div class="mcard-d">電子 ${(m.ej||0)+(m.eb||0)+(m.edb||0)} ｜ 借閱 ${m.bk||0}</div>
+      <div class="mbar-bg"><div class="mbar-f" style="width:${Math.round((m.e||0)/maxE*100)}%"></div></div>
+    </div>`;
+  }).join('');
 }
 function saveMon(idx){
   if(!isAdm())return;
