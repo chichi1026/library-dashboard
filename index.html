@@ -354,9 +354,16 @@ tbody tr.tr-tot td{background:#f0fdf4;font-weight:800;color:var(--gn);border-top
         <div class="aas">
           <button class="badd" onclick="openM('journal')">＋ 新增期刊</button>
           <button class="badd" onclick="openM('database')">＋ 新增資料庫</button>
+          <button class="badd" onclick="addJrnlYear()">＋ 新增年份欄</button>
         </div>
       </div>
-      <div class="card-full"><div class="ct">醫學期刊訂閱對照表</div><div class="tw" id="tjrnl"></div></div>
+      <div class="card-full">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem;flex-wrap:wrap;gap:.5rem">
+          <div class="ct" style="margin:0">醫學期刊訂閱對照表</div>
+          <span id="drag-hint" style="font-size:.68rem;color:var(--tx3);display:none">⬍ 拖曳列可調整順序</span>
+        </div>
+        <div class="tw" id="tjrnl"></div>
+      </div>
       <div class="g2">
         <div class="card"><div class="ct">醫學資料庫訂閱狀況</div><div class="tw" id="tdb"></div></div>
         <div class="card"><div class="ct">訂購數量歷年趨勢</div><div class="cw" style="height:190px"><canvas id="c-jt"></canvas></div></div>
@@ -376,7 +383,7 @@ tbody tr.tr-tot td{background:#f0fdf4;font-weight:800;color:var(--gn);border-top
       </div>
       <div class="kstrip" id="ac-kpi" style="grid-template-columns:repeat(4,1fr)"></div>
       <div class="g2">
-        <div class="card"><div class="ct">每日進館趨勢</div><div class="leg" id="ac-leg"></div><div class="cw" style="height:220px"><canvas id="ac-daily"></canvas></div></div>
+        <div class="card"><div class="ct">每月進館趨勢</div><div class="leg" id="ac-leg"></div><div class="cw" style="height:220px"><canvas id="ac-daily"></canvas></div></div>
         <div class="card"><div class="ct">職類進館比例</div><div class="cw" style="height:220px"><canvas id="ac-pie"></canvas></div></div>
       </div>
       <div class="g2">
@@ -694,26 +701,26 @@ async function sdAndPush(d){
 // ═══════════════════════════════════════════════
 const DD={
   years:['113','114'],
-  jy:['107年','108年','109年','110年','111年','112年','113年','114年','115年'],
+  jy:['109年','110年','111年','112年','113年','114年','115年'],
   jl:[
-    {n:'NEJM',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'JAMA',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
-    {n:'AJRCCM',t:'電子',d:['V','V','V','V','V','X','X','X','V']},{n:'Circulation',t:'電子',d:['V','V','V','V','V','X','V','V','V']},
-    {n:'Crit Care Med',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Clin Infect Dis',t:'電子',d:['V','V','V','V','V','V','V','V','X']},
-    {n:'ICHE',t:'電子',d:['V','V','V','V','X','X','X','X','V']},{n:'Pediatrics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
-    {n:'JBJS-American',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'J Neurosurgery',t:'紙本',d:['V','V','V','X','X','X','X','X','X']},
-    {n:'Radiographics',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Clinical Chemistry',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
-    {n:'J Nutrition',t:'電子',d:['V','V','V','V','V','X','V','X','V']},{n:'ICD-10-CM/PCS',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
-    {n:'AJOT',t:'電子',d:['V','V','V','V','V','V','V','V','V']},{n:'Physical Therapy',t:'電子',d:['V','V','V','V','V','V','V','V','V']},
-    {n:'Neurology',t:'紙本',d:['V','V','X','V','X','X','X','X','X']},
+    {n:'NEJM',t:'電子',d:['V','V','V','V','V','V','V']},{n:'JAMA',t:'電子',d:['V','V','V','V','V','V','V']},
+    {n:'AJRCCM',t:'電子',d:['V','V','V','X','X','X','V']},{n:'Circulation',t:'電子',d:['V','V','V','X','V','V','V']},
+    {n:'Crit Care Med',t:'電子',d:['V','V','V','V','V','V','V']},{n:'Clin Infect Dis',t:'電子',d:['V','V','V','V','V','V','X']},
+    {n:'ICHE',t:'電子',d:['V','V','X','X','X','X','V']},{n:'Pediatrics',t:'電子',d:['V','V','V','V','V','V','V']},
+    {n:'JBJS-American',t:'電子',d:['V','V','V','V','V','V','V']},{n:'J Neurosurgery',t:'紙本',d:['V','X','X','X','X','X','X']},
+    {n:'Radiographics',t:'電子',d:['V','V','V','V','V','V','V']},{n:'Clinical Chemistry',t:'電子',d:['V','V','V','V','V','V','V']},
+    {n:'J Nutrition',t:'電子',d:['V','V','V','X','V','X','V']},{n:'ICD-10-CM/PCS',t:'電子',d:['V','V','V','V','V','V','V']},
+    {n:'AJOT',t:'電子',d:['V','V','V','V','V','V','V']},{n:'Physical Therapy',t:'電子',d:['V','V','V','V','V','V','V']},
+    {n:'Neurology',t:'紙本',d:['X','V','X','X','X','X','X']},
   ],
-  jc:[17,17,16,16,14,11,13,12,14],
+  jc:[16,16,14,11,13,12,14],
   dbs:[
-    {n:'Micromedex',d:['V','V','V','V','X','X','X','X','V']},{n:'Clinicalkey',d:['V','V','V','V','V','V','V','V','V']},
-    {n:'DynaMed',d:['V','V','V','V','V','V','V','V','V']},{n:'STATdx',d:['V','X','X','X','X','X','V','V','V']},
-    {n:'UpTodate',d:['V','V','V','V','V','V','V','V','V']},{n:'CEPS',d:['V','V','V','V','V','V','V','V','V']},
-    {n:'Lexicomp',d:['X','V','V','V','V','V','V','V','V']},{n:'Sanford Guide',d:['X','X','V','V','V','V','V','V','V']},
-    {n:'PubMed',d:['X','X','V','V','V','V','V','V','V']},{n:'Cochrane',d:['X','X','V','V','V','V','V','V','V']},
-    {n:'Symskan',d:['X','X','X','X','V','V','V','V','V']},
+    {n:'Micromedex',d:['V','V','X','X','X','X','V']},{n:'Clinicalkey',d:['V','V','V','V','V','V','V']},
+    {n:'DynaMed',d:['V','V','V','V','V','V','V']},{n:'STATdx',d:['X','X','X','X','V','V','V']},
+    {n:'UpTodate',d:['V','V','V','V','V','V','V']},{n:'CEPS',d:['V','V','V','V','V','V','V']},
+    {n:'Lexicomp',d:['V','V','V','V','V','V','V']},{n:'Sanford Guide',d:['V','V','V','V','V','V','V']},
+    {n:'PubMed',d:['V','V','V','V','V','V','V']},{n:'Cochrane',d:['V','V','V','V','V','V','V']},
+    {n:'Symskan',d:['X','X','V','V','V','V','V']},
   ],
   // 資料庫各平台月使用次數（固定結構，月報輸入可覆蓋）
   DBM_KEYS:['Clinicalkey','DynaMed','UpTodate','Lexicomp','CEPS','PubMed','Symskan','Sanford Guide','Cochrane'],
@@ -967,19 +974,69 @@ function bLending(){
 // ═══════════════════════════════════════════════
 //  PAGE: 期刊
 // ═══════════════════════════════════════════════
+let jDragIdx=-1;
+
 function bJrnl(){
-  if(isAdm())document.getElementById('ab-jrnl').classList.add('show');
+  if(isAdm()){
+    document.getElementById('ab-jrnl').classList.add('show');
+    const hint=document.getElementById('drag-hint');
+    if(hint)hint.style.display='';
+  }
   const jy=D.jy;
-  let jh=`<table><thead><tr><th style="min-width:140px">期刊</th><th>型態</th>${jy.map(y=>`<th>${y}</th>`).join('')}${isAdm()?'<th>操作</th>':''}</tr></thead><tbody>`;
-  D.jl.forEach((j,i)=>{jh+=`<tr><td>${j.n}</td><td>${j.t}</td>${j.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}${isAdm()?`<td><button class="beditsm" onclick="openM('journal',${i})">編輯</button> <button class="bdelsm" onclick="delJ(${i})">刪</button></td>`:''}</tr>`;});
-  jh+=`<tr class="tr-tot"><td>訂購數</td><td></td>${D.jc.map(v=>`<td>${v}</td>`).join('')}${isAdm()?'<td></td>':''}</tr></tbody></table>`;
+  // ── 期刊表（管理者可拖曳排序）
+  let jh=`<table id="jrnl-table"><thead><tr>${isAdm()?'<th style="width:24px"></th>':''}<th style="min-width:140px">期刊</th><th>型態</th>${jy.map(y=>`<th>${y}</th>`).join('')}<th>操作</th></tr></thead><tbody id="jrnl-tbody">`;
+  D.jl.forEach((j,i)=>{
+    jh+=`<tr draggable="${isAdm()}" data-idx="${i}" ondragstart="jDragStart(${i})" ondragover="jDragOver(event,${i})" ondrop="jDrop(${i})" ondragend="jDragEnd()" style="cursor:${isAdm()?'grab':'default'}">`;
+    if(isAdm())jh+=`<td style="text-align:center;color:var(--tx3);font-size:.8rem;user-select:none">⠿</td>`;
+    jh+=`<td>${j.n}</td><td>${j.t}</td>${j.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}<td>${isAdm()?`<button class="beditsm" onclick="openM('journal',${i})">編輯</button> <button class="bdelsm" onclick="delJ(${i})">刪</button>`:''}</td></tr>`;
+  });
+  jh+=`<tr class="tr-tot"><td${isAdm()?'':''} colspan="${isAdm()?2:1}" style="text-align:left">訂購數</td><td></td>${D.jc.map(v=>`<td>${v}</td>`).join('')}<td></td></tr></tbody></table>`;
   document.getElementById('tjrnl').innerHTML=jh;
-  let dbh=`<table><thead><tr><th style="min-width:110px">資料庫</th>${jy.map(y=>`<th>${y}</th>`).join('')}${isAdm()?'<th>操作</th>':''}</tr></thead><tbody>`;
-  D.dbs.forEach((db,i)=>{dbh+=`<tr><td>${db.n}</td>${db.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}${isAdm()?`<td><button class="beditsm" onclick="openM('database',${i})">編輯</button> <button class="bdelsm" onclick="delDB(${i})">刪</button></td>`:''}</tr>`;});
-  dbh+='</tbody></table>';
+
+  // ── 資料庫表
+  let dbh=`<table><thead><tr><th style="min-width:110px">資料庫</th>${jy.map(y=>`<th>${y}</th>`).join('')}<th>操作</th></tr></thead><tbody>`;
+  D.dbs.forEach((db,i)=>{dbh+=`<tr><td>${db.n}</td>${db.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}<td>${isAdm()?`<button class="beditsm" onclick="openM('database',${i})">編輯</button> <button class="bdelsm" onclick="delDB(${i})">刪</button>`:''}</td></tr>`;});
+  const dbTotals=jy.map((_,yi)=>D.dbs.filter(db=>db.d[yi]==='V').length);
+  dbh+=`<tr class="tr-tot"><td>訂閱數</td>${dbTotals.map(v=>`<td>${v}</td>`).join('')}<td></td></tr></tbody></table>`;
   document.getElementById('tdb').innerHTML=dbh;
-  mkLine('c-jt',jy,[{l:'訂購數量',d:D.jc,c:'#3b82f6'}],true);
+
+  // ── 趨勢圖（期刊數 + 資料庫數，Y軸從0）
+  const dbCounts=jy.map((_,yi)=>D.dbs.filter(db=>db.d[yi]==='V').length);
+  const c=document.getElementById('c-jt');
+  if(c){
+    if(CH['c-jt'])CH['c-jt'].destroy();
+    CH['c-jt']=new Chart(c,{type:'line',data:{labels:jy,datasets:[
+      {label:'期刊訂購數',data:D.jc,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.12)',borderWidth:2.5,fill:true,tension:.38,pointRadius:4,pointHoverRadius:6},
+      {label:'資料庫訂閱數',data:dbCounts,borderColor:'#059669',backgroundColor:'rgba(5,150,105,.08)',borderWidth:2.5,fill:true,tension:.38,pointRadius:4,pointHoverRadius:6},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#4a5568',font:{size:11},boxWidth:12,padding:10}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},y:{min:0,ticks:{color:'#94a3b8',font:{size:11},stepSize:1},grid:{color:'rgba(0,0,0,.05)'}}}}});
+  }
 }
+
+// ── 拖曳排序
+function jDragStart(i){jDragIdx=i;setTimeout(()=>{const rows=document.querySelectorAll('#jrnl-tbody tr');if(rows[i])rows[i].style.opacity='.4';},0);}
+function jDragOver(e,i){e.preventDefault();const rows=document.querySelectorAll('#jrnl-tbody tr[data-idx]');rows.forEach(r=>r.style.borderTop='');const tr=document.querySelector(`#jrnl-tbody tr[data-idx="${i}"]`);if(tr)tr.style.borderTop='2px solid var(--ac)';}
+function jDrop(i){
+  if(jDragIdx<0||jDragIdx===i)return;
+  const arr=D.jl;const item=arr.splice(jDragIdx,1)[0];arr.splice(i,0,item);
+  D.jc=D.jy.map((_,yi)=>D.jl.filter(j=>j.d[yi]==='V').length);
+  sdAndPush(D);D=ld();bJrnl();toast('順序已更新');
+}
+function jDragEnd(){jDragIdx=-1;const rows=document.querySelectorAll('#jrnl-tbody tr');rows.forEach(r=>{r.style.opacity='1';r.style.borderTop='';});}
+
+// ── 新增年份欄
+function addJrnlYear(){
+  if(!isAdm())return;
+  const y=prompt('輸入新年份（民國，如：116年）');
+  if(!y)return;
+  const label=y.includes('年')?y:y+'年';
+  if(D.jy.includes(label)){toast('此年份已存在','err');return;}
+  D.jy.push(label);
+  D.jl.forEach(j=>{j.d.push('V');});
+  D.dbs.forEach(db=>{db.d.push('V');});
+  D.jc=D.jy.map((_,yi)=>D.jl.filter(j=>j.d[yi]==='V').length);
+  sdAndPush(D);D=ld();bJrnl();toast(`${label} 已新增`);
+}
+
 function delJ(i){if(!confirm('確定刪除？'))return;D.jl.splice(i,1);D.jc=D.jy.map((_,yi)=>D.jl.filter(j=>j.d[yi]==='V').length);sdAndPush(D);D=ld();bJrnl();toast('已刪除');}
 function delDB(i){if(!confirm('確定刪除？'))return;D.dbs.splice(i,1);sdAndPush(D);D=ld();bJrnl();toast('已刪除');}
 
@@ -1039,12 +1096,13 @@ function bAccess(){
     return;
   }
 
-  const grps=d.groups,dates=d.dates;
+  const grps=d.groups;
+  // ── 每月進館趨勢
   document.getElementById('ac-leg').innerHTML=legH(grps.map((g,i)=>({c:P[i],l:g})));
-  mkBar('ac-daily',dates.map(dt=>dt.slice(5)),grps.map((g,i)=>({l:g,d:dates.map(dt=>(d.daily[dt]||{})[g]||0),c:P[i]})),true);
+  const months=Object.keys(d.monthly).sort();
+  mkBar('ac-daily',months,grps.map((g,i)=>({l:g,d:months.map(m=>(d.monthly[m]||{})[g]||0),c:P[i]})),true);
   const grpTot=grps.map(g=>Object.values(d.monthly).reduce((s,mv)=>s+(mv[g]||0),0));
   mkPie('ac-pie',grps,grpTot,grps.map((_,i)=>P[i]));
-  const months=Object.keys(d.monthly).sort();
   mkBar('ac-month',months,grps.map((g,i)=>({l:g,d:months.map(m=>(d.monthly[m]||{})[g]||0),c:P[i]})),true);
   mkPie('ac-gate',['前門','後門'],[d.gate['前門']||0,d.gate['後門']||0],['#3b82f6','#8b5cf6']);
   document.getElementById('ac-gtabs').innerHTML=`<button class="ft${acGroup==='全部'?' on':''}" onclick="setACGroup('全部',this)">全部</button>`+grps.map(g=>`<button class="ft${acGroup===g?' on':''}" onclick="setACGroup('${g}',this)">${g}</button>`).join('');
