@@ -387,7 +387,7 @@ tbody tr.tr-tot td{background:#f0fdf4;font-weight:800;color:var(--gn);border-top
         <div class="card"><div class="ct">職類進館比例</div><div class="cw" style="height:220px"><canvas id="ac-pie"></canvas></div></div>
       </div>
       <div class="g2">
-        <div class="card"><div class="ct">月份統計</div><div class="cw" style="height:180px"><canvas id="ac-month"></canvas></div></div>
+        <div class="card"><div class="ct">月份進館人次</div><div class="cw" style="height:180px"><canvas id="ac-month"></canvas></div></div>
         <div class="card"><div class="ct">前後門比例</div><div class="cw" style="height:180px"><canvas id="ac-gate"></canvas></div></div>
       </div>
       <div class="card-full">
@@ -1016,11 +1016,15 @@ function bJrnl(){
   jh+=`<tr class="tr-tot"><td${isAdm()?'':''} colspan="${isAdm()?2:1}" style="text-align:left">訂購數</td><td></td>${D.jc.map(v=>`<td>${v}</td>`).join('')}<td></td></tr></tbody></table>`;
   document.getElementById('tjrnl').innerHTML=jh;
 
-  // ── 資料庫表
-  let dbh=`<table><thead><tr><th style="min-width:110px">資料庫</th>${jy.map(y=>`<th>${y}</th>`).join('')}<th>操作</th></tr></thead><tbody>`;
-  D.dbs.forEach((db,i)=>{dbh+=`<tr><td>${db.n}</td>${db.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}<td>${isAdm()?`<button class="beditsm" onclick="openM('database',${i})">編輯</button> <button class="bdelsm" onclick="delDB(${i})">刪</button>`:''}</td></tr>`;});
+  // ── 資料庫表（可拖曳排序）
+  let dbh=`<table><thead><tr>${isAdm()?'<th style="width:24px"></th>':''}<th style="min-width:110px">資料庫</th>${jy.map(y=>`<th>${y}</th>`).join('')}<th>操作</th></tr></thead><tbody id="db-tbody">`;
+  D.dbs.forEach((db,i)=>{
+    dbh+=`<tr draggable="${isAdm()}" data-idx="${i}" ondragstart="dbDragStart(${i})" ondragover="dbDragOver(event,${i})" ondrop="dbDrop(${i})" ondragend="dbDragEnd()" style="cursor:${isAdm()?'grab':'default'}">`;
+    if(isAdm())dbh+=`<td style="text-align:center;color:var(--tx3);font-size:.8rem;user-select:none">⠿</td>`;
+    dbh+=`<td>${db.n}</td>${db.d.map(v=>`<td style="text-align:center"><span class="bv ${v==='V'?'bvv':'bvx'}">${v}</span></td>`).join('')}<td>${isAdm()?`<button class="beditsm" onclick="openM('database',${i})">編輯</button> <button class="bdelsm" onclick="delDB(${i})">刪</button>`:''}</td></tr>`;
+  });
   const dbTotals=jy.map((_,yi)=>D.dbs.filter(db=>db.d[yi]==='V').length);
-  dbh+=`<tr class="tr-tot"><td>訂閱數</td>${dbTotals.map(v=>`<td>${v}</td>`).join('')}<td></td></tr></tbody></table>`;
+  dbh+=`<tr class="tr-tot"><td${isAdm()?'':''} colspan="${isAdm()?2:1}" style="text-align:left">訂閱數</td>${dbTotals.map(v=>`<td>${v}</td>`).join('')}<td></td></tr></tbody></table>`;
   document.getElementById('tdb').innerHTML=dbh;
 
   // ── 趨勢圖（期刊數 + 資料庫數，Y軸從0）
@@ -1045,6 +1049,16 @@ function jDrop(i){
   sdAndPush(D);D=ld();bJrnl();toast('順序已更新');
 }
 function jDragEnd(){jDragIdx=-1;const rows=document.querySelectorAll('#jrnl-tbody tr');rows.forEach(r=>{r.style.opacity='1';r.style.borderTop='';});}
+
+let dbDragIdx=-1;
+function dbDragStart(i){dbDragIdx=i;setTimeout(()=>{const rows=document.querySelectorAll('#db-tbody tr');if(rows[i])rows[i].style.opacity='.4';},0);}
+function dbDragOver(e,i){e.preventDefault();const rows=document.querySelectorAll('#db-tbody tr[data-idx]');rows.forEach(r=>r.style.borderTop='');const tr=document.querySelector(`#db-tbody tr[data-idx="${i}"]`);if(tr)tr.style.borderTop='2px solid var(--ac)';}
+function dbDrop(i){
+  if(dbDragIdx<0||dbDragIdx===i)return;
+  const arr=D.dbs;const item=arr.splice(dbDragIdx,1)[0];arr.splice(i,0,item);
+  sdAndPush(D);D=ld();bJrnl();toast('順序已更新');
+}
+function dbDragEnd(){dbDragIdx=-1;const rows=document.querySelectorAll('#db-tbody tr');rows.forEach(r=>{r.style.opacity='1';r.style.borderTop='';});}
 
 // ── 新增年份欄
 function addJrnlYear(){
@@ -1128,7 +1142,8 @@ function bAccess(){
   mkBar('ac-daily',months,grps.map((g,i)=>({l:g,d:months.map(m=>(d.monthly[m]||{})[g]||0),c:P[i]})),true);
   const grpTot=grps.map(g=>Object.values(d.monthly).reduce((s,mv)=>s+(mv[g]||0),0));
   mkPie('ac-pie',grps,grpTot,grps.map((_,i)=>P[i]));
-  mkBar('ac-month',months,grps.map((g,i)=>({l:g,d:months.map(m=>(d.monthly[m]||{})[g]||0),c:P[i]})),true);
+  const monthTotals=months.map(m=>Object.values(d.monthly[m]||{}).reduce((s,v)=>s+v,0));
+  mkLine('ac-month',months,[{l:'當月總人次',d:monthTotals,c:'#2563eb'}],true);
   mkPie('ac-gate',['前門','後門'],[d.gate['前門']||0,d.gate['後門']||0],['#3b82f6','#8b5cf6']);
   document.getElementById('ac-gtabs').innerHTML=`<button class="ft${acGroup==='全部'?' on':''}" onclick="setACGroup('全部',this)">全部</button>`+grps.map(g=>`<button class="ft${acGroup===g?' on':''}" onclick="setACGroup('${g}',this)">${g}</button>`).join('');
   document.getElementById('ac-fg').innerHTML='<option value="">全部職類</option>'+grps.map(g=>`<option>${g}</option>`).join('');
