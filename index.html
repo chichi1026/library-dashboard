@@ -650,32 +650,48 @@ async function diagGist(){
   try{
     const data=await gistFetch('GET');
     const fname=gistCfg.fname||'library-data.json';
+    const afname='library-access.json';
+    const allFiles=Object.keys(data.files);
     const file=data.files[fname];
     if(!file){
-      toast(`❌ Gist 中找不到檔案「${fname}」\n現有檔案：${Object.keys(data.files).join(', ')||'（無）'}`,'err');
+      alert(`❌ Gist 中找不到檔案「${fname}」\n現有檔案：${allFiles.join(', ')||'（無）'}`);
       updateSyncStatus('err');return;
     }
-    const content=(file.content||'').trim();
-    const truncated=file.truncated;
-    let parsed=null;
-    let parseErr='';
-    try{parsed=JSON.parse(content);}catch(e){parseErr=e.message;}
+    // 一律用 raw_url 取完整內容（避免截斷問題）
+    async function fetchFull(f){
+      if(!f)return'';
+      if(!f.truncated)return(f.content||'').trim();
+      const r=await fetch(f.raw_url,{headers:{'Authorization':'token '+gistCfg.token,'Cache-Control':'no-cache'}});
+      if(!r.ok)throw new Error('raw fetch HTTP '+r.status);
+      return(await r.text()).trim();
+    }
+    const mainContent=await fetchFull(file);
+    const accessFile=data.files[afname];
+    const accessContent=accessFile?await fetchFull(accessFile):'';
+    let parsed=null,parseErr='',accessCount=0;
+    try{
+      parsed=JSON.parse(mainContent);
+      if(accessContent){const ac=JSON.parse(accessContent);accessCount=Object.values(ac||{}).flat().length;}
+    }catch(e){parseErr=e.message;}
     const monthlyYears=parsed?.monthly?Object.keys(parsed.monthly):[];
     const hasData=monthlyYears.some(y=>{
       const m=parsed.monthly[y];
       return m&&m.some&&m.some(r=>r&&(r.e||r.bk||r.ej));
     });
-    const sizeKB=(content.length/1024).toFixed(1);
+    const mainKB=(mainContent.length/1024).toFixed(1);
+    const accessKB=(accessContent.length/1024).toFixed(1);
     const msg=[
-      `📋 檔案：${fname}`,
-      `📦 大小：${sizeKB} KB${truncated?' (已截斷！)':''}`,
+      `📋 主檔：${fname}`,
+      `📦 主檔大小：${mainKB} KB${file.truncated?' ⚠️已截斷':''}`,
+      accessFile?`📋 進館記錄：${afname}（${accessKB} KB，${accessCount} 筆）`:`📋 進館記錄：${afname}（未找到）`,
       `🗓 monthly 年份：${monthlyYears.join(', ')||'（無）'}`,
       `✅ 有效資料：${hasData?'是':'否'}`,
+      `🗂 Gist 所有檔案：${allFiles.join(', ')}`,
       parseErr?`❌ JSON錯誤：${parseErr}`:'✅ JSON 格式正常',
     ].join('\n');
     alert(msg);
     updateSyncStatus('ok');
-  }catch(e){updateSyncStatus('err');toast('診斷失敗：'+e.message,'err');}
+  }catch(e){updateSyncStatus('err');toast('診斷失敗：'+e.message,'err');console.error(e);}
 }
 async function testGist(){
   if(!gistCfg.token||!gistCfg.gistId){toast('請先填入 Token 和 Gist ID','err');return;}
@@ -690,56 +706,43 @@ async function pullGist(){
   if(!gistCfg.token||!gistCfg.gistId){toast('請先設定 Gist','err');return;}
   updateSyncStatus('loading');
   try{
-    // 先用 API 取得檔案 metadata
     const data=await gistFetch('GET');
     const fname=gistCfg.fname||'library-data.json';
+    const afname='library-access.json';
     const file=data.files[fname];
-    if(!file)throw new Error(`Gist 中找不到檔案 ${fname}`);
+    if(!file)throw new Error(`Gist 中找不到檔案 ${fname}，現有：${Object.keys(data.files).join(', ')}`);
 
-    let content='';
-    // 若未截斷，直接用 API 回傳內容
-    if(!file.truncated){
-      content=(file.content||'').trim();
-    } else {
-      // 截斷時：用帶 token 的 raw_url 取完整內容
-      const rawUrl=file.raw_url;
-      try{
-        const r=await fetch(rawUrl,{
-          headers:{'Authorization':'token '+gistCfg.token,'Cache-Control':'no-cache'}
-        });
-        if(!r.ok)throw new Error(`raw fetch HTTP ${r.status}`);
-        content=(await r.text()).trim();
-      } catch(rawErr){
-        // raw_url 失敗時，改用 API 的 /raw endpoint
-        const r2=await fetch(
-          `https://api.github.com/gists/${gistCfg.gistId}`,
-          {headers:{'Authorization':'token '+gistCfg.token,'Accept':'application/vnd.github.v3.raw'}}
-        );
-        if(!r2.ok)throw new Error(`API raw HTTP ${r2.status}`);
-        content=(await r2.text()).trim();
-      }
+    // 一律用 raw_url 取完整內容（避免大檔截斷問題）
+    async function fetchFull(f){
+      if(!f)return'';
+      if(!f.truncated)return(f.content||'').trim();
+      const r=await fetch(f.raw_url,{
+        headers:{'Authorization':'token '+gistCfg.token,'Cache-Control':'no-cache'}
+      });
+      if(!r.ok)throw new Error(`raw_url fetch HTTP ${r.status}`);
+      return(await r.text()).trim();
     }
 
-    if(!content||content==='{}'||content==='null'){
+    const mainContent=await fetchFull(file);
+    if(!mainContent||mainContent==='{}'||mainContent==='null'){
       updateSyncStatus('ok');toast('Gist 尚無資料，保留本地資料','info');return;
     }
     let parsed;
-    try{ parsed=JSON.parse(content); }
-    catch(pe){ throw new Error('JSON 解析失敗：'+pe.message+'\n前100字：'+content.slice(0,100)); }
-    if(!parsed||typeof parsed!=='object'){
-      updateSyncStatus('ok');toast('Gist 資料格式錯誤，保留本地資料','info');return;
+    try{ parsed=JSON.parse(mainContent); }
+    catch(pe){ throw new Error('JSON 解析失敗（'+pe.message+'），大小：'+(mainContent.length/1024).toFixed(1)+'KB'); }
+    if(!parsed||typeof parsed!=='object'||(!parsed.monthly&&!parsed.jl)){
+      updateSyncStatus('ok');toast('Gist 資料無效，保留本地資料','info');return;
     }
-    // 診斷資訊：顯示 Gist 讀到的頂層 keys 與 monthly 年份
-    const gistKeys=Object.keys(parsed);
-    const gistMonthlyYears=parsed.monthly?Object.keys(parsed.monthly):[];
-    console.log('[Gist Pull] keys:',gistKeys,'monthly years:',gistMonthlyYears,'content length:',content.length);
-    // 放寬判斷：只要 parsed 有 monthly 欄位即接受（包含空物件的情況可能是新帳號初始化）
-    // 僅當完全沒有 monthly 且沒有 jl 時才視為空資料
-    if(!parsed.monthly&&!parsed.jl){
-      updateSyncStatus('ok');
-      toast(`Gist 資料為空（keys: ${gistKeys.join(',')}），保留本地資料`,'info');
-      return;
+    // 讀取進館記錄（可能不存在）
+    const accessFile=data.files[afname];
+    if(accessFile){
+      try{
+        const ac=await fetchFull(accessFile);
+        if(ac&&ac!=='{}')parsed.accessEntries=JSON.parse(ac);
+      }catch(ae){console.warn('[Gist Pull] access file parse error:',ae);}
     }
+    const mainKB=(mainContent.length/1024).toFixed(1);
+    console.log('[Gist Pull] main:',mainKB,'KB, monthly:',Object.keys(parsed.monthly||{}));
     localStorage.setItem('lib_v5',JSON.stringify(parsed));
     D=ld();
     if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
@@ -748,7 +751,6 @@ async function pullGist(){
     if(!D.years||!D.years.length)D.years=['113','114'];
     D.years.sort((a,b)=>parseInt(a)-parseInt(b));
     if(!D.monthly)D.monthly={};
-    // 選擇有實際資料的最新年份
     const yearsWithData=D.years.filter(y=>{
       const m=D.monthly[y];
       return m&&m.some&&m.some(r=>r&&(r.e||r.bk||r.ej));
@@ -756,12 +758,8 @@ async function pullGist(){
     selYear=(yearsWithData.length?yearsWithData[yearsWithData.length-1]:D.years[D.years.length-1])||'114';
     selMonths=ALL_MONTHS.map((_,i)=>i);selRange='all';
     updateSyncStatus('ok');
-    // setTimeout 確保 DOM 穩定後再重建
-    setTimeout(()=>{
-      buildYearTabs();buildMonthTabs();updateRangeTabs();
-      refreshAll();
-    },50);
-    toast('已從 Gist 讀取最新資料','info');
+    setTimeout(()=>{buildYearTabs();buildMonthTabs();updateRangeTabs();refreshAll();},50);
+    toast(`已從 Gist 讀取（主檔 ${mainKB} KB）`,'info');
   }catch(e){
     updateSyncStatus('err');
     toast('讀取失敗：'+e.message,'err');
@@ -773,11 +771,21 @@ async function pushGist(){
   updateSyncStatus('loading');
   try{
     const fname=gistCfg.fname||'library-data.json';
-    const payload=JSON.stringify(D,null,2);
-    console.log('[Gist Push] size:',payload.length,'bytes, monthly years:',Object.keys(D.monthly||{}));
-    await gistFetch('PATCH',{files:{[fname]:{content:payload}}});
-    const kb=(payload.length/1024).toFixed(1);
-    updateSyncStatus('ok');toast(`已推送到 Gist（${kb} KB）`);
+    const afname='library-access.json';
+    // 拆分：主檔排除 accessEntries，進館記錄獨立存檔
+    const {accessEntries,...mainData}=D;
+    const mainPayload=JSON.stringify(mainData,null,2);
+    const accessPayload=JSON.stringify(accessEntries||{},null,2);
+    const mainKB=(mainPayload.length/1024).toFixed(1);
+    const accessKB=(accessPayload.length/1024).toFixed(1);
+    console.log('[Gist Push] main:',mainKB,'KB, access:',accessKB,'KB');
+    // 同時推送兩個檔案
+    await gistFetch('PATCH',{files:{
+      [fname]:{content:mainPayload},
+      [afname]:{content:accessPayload}
+    }});
+    updateSyncStatus('ok');
+    toast(`已推送到 Gist（主檔 ${mainKB} KB + 進館記錄 ${accessKB} KB）`);
   }catch(e){updateSyncStatus('err');toast('推送失敗：'+e.message,'err');console.error('[Gist Push Error]',e);}
 }
 async function sdAndPush(d){
@@ -785,7 +793,12 @@ async function sdAndPush(d){
   if(gistCfg.token&&gistCfg.gistId){
     try{
       const fname=gistCfg.fname||'library-data.json';
-      await gistFetch('PATCH',{files:{[fname]:{content:JSON.stringify(d,null,2)}}});
+      const afname='library-access.json';
+      const {accessEntries,...mainData}=d;
+      await gistFetch('PATCH',{files:{
+        [fname]:{content:JSON.stringify(mainData,null,2)},
+        [afname]:{content:JSON.stringify(accessEntries||{},null,2)}
+      }});
       updateSyncStatus('ok');
     }catch(e){updateSyncStatus('err');}
   }
