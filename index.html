@@ -612,11 +612,7 @@ async function diagGist(){
     const fname=gistCfg.fname||'library-data.json';
     const allFiles=Object.keys(data.files);
     const file=data.files[fname];
-    if(!file){
-      alert(`❌ Gist 中找不到檔案「${fname}」\n現有檔案：${allFiles.join(', ')||'（無）'}`);
-      updateSyncStatus('err');return;
-    }
-    // 一律用 raw_url 取完整內容（避免截斷問題）
+    // 讀取完整內容（處理截斷）
     async function fetchFull(f){
       if(!f)return'';
       if(!f.truncated)return(f.content||'').trim();
@@ -624,33 +620,35 @@ async function diagGist(){
       if(!r.ok)throw new Error('raw fetch HTTP '+r.status);
       return(await r.text()).trim();
     }
-    const mainContent=await fetchFull(file);
-    const accessFile=data.files[afname];
-    const accessContent=accessFile?await fetchFull(accessFile):'';
-    let parsed=null,parseErr='',accessCount=0;
-    try{
-      parsed=JSON.parse(mainContent);
-      if(accessContent){const ac=JSON.parse(accessContent);accessCount=Object.values(ac||{}).flat().length;}
-    }catch(e){parseErr=e.message;}
+    let mainContent='',parsed=null,parseErr='';
+    if(file){
+      mainContent=await fetchFull(file);
+      try{parsed=JSON.parse(mainContent);}catch(e){parseErr=e.message;}
+    }
     const monthlyYears=parsed?.monthly?Object.keys(parsed.monthly):[];
     const hasData=monthlyYears.some(y=>{
       const m=parsed.monthly[y];
       return m&&m.some&&m.some(r=>r&&(r.e||r.bk||r.ej));
     });
     const mainKB=(mainContent.length/1024).toFixed(1);
-    const accessKB=(accessContent.length/1024).toFixed(1);
     const msg=[
-      `📋 主檔：${fname}`,
-      `📦 主檔大小：${mainKB} KB${file.truncated?' ⚠️已截斷':''}`,
-      accessFile?`📋 進館記錄：${afname}（${accessKB} KB，${accessCount} 筆）`:`📋 進館記錄：${afname}（未找到）`,
+      `🔑 Token：${gistCfg.token.slice(0,8)}...（${gistCfg.token.length}字元）`,
+      `🆔 Gist ID：${gistCfg.gistId}`,
+      `🗂 Gist 所有檔案：${allFiles.join(', ')||'（無）'}`,
+      file?`📋 主檔：${fname}（${mainKB} KB${file.truncated?' ⚠️截斷':''}）`:`❌ 找不到主檔「${fname}」`,
       `🗓 monthly 年份：${monthlyYears.join(', ')||'（無）'}`,
       `✅ 有效資料：${hasData?'是':'否'}`,
-      `🗂 Gist 所有檔案：${allFiles.join(', ')}`,
       parseErr?`❌ JSON錯誤：${parseErr}`:'✅ JSON 格式正常',
     ].join('\n');
     alert(msg);
     updateSyncStatus('ok');
-  }catch(e){updateSyncStatus('err');toast('診斷失敗：'+e.message,'err');console.error(e);}
+  }catch(e){
+    updateSyncStatus('err');
+    // 顯示詳細錯誤包含token狀態
+    const detail=`錯誤：${e.message}\nToken前8碼：${gistCfg.token.slice(0,8)||'(空)'}\nGist ID：${gistCfg.gistId||'(空)'}`;
+    alert('診斷失敗\n\n'+detail);
+    console.error('[diagGist]',e);
+  }
 }
 async function testGist(){
   if(!gistCfg.token||!gistCfg.gistId){toast('請先填入 Token 和 Gist ID','err');return;}
