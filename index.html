@@ -604,52 +604,60 @@ async function gistFetch(method,body=null){
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
+// ── 共用：取完整 raw 內容（raw_url 不帶 Authorization 避免 CORS）
+async function fetchRaw(f){
+  if(!f)return'';
+  if(!f.truncated)return(f.content||'').trim();
+  const r=await fetch(f.raw_url+'?t='+Date.now());
+  if(!r.ok)throw new Error('raw fetch HTTP '+r.status);
+  return(await r.text()).trim();
+}
+
+// ── 拆分：meta（期刊/資料庫/設定） + 各年份 monthly
+function splitByYear(d){
+  const {monthly,...meta}=d;
+  const files={'library-meta.json':{content:JSON.stringify(meta,null,2)}};
+  Object.keys(monthly||{}).forEach(y=>{
+    files[`library-${y}.json`]={content:JSON.stringify(monthly[y],null,2)};
+  });
+  return files;
+}
+
 async function diagGist(){
   if(!gistCfg.token||!gistCfg.gistId){toast('請先填入並儲存 Token 和 Gist ID','err');return;}
   updateSyncStatus('loading');
   try{
     const data=await gistFetch('GET');
-    const fname=gistCfg.fname||'library-data.json';
     const allFiles=Object.keys(data.files);
-    const file=data.files[fname];
-    // 讀取完整內容（處理截斷）
-    async function fetchFull(f){
-      if(!f)return'';
-      if(!f.truncated)return(f.content||'').trim();
-      const r=await fetch(f.raw_url+'?t='+Date.now());
-      if(!r.ok)throw new Error('raw fetch HTTP '+r.status);
-      return(await r.text()).trim();
-    }
-    let mainContent='',parsed=null,parseErr='';
-    if(file){
-      mainContent=await fetchFull(file);
-      try{parsed=JSON.parse(mainContent);}catch(e){parseErr=e.message;}
-    }
-    const monthlyYears=parsed?.monthly?Object.keys(parsed.monthly):[];
-    const hasData=monthlyYears.some(y=>{
-      const m=parsed.monthly[y];
-      return m&&m.some&&m.some(r=>r&&(r.e||r.bk||r.ej));
-    });
-    const mainKB=(mainContent.length/1024).toFixed(1);
-    const msg=[
+    const metaFile=data.files['library-meta.json'];
+    const yearFiles=allFiles.filter(f=>f.match(/^library-\d+\.json$/));
+    const legacyFile=data.files['library-data.json'];
+    const lines=[
       `🔑 Token：${gistCfg.token.slice(0,8)}...（${gistCfg.token.length}字元）`,
       `🆔 Gist ID：${gistCfg.gistId}`,
       `🗂 Gist 所有檔案：${allFiles.join(', ')||'（無）'}`,
-      file?`📋 主檔：${fname}（${mainKB} KB${file.truncated?' ⚠️截斷':''}）`:`❌ 找不到主檔「${fname}」`,
-      `🗓 monthly 年份：${monthlyYears.join(', ')||'（無）'}`,
-      `✅ 有效資料：${hasData?'是':'否'}`,
-      parseErr?`❌ JSON錯誤：${parseErr}`:'✅ JSON 格式正常',
-    ].join('\n');
-    alert(msg);
+    ];
+    if(metaFile){
+      lines.push(`✅ 新格式：meta + 年份檔（${yearFiles.join(', ')}）`);
+      yearFiles.forEach(yf=>{
+        const f=data.files[yf];
+        lines.push(`  ${yf}：${(f.size/1024).toFixed(1)} KB${f.truncated?' ⚠️截斷':''}`);
+      });
+    } else if(legacyFile){
+      lines.push(`⚠️ 舊格式：library-data.json（${(legacyFile.size/1024).toFixed(1)} KB${legacyFile.truncated?' ⚠️截斷':''}）`);
+      lines.push('→ 請按「推送到 Gist」升級為新格式');
+    } else {
+      lines.push('❌ 找不到任何資料檔案，請先推送');
+    }
+    alert(lines.join('\n'));
     updateSyncStatus('ok');
   }catch(e){
     updateSyncStatus('err');
-    // 顯示詳細錯誤包含token狀態
-    const detail=`錯誤：${e.message}\nToken前8碼：${gistCfg.token.slice(0,8)||'(空)'}\nGist ID：${gistCfg.gistId||'(空)'}`;
-    alert('診斷失敗\n\n'+detail);
+    alert(`診斷失敗\n\n錯誤：${e.message}\nToken前8碼：${gistCfg.token.slice(0,8)||'(空)'}\nGist ID：${gistCfg.gistId||'(空)'}`);
     console.error('[diagGist]',e);
   }
 }
+
 async function testGist(){
   if(!gistCfg.token||!gistCfg.gistId){toast('請先填入 Token 和 Gist ID','err');return;}
   updateSyncStatus('loading');
@@ -659,38 +667,40 @@ async function testGist(){
     toast('連線成功！');
   }catch(e){updateSyncStatus('err');toast('連線失敗：'+e.message,'err');}
 }
+
 async function pullGist(){
   if(!gistCfg.token||!gistCfg.gistId){toast('請先設定 Gist','err');return;}
   updateSyncStatus('loading');
   try{
     const data=await gistFetch('GET');
-    const fname=gistCfg.fname||'library-data.json';
-    const afname='library-access.json';
-    const file=data.files[fname];
-    if(!file)throw new Error(`Gist 中找不到檔案 ${fname}，現有：${Object.keys(data.files).join(', ')}`);
+    const allFiles=data.files;
+    const metaFile=allFiles['library-meta.json'];
 
-    // 一律用 raw_url 取完整內容（避免大檔截斷問題）
-    async function fetchFull(f){
-      if(!f)return'';
-      if(!f.truncated)return(f.content||'').trim();
-      const r=await fetch(f.raw_url+'?t='+Date.now());
-      if(!r.ok)throw new Error(`raw_url fetch HTTP ${r.status}`);
-      return(await r.text()).trim();
+    let merged;
+    if(metaFile){
+      // 新格式：meta + 各年份分檔
+      const metaStr=await fetchRaw(metaFile);
+      merged=JSON.parse(metaStr);
+      merged.monthly=merged.monthly||{};
+      const yearKeys=Object.keys(allFiles).filter(f=>f.match(/^library-\d+\.json$/));
+      await Promise.all(yearKeys.map(async yk=>{
+        const ystr=await fetchRaw(allFiles[yk]);
+        const yr=yk.replace('library-','').replace('.json','');
+        try{merged.monthly[yr]=JSON.parse(ystr);}catch(e){console.warn('year parse err',yk,e);}
+      }));
+    } else {
+      // 舊格式 fallback
+      const legacyFile=allFiles['library-data.json'];
+      if(!legacyFile)throw new Error('Gist 中找不到資料，請先從主裝置推送');
+      const raw=await fetchRaw(legacyFile);
+      if(!raw||raw==='{}'||raw==='null'){updateSyncStatus('ok');toast('Gist 尚無資料，保留本地資料','info');return;}
+      merged=JSON.parse(raw);
     }
 
-    const mainContent=await fetchFull(file);
-    if(!mainContent||mainContent==='{}'||mainContent==='null'){
-      updateSyncStatus('ok');toast('Gist 尚無資料，保留本地資料','info');return;
-    }
-    let parsed;
-    try{ parsed=JSON.parse(mainContent); }
-    catch(pe){ throw new Error('JSON 解析失敗（'+pe.message+'），大小：'+(mainContent.length/1024).toFixed(1)+'KB'); }
-    if(!parsed||typeof parsed!=='object'||(!parsed.monthly&&!parsed.jl)){
+    if(!merged||typeof merged!=='object'||(!merged.monthly&&!merged.jl)){
       updateSyncStatus('ok');toast('Gist 資料無效，保留本地資料','info');return;
     }
-    const mainKB=(mainContent.length/1024).toFixed(1);
-    console.log('[Gist Pull] main:',mainKB,'KB, monthly:',Object.keys(parsed.monthly||{}));
-    localStorage.setItem('lib_v5',JSON.stringify(parsed));
+    localStorage.setItem('lib_v5',JSON.stringify(merged));
     D=ld();
     if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
     if(!D.VM_KEYS)D.VM_KEYS=DD.VM_KEYS;
@@ -706,32 +716,35 @@ async function pullGist(){
     selMonths=ALL_MONTHS.map((_,i)=>i);selRange='all';
     updateSyncStatus('ok');
     setTimeout(()=>{buildYearTabs();buildMonthTabs();updateRangeTabs();refreshAll();},50);
-    toast(`已從 Gist 讀取（主檔 ${mainKB} KB）`,'info');
+    const yrs=Object.keys(merged.monthly||{}).join(', ');
+    toast(`已從 Gist 讀取（${yrs}）`,'info');
   }catch(e){
     updateSyncStatus('err');
     toast('讀取失敗：'+e.message,'err');
     console.error('pullGist error',e);
   }
 }
+
 async function pushGist(){
   if(!gistCfg.token||!gistCfg.gistId){toast('請先設定 Gist','err');return;}
   updateSyncStatus('loading');
   try{
-    const fname=gistCfg.fname||'library-data.json';
-    const payload=JSON.stringify(D,null,2);
-    const kb=(payload.length/1024).toFixed(1);
-    console.log('[Gist Push] size:',kb,'KB');
-    await gistFetch('PATCH',{files:{[fname]:{content:payload}}});
+    const files=splitByYear(D);
+    const fileSizes=Object.entries(files).map(([k,v])=>`${k}:${(v.content.length/1024).toFixed(0)}KB`).join(', ');
+    console.log('[Gist Push]',fileSizes);
+    await gistFetch('PATCH',{files});
     updateSyncStatus('ok');
-    toast(`已推送到 Gist（${kb} KB）`);
+    const years=Object.keys(D.monthly||{}).join(', ');
+    toast(`已推送到 Gist（${years}，共${Object.keys(files).length}個檔案）`);
   }catch(e){updateSyncStatus('err');toast('推送失敗：'+e.message,'err');console.error('[Gist Push Error]',e);}
 }
+
 async function sdAndPush(d){
   sd(d);
   if(gistCfg.token&&gistCfg.gistId){
     try{
-      const fname=gistCfg.fname||'library-data.json';
-      await gistFetch('PATCH',{files:{[fname]:{content:JSON.stringify(d,null,2)}}});
+      const files=splitByYear(d);
+      await gistFetch('PATCH',{files});
       updateSyncStatus('ok');
     }catch(e){updateSyncStatus('err');}
   }
