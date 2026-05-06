@@ -659,7 +659,17 @@ async function pullGist(){
     const fname=gistCfg.fname||'library-data.json';
     const file=data.files[fname];
     if(!file)throw new Error(`Gist 中找不到檔案 ${fname}`);
-    const content=file.content.trim();
+
+    // 若檔案被截斷，改用 raw_url 取完整內容
+    let content;
+    if(file.truncated&&file.raw_url){
+      const r=await fetch(file.raw_url,{headers:{'Authorization':'token '+gistCfg.token}});
+      if(!r.ok)throw new Error(`取得完整資料失敗 HTTP ${r.status}`);
+      content=(await r.text()).trim();
+    } else {
+      content=(file.content||'').trim();
+    }
+
     if(content==='{}'||content===''||content==='null'){
       updateSyncStatus('ok');
       toast('Gist 尚無資料，保留本地資料','info');
@@ -673,7 +683,6 @@ async function pullGist(){
     }
     localStorage.setItem('lib_v5',JSON.stringify(parsed));
     D=ld();
-    // 補齊必要欄位
     if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
     if(!D.VM_KEYS)D.VM_KEYS=DD.VM_KEYS;
     if(!D.AC_GROUPS)D.AC_GROUPS=DD.AC_GROUPS;
@@ -681,7 +690,6 @@ async function pullGist(){
     D.years.sort((a,b)=>parseInt(a)-parseInt(b));
     if(!D.monthly)D.monthly={};
     ['113','114'].forEach(y=>{if(!D.monthly[y])D.monthly[y]=DD.monthly[y];});
-    // 重新建立年份/月份列
     selYear=D.years[D.years.length-1]||'114';
     selMonths=ALL_MONTHS.map((_,i)=>i);
     selRange='all';
