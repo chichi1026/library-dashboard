@@ -660,21 +660,35 @@ async function pullGist(){
     const file=data.files[fname];
     if(!file)throw new Error(`Gist 中找不到檔案 ${fname}`);
     const content=file.content.trim();
-    // 若 Gist 只有空物件或空資料，略過不覆寫本地資料
     if(content==='{}'||content===''||content==='null'){
       updateSyncStatus('ok');
       toast('Gist 尚無資料，保留本地資料','info');
       return;
     }
     const parsed=JSON.parse(content);
-    // 確認有實際月報資料才覆寫
     if(!parsed||!parsed.monthly||Object.keys(parsed.monthly).length===0){
       updateSyncStatus('ok');
       toast('Gist 資料為空，保留本地資料','info');
       return;
     }
     localStorage.setItem('lib_v5',JSON.stringify(parsed));
-    D=ld();updateSyncStatus('ok');refreshAll();toast('已從 Gist 讀取最新資料','info');
+    D=ld();
+    // 補齊必要欄位
+    if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
+    if(!D.VM_KEYS)D.VM_KEYS=DD.VM_KEYS;
+    if(!D.AC_GROUPS)D.AC_GROUPS=DD.AC_GROUPS;
+    if(!D.years||!D.years.length)D.years=['113','114'];
+    D.years.sort((a,b)=>parseInt(a)-parseInt(b));
+    if(!D.monthly)D.monthly={};
+    ['113','114'].forEach(y=>{if(!D.monthly[y])D.monthly[y]=DD.monthly[y];});
+    // 重新建立年份/月份列
+    selYear=D.years[D.years.length-1]||'114';
+    selMonths=ALL_MONTHS.map((_,i)=>i);
+    selRange='all';
+    buildYearTabs();buildMonthTabs();updateRangeTabs();
+    updateSyncStatus('ok');
+    refreshAll();
+    toast('已從 Gist 讀取最新資料','info');
   }catch(e){updateSyncStatus('err');toast('讀取失敗：'+e.message,'err');}
 }
 async function pushGist(){
@@ -1526,23 +1540,20 @@ function initApp(){
   if(!D.years||!D.years.length)D.years=['113','114'];
   D.years.sort((a,b)=>parseInt(a)-parseInt(b));
   if(!D.monthly)D.monthly={};
-  // 補上預設年份資料（若本地沒有）
   ['113','114'].forEach(y=>{if(!D.monthly[y])D.monthly[y]=DD.monthly[y];});
-  if(!D.accessEntries)D.accessEntries=DD.accessEntries;
-  sd(D); // 確保本地有寫入
+  if(!D.accessEntries||typeof D.accessEntries!=='object'||Array.isArray(D.accessEntries))D.accessEntries={};
+  sd(D);
   selYear=D.years[D.years.length-1]||'114';
+  selMonths=ALL_MONTHS.map((_,i)=>i);
+  selRange='all';
   buildYearTabs();buildMonthTabs();updateRangeTabs();
-  // 管理者列初始化：不用 inline style 蓋掉，改用 class 控制
   document.querySelectorAll('.ab:not(#ab-mon)').forEach(ab=>{
-    ab.style.display=''; // 清除任何 inline style
-    ab.classList.remove('show'); // 預設隱藏
+    ab.style.display='';
+    ab.classList.remove('show');
   });
-  // Gist 同步：先 pull，若 Gist 為空則自動 push 本地資料上去
   if(gistCfg.token&&gistCfg.gistId){
     updateSyncStatus('loading');
-    pullGist().then(()=>{
-      // pullGist 內部若判斷 Gist 為空會保留本地並 toast，這裡補一次 push
-    }).catch(()=>{updateSyncStatus('err');});
+    pullGist().catch(()=>{updateSyncStatus('err');});
   }
   bKPI();bOv();
 }
