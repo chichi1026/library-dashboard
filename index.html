@@ -701,11 +701,19 @@ async function pullGist(){
     if(!D.years||!D.years.length)D.years=['113','114'];
     D.years.sort((a,b)=>parseInt(a)-parseInt(b));
     if(!D.monthly)D.monthly={};
-    ['113','114'].forEach(y=>{if(!D.monthly[y])D.monthly[y]=DD.monthly[y];});
-    selYear=D.years[D.years.length-1]||'114';
+    // 選擇有實際資料的最新年份
+    const yearsWithData=D.years.filter(y=>{
+      const m=D.monthly[y];
+      return m&&m.some&&m.some(r=>r&&(r.e||r.bk||r.ej));
+    });
+    selYear=(yearsWithData.length?yearsWithData[yearsWithData.length-1]:D.years[D.years.length-1])||'114';
     selMonths=ALL_MONTHS.map((_,i)=>i);selRange='all';
-    buildYearTabs();buildMonthTabs();updateRangeTabs();
-    updateSyncStatus('ok');refreshAll();
+    updateSyncStatus('ok');
+    // setTimeout 確保 DOM 穩定後再重建
+    setTimeout(()=>{
+      buildYearTabs();buildMonthTabs();updateRangeTabs();
+      refreshAll();
+    },50);
     toast('已從 Gist 讀取最新資料','info');
   }catch(e){
     updateSyncStatus('err');
@@ -1616,7 +1624,11 @@ function initApp(){
   ['113','114'].forEach(y=>{if(!D.monthly[y])D.monthly[y]=DD.monthly[y];});
   if(!D.accessEntries||typeof D.accessEntries!=='object'||Array.isArray(D.accessEntries))D.accessEntries={};
   sd(D);
-  selYear=D.years[D.years.length-1]||'114';
+  // 選擇有實際資料的最新年份
+  const yearsWithData=D.years.filter(y=>{
+    const m=D.monthly[y];return m&&m.some&&m.some(r=>r&&(r.e||r.bk||r.ej));
+  });
+  selYear=(yearsWithData.length?yearsWithData[yearsWithData.length-1]:D.years[D.years.length-1])||'114';
   selMonths=ALL_MONTHS.map((_,i)=>i);
   selRange='all';
   buildYearTabs();buildMonthTabs();updateRangeTabs();
