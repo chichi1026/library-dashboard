@@ -546,6 +546,10 @@ function launchApp(){
   document.getElementById('btn-switch-admin').style.display=a?'none':'';
   document.getElementById('settings-admin-only').style.display=a?'block':'none';
   loadCfgUI();
+  // 自動從 Gist 讀取（所有裝置開啟即同步）
+  if(gistCfg.gistId){
+    setTimeout(()=>pullGist().catch(e=>console.warn('auto pull:',e)),800);
+  }
   initApp();
 }
 function promptAdminSwitch(){
@@ -569,21 +573,24 @@ document.addEventListener('DOMContentLoaded',()=>{
 //  GIST CONFIG & SYNC
 // ═══════════════════════════════════════════════
 const CFG_KEY='lib_gist_cfg';
-let gistCfg={token:'',gistId:'',fname:'library-data.json'};
+// Gist ID 內建（唯讀同步用），Token 僅存 localStorage（管理者推送用）
+const DEFAULT_GIST_ID='6e3ca3defc5c940fa65dc10672e8949d';
+let gistCfg={token:'',gistId:DEFAULT_GIST_ID,fname:'library-data.json'};
 
 function loadCfgUI(){
-  try{const s=localStorage.getItem(CFG_KEY);if(s)gistCfg={...gistCfg,...JSON.parse(s)};}catch(e){}
+  try{const s=localStorage.getItem(CFG_KEY);if(s){const saved=JSON.parse(s);gistCfg={...gistCfg,...saved};}}catch(e){}
+  if(!gistCfg.gistId)gistCfg.gistId=DEFAULT_GIST_ID;
   document.getElementById('cfg-token').value=gistCfg.token||'';
   document.getElementById('cfg-gist').value=gistCfg.gistId||'';
   document.getElementById('cfg-fname').value=gistCfg.fname||'library-data.json';
-  updateSyncStatus(gistCfg.token&&gistCfg.gistId?'idle':'none');
+  updateSyncStatus(gistCfg.gistId?'idle':'none');
 }
 function saveCfg(){
   gistCfg.token=document.getElementById('cfg-token').value.trim();
   gistCfg.gistId=document.getElementById('cfg-gist').value.trim();
   gistCfg.fname=document.getElementById('cfg-fname').value.trim()||'library-data.json';
   localStorage.setItem(CFG_KEY,JSON.stringify(gistCfg));
-  updateSyncStatus(gistCfg.token&&gistCfg.gistId?'idle':'none');
+  updateSyncStatus(gistCfg.gistId?'idle':'none');
   toast('設定已儲存');
 }
 function updateSyncStatus(st){
@@ -597,7 +604,8 @@ function updateSyncStatus(st){
   if(badge){badge.className='status-badge '+(bc);badge.textContent=lc;}
 }
 async function gistFetch(method,body=null){
-  if(!gistCfg.token||!gistCfg.gistId)throw new Error('未設定 Gist');
+  if(!gistCfg.token)throw new Error('推送需要 Token，請管理者到設定頁填入');
+  if(!gistCfg.gistId)throw new Error('未設定 Gist ID');
   const opts={method,headers:{'Authorization':'token '+gistCfg.token,'Content-Type':'application/json'}};
   if(body)opts.body=JSON.stringify(body);
   const r=await fetch(`https://api.github.com/gists/${gistCfg.gistId}`,opts);
@@ -669,34 +677,38 @@ async function testGist(){
 }
 
 async function pullGist(){
-  if(!gistCfg.token||!gistCfg.gistId){toast('請先設定 Gist','err');return;}
+  if(!gistCfg.gistId){toast('請先設定 Gist ID','err');return;}
   updateSyncStatus('loading');
   try{
-    const data=await gistFetch('GET');
-    const allFiles=data.files;
-    const metaFile=allFiles['library-meta.json'];
-
+    // 直接用 raw URL 讀取（不需 token，避免 CORS）
+    const base=`https://gist.githubusercontent.com/chichi1026/${gistCfg.gistId}/raw`;
+    async function fetchByName(fname){
+      const r=await fetch(`${base}/${fname}?t=${Date.now()}`);
+      if(!r.ok)return null;
+      return(await r.text()).trim();
+    }
+    // 先嘗試新格式（meta + 年份分檔）
+    const metaStr=await fetchByName('library-meta.json');
     let merged;
-    if(metaFile){
-      // 新格式：meta + 各年份分檔
-      const metaStr=await fetchRaw(metaFile);
+    if(metaStr){
       merged=JSON.parse(metaStr);
       merged.monthly=merged.monthly||{};
-      const yearKeys=Object.keys(allFiles).filter(f=>f.match(/^library-\d+\.json$/));
-      await Promise.all(yearKeys.map(async yk=>{
-        const ystr=await fetchRaw(allFiles[yk]);
-        const yr=yk.replace('library-','').replace('.json','');
-        try{merged.monthly[yr]=JSON.parse(ystr);}catch(e){console.warn('year parse err',yk,e);}
+      // 嘗試讀取各年份（113~目前年+1）
+      const curYear=new Date().getFullYear()-1911;
+      const tryYears=[];
+      for(let y=110;y<=curYear+1;y++)tryYears.push(String(y));
+      await Promise.all(tryYears.map(async y=>{
+        const s=await fetchByName(`library-${y}.json`);
+        if(s){try{merged.monthly[y]=JSON.parse(s);}catch(e){}}
       }));
     } else {
       // 舊格式 fallback
-      const legacyFile=allFiles['library-data.json'];
-      if(!legacyFile)throw new Error('Gist 中找不到資料，請先從主裝置推送');
-      const raw=await fetchRaw(legacyFile);
-      if(!raw||raw==='{}'||raw==='null'){updateSyncStatus('ok');toast('Gist 尚無資料，保留本地資料','info');return;}
+      const raw=await fetchByName('library-data.json');
+      if(!raw||raw==='{}'||raw==='null'){
+        updateSyncStatus('ok');toast('Gist 尚無資料，保留本地資料','info');return;
+      }
       merged=JSON.parse(raw);
     }
-
     if(!merged||typeof merged!=='object'||(!merged.monthly&&!merged.jl)){
       updateSyncStatus('ok');toast('Gist 資料無效，保留本地資料','info');return;
     }
@@ -716,8 +728,8 @@ async function pullGist(){
     selMonths=ALL_MONTHS.map((_,i)=>i);selRange='all';
     updateSyncStatus('ok');
     setTimeout(()=>{buildYearTabs();buildMonthTabs();updateRangeTabs();refreshAll();},50);
-    const yrs=Object.keys(merged.monthly||{}).join(', ');
-    toast(`已從 Gist 讀取（${yrs}）`,'info');
+    const yrs=Object.keys(D.monthly).filter(y=>D.monthly[y]?.some(r=>r&&(r.e||r.bk||r.ej))).join(', ');
+    toast(`已從 Gist 讀取（${yrs||'無資料'}）`,'info');
   }catch(e){
     updateSyncStatus('err');
     toast('讀取失敗：'+e.message,'err');
