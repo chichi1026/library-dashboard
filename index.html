@@ -54,6 +54,23 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--tx);
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .bsm{font-size:.73rem;padding:.3rem .75rem;border-radius:var(--r2);border:1.5px solid var(--bd2);background:#fff;color:var(--tx2);cursor:pointer;font-family:inherit;transition:all .15s;font-weight:600}
 .bsm:hover{background:var(--bg3);color:var(--tx);border-color:var(--ac)}
+.bmeeting.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.bmeeting.on:hover{background:#1d4ed8;color:#fff}
+
+/* ── MEETING MODE (會議模式：放大字體/圖表供投影) ── */
+html.meeting{font-size:23px}
+html.meeting .kv{font-size:2rem}
+html.meeting .ct,html.meeting .kl{font-size:.8rem}
+html.meeting .ks,html.meeting .li,html.meeting .leg{font-size:.78rem}
+html.meeting table{font-size:.92rem}
+html.meeting thead th{font-size:.78rem}
+html.meeting .nb{font-size:.95rem;padding:.8rem 1.3rem}
+html.meeting .ytab,html.meeting .ft{font-size:.9rem;padding:.42rem 1.05rem}
+html.meeting .tt{font-size:1.05rem}
+html.meeting .kstrip{grid-template-columns:repeat(3,1fr)}
+html.meeting .g3{grid-template-columns:1fr 1fr}
+html.meeting .cw{min-height:320px}
+html.meeting{--tx3:#5b6b82;--bd2:rgba(0,0,0,.22)}
 
 /* ── YEAR/MONTH BAR ── */
 .ybar{background:#fff;border-bottom:1px solid var(--bd);padding:.5rem 1.25rem;display:flex;align-items:center;gap:.65rem;overflow-x:auto;scrollbar-width:none;box-shadow:0 1px 0 var(--bd)}
@@ -254,6 +271,7 @@ tbody tr.tr-tot td{background:#f0fdf4;font-weight:800;color:var(--gn);border-top
       <span id="sync-label" style="font-size:.65rem;color:var(--tx3)">未設定同步</span>
       <span class="brole" id="rb">閱覽者</span>
       <button class="bsm" id="btn-switch-admin" onclick="promptAdminSwitch()" style="display:none">切換管理者</button>
+      <button class="bsm bmeeting" id="btn-meeting" onclick="toggleMeeting()" title="放大字體與圖表，適合會議投影">🔍 會議模式</button>
       <button class="bsm" onclick="doLogout()">離開</button>
     </div>
   </div>
@@ -923,10 +941,24 @@ function getMonData(){const all=(D.monthly||{})[selYear]||[];return selMonths.ma
 // ═══════════════════════════════════════════════
 const P=['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316','#a78bfa','#60a5fa','#34d399','#fbbf24','#fb7185','#e879f9','#5eead4','#93c5fd'];
 const CH={};
+// 會議模式：放大圖表字體/線條，供投影/長官閱讀
+let meetingMode=false;
+function cfs(){return meetingMode?16:11;}         // 座標軸/圖例字級
+function ctick(){return meetingMode?'#475569':'#94a3b8';}  // 座標軸文字顏色（會議模式加深對比）
+function cleg(){return meetingMode?'#1a2233':'#4a5568';}   // 圖例文字顏色
+function clw(){return meetingMode?4:2.5;}         // 折線粗細
+function cpr(){return meetingMode?5:3;}           // 折線資料點半徑
+function toggleMeeting(){
+  meetingMode=!meetingMode;
+  document.documentElement.classList.toggle('meeting',meetingMode);
+  document.getElementById('btn-meeting').classList.toggle('on',meetingMode);
+  document.getElementById('btn-meeting').textContent=meetingMode?'🔍 一般模式':'🔍 會議模式';
+  refreshAll();
+}
 const sa=a=>(a||[]).reduce((s,v)=>s+(v||0),0);
-function mkLine(id,lbs,ds,fill=false){const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();CH[id]=new Chart(c,{type:'line',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,borderColor:d.c||P[i],backgroundColor:fill?(d.c||P[i])+'28':'transparent',borderWidth:2.5,fill,tension:.38,pointRadius:3,pointHoverRadius:5}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:45},grid:{color:'rgba(0,0,0,.05)'}},y:{ticks:{color:'#94a3b8',font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}}}}});}
-function mkBar(id,lbs,ds,st=false,hz=false){const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();CH[id]=new Chart(c,{type:'bar',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,backgroundColor:(d.c||P[i])+'cc',borderWidth:0,borderRadius:st?0:4}))},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:{x:{stacked:st,ticks:{color:'#94a3b8',font:{size:11},autoSkip:false,maxRotation:45},grid:{color:'rgba(0,0,0,.05)'}},y:{stacked:st,ticks:{color:'#94a3b8',font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}}}}});}
-function mkPie(id,lbs,vs,cs){const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();CH[id]=new Chart(c,{type:'doughnut',data:{labels:lbs,datasets:[{data:vs,backgroundColor:cs,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#4a5568',font:{size:11},boxWidth:11,boxHeight:11,padding:9}}}}});}
+function mkLine(id,lbs,ds,fill=false){const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();CH[id]=new Chart(c,{type:'line',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,borderColor:d.c||P[i],backgroundColor:fill?(d.c||P[i])+'28':'transparent',borderWidth:clw(),fill,tension:.38,pointRadius:cpr(),pointHoverRadius:cpr()+2}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:ctick(),font:{size:cfs()},autoSkip:false,maxRotation:45},grid:{color:'rgba(0,0,0,.05)'}},y:{ticks:{color:ctick(),font:{size:cfs()}},grid:{color:'rgba(0,0,0,.05)'}}}}});}
+function mkBar(id,lbs,ds,st=false,hz=false){const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();CH[id]=new Chart(c,{type:'bar',data:{labels:lbs,datasets:ds.map((d,i)=>({label:d.l,data:d.d,backgroundColor:(d.c||P[i])+'cc',borderWidth:0,borderRadius:st?0:4}))},options:{responsive:true,maintainAspectRatio:false,indexAxis:hz?'y':'x',plugins:{legend:{display:false}},scales:{x:{stacked:st,ticks:{color:ctick(),font:{size:cfs()},autoSkip:false,maxRotation:45},grid:{color:'rgba(0,0,0,.05)'}},y:{stacked:st,ticks:{color:ctick(),font:{size:cfs()}},grid:{color:'rgba(0,0,0,.05)'}}}}});}
+function mkPie(id,lbs,vs,cs){const c=document.getElementById(id);if(!c)return;if(CH[id])CH[id].destroy();CH[id]=new Chart(c,{type:'doughnut',data:{labels:lbs,datasets:[{data:vs,backgroundColor:cs,borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:cleg(),font:{size:cfs()},boxWidth:meetingMode?15:11,boxHeight:meetingMode?15:11,padding:meetingMode?13:9}},tooltip:{titleFont:{size:cfs()+1},bodyFont:{size:cfs()}}}}});}
 function legH(it){return it.map((x,i)=>`<div class="li"><span class="ld" style="background:${x.c||P[i]}"></span>${x.l}</div>`).join('');}
 function tblH(cols,rows){let h=`<table><thead><tr>${cols.map((c,i)=>`<th${i>0?' style="min-width:42px"':''}>${c}</th>`).join('')}</tr></thead><tbody>`;rows.forEach(r=>{h+=`<tr${r._t?' class="tr-tot"':''}>${r.d.map(v=>`<td>${v===undefined||v===null?0:v}</td>`).join('')}</tr>`;});return h+'</tbody></table>';}
 function toast(msg,t='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+t+' show';setTimeout(()=>el.classList.remove('show'),3000);}
@@ -1098,9 +1130,9 @@ function bJrnl(){
   if(c){
     if(CH['c-jt'])CH['c-jt'].destroy();
     CH['c-jt']=new Chart(c,{type:'line',data:{labels:jy,datasets:[
-      {label:'期刊訂購數',data:D.jc,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.12)',borderWidth:2.5,fill:true,tension:.38,pointRadius:4,pointHoverRadius:6},
-      {label:'資料庫訂閱數',data:dbCounts,borderColor:'#059669',backgroundColor:'rgba(5,150,105,.08)',borderWidth:2.5,fill:true,tension:.38,pointRadius:4,pointHoverRadius:6},
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#4a5568',font:{size:11},boxWidth:12,padding:10}}},scales:{x:{ticks:{color:'#94a3b8',font:{size:11}},grid:{color:'rgba(0,0,0,.05)'}},y:{min:0,ticks:{color:'#94a3b8',font:{size:11},stepSize:1},grid:{color:'rgba(0,0,0,.05)'}}}}});
+      {label:'期刊訂購數',data:D.jc,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.12)',borderWidth:clw(),fill:true,tension:.38,pointRadius:cpr()+1,pointHoverRadius:cpr()+3},
+      {label:'資料庫訂閱數',data:dbCounts,borderColor:'#059669',backgroundColor:'rgba(5,150,105,.08)',borderWidth:clw(),fill:true,tension:.38,pointRadius:cpr()+1,pointHoverRadius:cpr()+3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:cleg(),font:{size:cfs()},boxWidth:meetingMode?16:12,padding:meetingMode?14:10}}},scales:{x:{ticks:{color:ctick(),font:{size:cfs()}},grid:{color:'rgba(0,0,0,.05)'}},y:{min:0,ticks:{color:ctick(),font:{size:cfs()},stepSize:1},grid:{color:'rgba(0,0,0,.05)'}}}}});
   }
 }
 
