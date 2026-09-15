@@ -636,7 +636,14 @@ async function gistFetch(method,body=null){
   if(!gistCfg.gistId)throw new Error('未設定 Gist ID');
   const opts={method,headers:{'Authorization':'token '+gistCfg.token,'Content-Type':'application/json'}};
   if(body)opts.body=JSON.stringify(body);
-  const r=await fetch(`https://api.github.com/gists/${gistCfg.gistId}`,opts);
+  let r;
+  try{
+    r=await fetch(`https://api.github.com/gists/${gistCfg.gistId}`,opts);
+  }catch(networkErr){
+    throw new Error(`無法連線到 api.github.com（網路層錯誤：${networkErr.message}）。可能是網路/防火牆封鎖，請改用「手動貼上同步」`);
+  }
+  if(r.status===401)throw new Error('Token 無效或已過期（HTTP 401），請重新產生 GitHub PAT Token');
+  if(r.status===404)throw new Error(`找不到 Gist（HTTP 404）。請確認 Gist ID「${gistCfg.gistId}」正確`);
   if(!r.ok)throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
@@ -704,39 +711,50 @@ async function testGist(){
   }catch(e){updateSyncStatus('err',e.message);toast('連線失敗：'+e.message,'err');}
 }
 
+const GIST_OWNER='chichi1026'; // Gist 擁有者帳號（raw CDN 網址需要，且已確認無誤）
 async function pullGist(){
   if(!gistCfg.gistId){toast('請先設定 Gist ID','err');return;}
   updateSyncStatus('loading');
   try{
-    // 用 Gist API 取得檔案清單（公開 GET 不需 token）。
-    // 不再假設固定的 GitHub 帳號名稱去拼 raw URL — 這是先前同步失敗的主因：
-    // 一旦 Gist 擁有者帳號跟寫死的名稱不同，raw URL 就會 404。
-    // 改用 API 回傳的 files[].raw_url，一定對應到正確帳號。
-    const r=await fetch(`https://api.github.com/gists/${gistCfg.gistId}`,{headers:{'Accept':'application/vnd.github+json'}});
-    if(!r.ok){
-      if(r.status===404)throw new Error(`找不到 Gist（HTTP 404）。請確認 Gist ID「${gistCfg.gistId}」正確，且該 Gist 存在`);
-      if(r.status===403)throw new Error('GitHub API 存取被拒（HTTP 403）。可能是未登入請求額度已用完，請稍後再試');
-      throw new Error(`HTTP ${r.status}`);
+    // 優先用 raw CDN 讀取：速度快、無流量限制（api.github.com 未登入請求每小時僅 60 次，
+    // 多人共用同一對外 IP——例如醫院防火牆/NAT——很容易被打滿，故不作為主要讀取管道）。
+    const base=`https://gist.githubusercontent.com/${GIST_OWNER}/${gistCfg.gistId}/raw`;
+    async function fetchByName(fname){
+      const url=`${base}/${fname}?t=${Date.now()}`;
+      let r;
+      try{
+        r=await fetch(url);
+      }catch(networkErr){
+        // fetch() 直接 reject：通常代表網路層被擋（防火牆/代理伺服器/DNS），而非 GitHub 回應錯誤
+        const err=new Error(`無法連線到 gist.githubusercontent.com（網路層錯誤：${networkErr.message}）。可能是醫院網路/防火牆封鎖了此網域，請改用下方「手動貼上同步」，或請資訊室確認可存取 *.githubusercontent.com`);
+        err.isNetwork=true;
+        throw err;
+      }
+      if(r.status===404)return null;
+      if(!r.ok)throw new Error(`讀取 ${fname} 失敗（HTTP ${r.status}）`);
+      return(await r.text()).trim();
     }
-    const data=await r.json();
-    const files=data.files||{};
+    // 先嘗試新格式（meta + 年份分檔）
+    const metaStr=await fetchByName('library-meta.json');
     let merged;
-    if(files['library-meta.json']){
-      merged=JSON.parse(await fetchRaw(files['library-meta.json']));
+    if(metaStr){
+      merged=JSON.parse(metaStr);
       merged.monthly=merged.monthly||{};
-      const yearFiles=Object.keys(files).filter(f=>/^library-\d+\.json$/.test(f));
-      await Promise.all(yearFiles.map(async yf=>{
-        const y=yf.match(/^library-(\d+)\.json$/)[1];
-        try{merged.monthly[y]=JSON.parse(await fetchRaw(files[yf]));}catch(e){}
+      // 嘗試讀取各年份（110~目前年+1）
+      const curYear=new Date().getFullYear()-1911;
+      const tryYears=[];
+      for(let y=110;y<=curYear+1;y++)tryYears.push(String(y));
+      await Promise.all(tryYears.map(async y=>{
+        const s=await fetchByName(`library-${y}.json`).catch(()=>null);
+        if(s){try{merged.monthly[y]=JSON.parse(s);}catch(e){}}
       }));
-    } else if(files['library-data.json']){
-      const raw=await fetchRaw(files['library-data.json']);
+    } else {
+      // 舊格式 fallback
+      const raw=await fetchByName('library-data.json');
       if(!raw||raw==='{}'||raw==='null'){
         updateSyncStatus('ok');toast('Gist 尚無資料，保留本地資料','info');return;
       }
       merged=JSON.parse(raw);
-    } else {
-      updateSyncStatus('ok');toast('Gist 尚無資料檔案，保留本地資料','info');return;
     }
     if(!merged||typeof merged!=='object'||(!merged.monthly&&!merged.jl)){
       updateSyncStatus('ok');toast('Gist 資料無效，保留本地資料','info');return;
