@@ -459,7 +459,10 @@ tbody tr.tr-tot td{background:#f0fdf4;font-weight:800;color:var(--gn);border-top
 
           <!-- 資料庫各平台使用次數 -->
           <div class="if-group">
-            <div class="if-group-title">四、資料庫各平台使用次數（次/月）</div>
+            <div class="if-group-title" style="display:flex;align-items:center;justify-content:space-between">
+              <span>四、資料庫各平台使用次數（次/月）</span>
+              <button class="badd" id="btn-add-dbm" style="display:none" onclick="addDBMKey()">＋ 新增平台</button>
+            </div>
             <div id="f-dbm-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem"></div>
           </div>
 
@@ -764,6 +767,7 @@ async function pullGist(){
     if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
     if(!D.VM_KEYS)D.VM_KEYS=DD.VM_KEYS;
     if(!D.AC_GROUPS)D.AC_GROUPS=DD.AC_GROUPS;
+    if(D.DBM_KEYS&&!D.DBM_KEYS.includes('STATdx'))D.DBM_KEYS.push('STATdx');
     if(!D.years||!D.years.length)D.years=['113','114'];
     D.years.sort((a,b)=>parseInt(a)-parseInt(b));
     if(!D.monthly)D.monthly={};
@@ -836,7 +840,7 @@ const DD={
     {n:'Symskan',d:['X','X','V','V','V','V','V']},
   ],
   // 資料庫各平台月使用次數（固定結構，月報輸入可覆蓋）
-  DBM_KEYS:['Clinicalkey','DynaMed','UpTodate','Lexicomp','CEPS','PubMed','Symskan','Sanford Guide','Cochrane'],
+  DBM_KEYS:['Clinicalkey','DynaMed','UpTodate','Lexicomp','CEPS','PubMed','Symskan','Sanford Guide','Cochrane','STATdx'],
   VM_KEYS:['Clinical Key','Dynamed','UpTodate','Lexicomp','CEPS','Kono雜誌庫'],
   // 進出館職類
   AC_GROUPS:['PGY','其他醫事人員','實習生','復健','放射','檢驗','藥劑','行政人員','護理','醫師'],
@@ -919,6 +923,8 @@ let D=ld();
 if(!D.DBM_KEYS)D.DBM_KEYS=DD.DBM_KEYS;
 if(!D.VM_KEYS)D.VM_KEYS=DD.VM_KEYS;
 if(!D.AC_GROUPS)D.AC_GROUPS=DD.AC_GROUPS;
+// 新增資料庫平台：STATdx（既有資料若尚未包含則補上）
+if(D.DBM_KEYS&&!D.DBM_KEYS.includes('STATdx')){D.DBM_KEYS.push('STATdx');sd(D);}
 // 遷移舊格式 accessEntries（陣列→物件）
 if(Array.isArray(D.accessEntries)){
   const migrated={};
@@ -1216,6 +1222,21 @@ function buildDBMGrid(){
   const ks=D.DBM_KEYS||[];
   document.getElementById('f-dbm-grid').innerHTML=ks.map(k=>`<div class="mf"><label>${k}</label><input type="number" id="f-dbm-${k.replace(/[^a-zA-Z0-9]/g,'_')}" min="0" placeholder="0"></div>`).join('');
 }
+function addDBMKey(){
+  if(!isAdm()){toast('需要管理者權限','err');return;}
+  const name=(prompt('新增資料庫平台名稱：')||'').trim();
+  if(!name)return;
+  if(!D.DBM_KEYS)D.DBM_KEYS=[];
+  if(D.DBM_KEYS.includes(name)){toast('已存在同名項目','err');return;}
+  // 先保留目前表單上已輸入的數值，重建欄位後再填回，避免遺失正在編輯的資料
+  const cur={};
+  D.DBM_KEYS.forEach(k=>{const el=document.getElementById(dbmFieldId(k));if(el)cur[k]=el.value;});
+  D.DBM_KEYS.push(name);
+  buildDBMGrid();
+  D.DBM_KEYS.forEach(k=>{if(cur[k]!==undefined){const el=document.getElementById(dbmFieldId(k));if(el)el.value=cur[k];}});
+  sdAndPush(D);
+  toast(`已新增「${name}」`);
+}
 function buildVMGrid(){
   const ks=D.VM_KEYS||[];
   document.getElementById('f-vm-grid').innerHTML=ks.map(k=>`<div class="mf"><label>${k}</label><input type="number" id="f-vm-${k.replace(/[^a-zA-Z0-9]/g,'_')}" min="0" placeholder="0"></div>`).join('');
@@ -1234,6 +1255,7 @@ IED_BASE.forEach(k=>{document.getElementById('f-'+k)?.addEventListener('input',u
 
 function bMon(){
   document.getElementById('mon-year-label').textContent=`民國${selYear}年`;
+  const addBtn=document.getElementById('btn-add-dbm');if(addBtn)addBtn.style.display=isAdm()?'':'none';
   // 只有在編輯器關閉時才重建 grid（避免清空正在編輯的欄位）
   if(document.getElementById('ied').style.display==='none'||document.getElementById('ied').style.display===''){
     buildDBMGrid();buildVMGrid();
